@@ -14,6 +14,8 @@
 
 {{-- Fim de blocos do laravel-usp-theme --}}
 
+@include('blocos.modal-pessoa')
+
 @section('title')
   @parent
 @endsection

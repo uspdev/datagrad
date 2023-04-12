@@ -37,32 +37,14 @@ $submenu2 = [
 
 $menu = [
     [
-        'text' => '<i class="fas fa-home"></i> Home',
-        'url' => 'home',
+        'text' => 'Cursos',
+        'url' => 'graduacao/cursos',
+        'can' => 'datagrad',
     ],
     [
-        # este item de menu será substituido no momento da renderização
-        'key' => 'menu_dinamico',
-    ],
-    [
-        'text' => 'Drop Down',
-        'submenu' => $submenu2,
-        'can' => '',
-    ],
-    [
-        'text' => 'Está logado',
-        'url' => config('app.url') . '/logado', // com caminho absoluto
-        'can' => 'user',
-    ],
-    [
-        'text' => 'Menu gerente',
-        'url' => 'gerente',
-        'can' => 'gerente',
-    ],
-    [
-        'text' => 'Menu admin',
-        'submenu' => $admin,
-        'can' => 'admin',
+        'text' => 'Relatório por nomes',
+        'url' => 'graduacao/relatorio/nomes',
+        'can' => 'datagrad',
     ],
 ];
 
@@ -73,13 +55,6 @@ $right_menu = [
     ],
     [
         'key' => 'laravel-tools',
-    ],
-    [
-        'text' => '<i class="fas fa-cog"></i>',
-        'title' => 'Configurações',
-        'target' => '_blank',
-        'url' => config('app.url') . '/item1',
-        'align' => 'right',
     ],
 ];
 

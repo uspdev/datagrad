@@ -2,7 +2,9 @@
 
 namespace App\Providers;
 
+use Spatie\Permission\Models\Role;
 use Illuminate\Support\ServiceProvider;
+use Spatie\Permission\Models\Permission;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -23,6 +25,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        //
+        // criando role e tribuindo permissões a ela
+        Permission::firstOrCreate(['name' => 'datagrad']);
+        $role = Role::firstOrCreate(['name' => 'datagrad'])->givePermissionTo(['datagrad']);
     }
 }
