@@ -6,7 +6,6 @@ use App\Replicado\Graduacao;
 use App\Replicado\Lattes;
 use App\Replicado\Pessoa;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Uspdev\Replicado\Uteis;
 
 class GraduacaoController extends Controller
@@ -29,7 +28,8 @@ class GraduacaoController extends Controller
 
             foreach ($nomes as $nome) {
                 // vamos procurar 1o por nome exato e depois por fonetico
-                if ($pessoaReplicado = Pessoa::procurarServidorPorNome($nome, $fonetico = false) ?? Pessoa::procurarServidorPorNome($nome, $fonetico = true)) {
+                $pessoaReplicado = Pessoa::procurarServidorPorNome($nome, $fonetico = false) ?? Pessoa::procurarServidorPorNome($nome, $fonetico = true);
+                if ($pessoaReplicado) {
                     $pessoa = [];
                     $pessoa['unidade'] = $pessoaReplicado['sglclgund'];
                     $pessoa['nome'] = $pessoaReplicado['nompesttd'];
@@ -50,8 +50,8 @@ class GraduacaoController extends Controller
         }
 
         return view('grad.relatorio-por-nomes', [
-            'pessoas' => $pessoas,
             'nomes' => $request->nomes,
+            'pessoas' => $pessoas,
             'naoEncontrados' => $naoEncontrados,
         ]);
     }
@@ -147,34 +147,29 @@ class GraduacaoController extends Controller
         $this->authorize('datagrad');
 
         $pessoa = Pessoa::dump($codpes);
-        $pessoaReplicado = Pessoa::procurarServidorPorNome($pessoa['nompesttd'], $fonetico = false);
+        $pessoaReplicado = Pessoa::procurarServidorPorNome($pessoa['nompes'], $fonetico = false);
+        if ($pessoaReplicado) {
 
-        $pessoa = [];
-        $pessoa['unidade'] = $pessoaReplicado['sglclgund'];
-        $pessoa['nome'] = $pessoaReplicado['nompesttd'];
-        $pessoa['codpes'] = $pessoaReplicado['codpes'];
-        $pessoa['lattes'] = Lattes::id($pessoa['codpes']);
-        $pessoa['linkLattes'] = Lattes::retornarLinkCurriculo($pessoa['codpes']);
-        $pessoa['nomeFuncao'] = $pessoaReplicado['nomfnc'];
-        $pessoa['dtaultalt'] = Lattes::retornarDataUltimaAlteracao($pessoa['codpes']);
-        $pessoa['linkOrcid'] = Lattes::retornarLinkOrcid($pessoa['codpes']);
-        $pessoa['tipoJornada'] = Pessoa::retornarTipoJornada($pessoa['codpes']);
-        $pessoa['departamento'] = Pessoa::retornarSetor($pessoa['codpes']);
-        $pessoa = array_merge($pessoa, Lattes::retornarFormacaoAcademicaFormatado($pessoa['codpes']));
+            $pessoa = [];
+            $pessoa['unidade'] = $pessoaReplicado['sglclgund'];
+            $pessoa['nome'] = $pessoaReplicado['nompesttd'];
+            $pessoa['codpes'] = $pessoaReplicado['codpes'];
+            $pessoa['lattes'] = Lattes::id($pessoa['codpes']);
+            $pessoa['linkLattes'] = Lattes::retornarLinkCurriculo($pessoa['codpes']);
+            $pessoa['nomeFuncao'] = $pessoaReplicado['nomfnc'];
+            $pessoa['dtaultalt'] = Lattes::retornarDataUltimaAlteracao($pessoa['codpes']);
+            $pessoa['linkOrcid'] = Lattes::retornarLinkOrcid($pessoa['codpes']);
+            $pessoa['tipoJornada'] = Pessoa::retornarTipoJornada($pessoa['codpes']);
+            $pessoa['departamento'] = Pessoa::retornarSetor($pessoa['codpes']);
+            $pessoa = array_merge($pessoa, Lattes::retornarFormacaoAcademicaFormatado($pessoa['codpes']));
+            $pessoa['fotoLattes'] = base64_encode(Lattes::obterFoto($pessoa['lattes'], storage_path('app/fotos-lattes')));
 
-        if (Storage::exists('app/fotos-lattes/' . $pessoa['lattes'] . '.jpg')) {
-            $fotoLattes = Storage::get('app/fotos-lattes/' . $pessoa['lattes'] . '.jpg');
-        } else {
-            $fotoLattes = Lattes::obterFoto($pessoa['lattes'], storage_path('app/fotos-lattes'));
-            Storage::put('app/fotos-lattes/' . $pessoa['lattes'] . '.jpg', $fotoLattes);
+            return view('blocos.partials.modal-pessoa-body', [
+                'codpes' => $codpes,
+                'lattes' => \App\Replicado\Lattes::class,
+                'pessoa' => $pessoa,
+
+            ]);
         }
-        $pessoa['fotoLattes'] = base64_encode($fotoLattes);
-
-        return view('blocos.partials.modal-pessoa-body', [
-            'codpes' => $codpes,
-            'lattes' => \App\Replicado\Lattes::class,
-            'pessoa' => $pessoa,
-
-        ]);
     }
 }

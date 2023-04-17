@@ -2,6 +2,7 @@
 
 namespace App\Replicado;
 
+use Exception;
 use GuzzleHttp\Client;
 use Uspdev\Replicado\DB;
 use Uspdev\Replicado\Lattes as LattesReplicado;
@@ -72,14 +73,14 @@ class Lattes extends LattesReplicado
      */
     public static function retornarDataUltimaAlteracao(int $codpes)
     {
-        $query = "SELECT dtaultalt
+        $query = "SELECT  CONVERT(VARCHAR(10), dtaultalt ,103) dtaultalt
             FROM DIM_PESSOA_XMLUSP
             WHERE codpes = convert(int,:codpes)";
 
         $param['codpes'] = $codpes;
         $result = DB::fetch($query, $param);
 
-        return $result ? Uteis::data_mes($result['dtaultalt']) : false;
+        return $result ? $result['dtaultalt'] : false;
     }
 
     /**
@@ -90,28 +91,43 @@ class Lattes extends LattesReplicado
      * Com esse outro id é possível acessar a url de foto.
      *
      * @param Int $id Id lattes da pessoa
+     * @param $cachePath (opt) Indica o caminho no filesystem para salvar a foto
      * @return Img Blob da imagem
      * @author Masakik, em 3/4/2023
      */
-    public static function obterFoto($id, $saveLocation = null)
+    public static function obterFoto($id, $cachePath = null)
     {
         $curriculoUrl = 'http://buscatextual.cnpq.br/buscatextual/cv?id=';
         $fotoUrl = 'http://servicosweb.cnpq.br/wspessoa/servletrecuperafoto?tipo=1&id=';
+        $foto = '';
 
-        $client = new Client();
-        $response = $client->request('GET', $curriculoUrl . $id, ['allow_redirects' => false]);
-        $headers = $response->getHeader('Location');
+        if ($cachePath) {
+            $cachePath = rtrim($cachePath, '/') . '/'; // garantindo trailing slash
+            is_dir($cachePath) || mkdir($cachePath, 0755, true);
+            $filename = $id . '.jpg';
 
-        parse_str($headers[0], $parsedUrl);
-        // dd($id, $response, $headers[0], $parsedUrl);
-
-        $idk = $parsedUrl['id'] ?? null;
-
-        $foto = file_get_contents($fotoUrl . $idk);
-        if ($saveLocation) {
-            is_dir($saveLocation) || mkdir($saveLocation, 0755, true);
-            file_put_contents($saveLocation . '/' . $id . '.jpg', $foto);
+            // recuperando do cache se existir
+            if (file_exists($cachePath . $filename)) {
+                $foto = file_get_contents($cachePath . $filename);
+            }
         }
+
+        if (!$foto) {
+            try {
+                $client = new Client();
+                $response = $client->request('GET', $curriculoUrl . $id, ['allow_redirects' => false]);
+                $headers = $response->getHeader('Location');
+                parse_str($headers[0], $parsedUrl);
+                $idk = $parsedUrl['id'] ?? null;
+                $foto = file_get_contents($fotoUrl . $idk);
+
+                // salvando cache
+                file_put_contents($cachePath . $filename, $foto);
+            } catch (Exception $e) {
+                // gerar log do exception
+            }
+        }
+
         return $foto;
     }
 }
