@@ -1,64 +1,15 @@
-# Starter
+# Datagrad
 
-Esta aplicação já tem as principais bibliotecas USPDev pré configuradas.
-
-* Inicio
-
-```bash
-    git clone git@github.com:uspdev/starter sua-aplicacao
-    cd sua-aplicacao
-    composer install
-    cp .env.example .env
-    php artisan key:generate
-    php artisan migrate
-```
-
-* Crie seu repositório remoto e faça as seguintes configurações
-
-```bash
-    git remote remove origin
-    git remote add origin git@github.com:uspdev/sua-aplicacao
-    git push -u origin main
-```
-
-* ajuste o `composer.json` com os dados da sua aplicação
-* Utilize o `readme.md` como exemplo
-* Remova o que for desnecessário
-* Ajuste o `.env.example`
-
-OBS.: Caso não vá utilizar alguma biblioteca instalada, além de remover do composer.json
-verifique a necessidade de ajustes no `.env.example`. 
-
-## Testes
-
-    php artisan dusk
-
-## Histórico
-
-* 15/12/2022
-    - instalado `laravel/dusk`: teste de navegador com testes basicos.
-
-* 16/11/2022
-    - instalado `ybr-nx/laravel-mariadb`: permite utilizar json em mariadb de forma similar ao mysql
-    - instalado `spatie/commonmark-highlighter`
-    - helper `md2html($markdown)`
----
-
-# Minha Aplicação
-
-Diga o que é sua aplicação.
+Sistema que auxilia na elaboração do relatório de revalidação de cursos de graduação.
 ## Funcionalidades
 
-* Descreva suas funcionalidades aqui
-* Pode colocar prints de tela
+* Gera lista de disciplinas oferecidas por semestre por curso
+* Gera relatório de lista de nomes para relatório sintético
 
 ## Requisitos
 
-O que é necessário para rodar esta aplicação
+Aplicação laravel padrão
 
-## Atualização
-
-[Se houver instruções específicas sobre atualizações, descreva aqui.]
 
 ### Em produção
 
@@ -98,10 +49,6 @@ vim /etc/memcached.conf
 
 /etc/init.d/memcached restart
 ```
-
-### Email
-
-O gmail utiliza senhas de app (https://support.google.com/accounts/answer/185833?hl=pt-BR) desde maio/2022. Siga os passos para gerar uma senha de app para sua aplicação.
 
 ### Apache ou nginx
 
