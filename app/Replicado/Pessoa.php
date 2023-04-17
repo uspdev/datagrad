@@ -32,7 +32,7 @@ class Pessoa extends PessoaReplicado
 
     /**
      * Lista os dados de vinculos ativos da pessoa de VINCULOPESSOAUSP
-     * 
+     *
      * O método no replicado usa localizapessoa, que parece melhor que esse
      *
      * Não limita por unidade pois a tabela possui dados de outras unidades.
@@ -107,11 +107,11 @@ class Pessoa extends PessoaReplicado
 
     public static function procurarServidorPorNome($nome, $fonetico = true)
     {
-        foreach (PessoaReplicado::procurarPorNome($nome, $fonetico, true) as $pessoa) {
+        foreach (PessoaReplicado::procurarPorNome($nome, $fonetico, $ativos = true) as $pessoa) {
             if (isset($pessoa['tipvin']) && $pessoa['tipvin'] == 'SERVIDOR') {
                 return $pessoa;
             }
         }
-        return null;
+        return [];
     }
 }

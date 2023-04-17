@@ -4,15 +4,7 @@
   @include('grad.partials.curso-menu', ['view' => 'Turmas'])
   <div class="mt-3 ml-3 d-inline-flex">
 
-    <form method="POST" action="{{ route('graduacao.relatorio.porNomes.post') }}">
-      @csrf
-      <input type="hidden" name="nomes" value="{!! $nomes !!}">
-      <button class="btn btn-outline-info btn-spinner" type="submit" title="{{ $nomesCount }} nomes não repetidos">
-        Relatório por nomes <span class="badge badge-pill badge-primary">{{ $nomesCount }}</span>
-      </button>
-    </form>
-
-    <div class="border border-primary rounded ml-3" style="padding-top: 7px;">
+    <div class="border border-primary rounded" style="padding-top: 7px;">
 
       <form method="get" class="form-inline" id="form-semestre">
         <div class="mx-2"><b>Semestre</b>: de</div>
@@ -34,6 +26,14 @@
         <button class="btn btn-sm btn-primary d-none btn-spinner py-0 mr-2" type="submit">OK</button>
       </form>
     </div>
+
+    <form method="POST" action="{{ route('graduacao.relatorio.porNomes.post') }}">
+      @csrf
+      <input type="hidden" name="nomes" value="{!! $nomes !!}">
+      <button class="btn btn-outline-info btn-spinner ml-3" type="submit" title="{{ $nomesCount }} nomes não repetidos">
+        Relatório por nomes <span class="badge badge-pill badge-primary">{{ $nomesCount }}</span>
+      </button>
+    </form>
 
   </div>
 
