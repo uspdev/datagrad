@@ -6341,12 +6341,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/uspdev/senhaunica-socialite.git",
-                "reference": "440fb78ff3dac259eb46715d362e350bd9bc02f0"
+                "reference": "bcacadfb9f7a23a78dc628ba33e29adb590aa7d0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/uspdev/senhaunica-socialite/zipball/440fb78ff3dac259eb46715d362e350bd9bc02f0",
-                "reference": "440fb78ff3dac259eb46715d362e350bd9bc02f0",
+                "url": "https://api.github.com/repos/uspdev/senhaunica-socialite/zipball/bcacadfb9f7a23a78dc628ba33e29adb590aa7d0",
+                "reference": "bcacadfb9f7a23a78dc628ba33e29adb590aa7d0",
                 "shasum": ""
             },
             "require": {
@@ -6389,7 +6389,7 @@
                 "issues": "https://github.com/uspdev/senhaunica-socialite/issues",
                 "source": "https://github.com/uspdev/senhaunica-socialite/tree/permissions"
             },
-            "time": "2023-04-12T10:42:34+00:00"
+            "time": "2023-04-18T13:12:59+00:00"
         },
         {
             "name": "vlucas/phpdotenv",
