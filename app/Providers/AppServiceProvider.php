@@ -26,7 +26,5 @@ class AppServiceProvider extends ServiceProvider
     public function boot()
     {
         // criando role e tribuindo permissões a ela
-        Permission::firstOrCreate(['name' => 'datagrad']);
-        $role = Role::firstOrCreate(['name' => 'datagrad'])->givePermissionTo(['datagrad']);
     }
 }
