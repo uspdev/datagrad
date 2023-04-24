@@ -13,7 +13,7 @@ class GraduacaoController extends Controller
     public function relatorioSintese(Request $request)
     {
         $this->authorize('datagrad');
-        \UspTheme::activeUrl('graduacao/relatorio/nomes');
+        \UspTheme::activeUrl('graduacao/relatorio/sintese');
 
         $pessoas = [];
         $naoEncontrados = [];

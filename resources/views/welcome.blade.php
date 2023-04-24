@@ -39,7 +39,6 @@
       Este sistema extrai dados da base USP como função, jornada, carga horária, turmas, etc, bem como dados do currículo
       lattes como titulação, atividade docente, etc. <br>
       Lembrando que o currículo lattes deve ser mantido atualizado pelo docente conforme item 3 do anexo 8.
-
     </div>
   </div>
 @endsection
