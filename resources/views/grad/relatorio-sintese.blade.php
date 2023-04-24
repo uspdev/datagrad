@@ -1,8 +1,24 @@
 @extends('layouts.app')
 
 @section('content')
+  <h4>Relatório síntese</h4>
 
-  @include('grad.partials.relatorio-form')
+  <form method="POST" action="">
+    @csrf
+    <div class="form-group">
+      <label for="nomesTextarea">Forneça uma lista de nomes (1 por linha)</label>
+      <textarea name="nomes" class="form-control" id="nomesTextarea" rows="4">{{ $nomes }}</textarea>
+    </div>
+    <button type="submit" class="btn btn-sm btn-primary spinner">Enviar</button>
+  </form>
+
+  @if ($naoEncontrados)
+    <hr>
+    <div class="h4">Não encontrados</div>
+    @foreach ($naoEncontrados as $nome)
+      {{ $nome }}<br>
+    @endforeach
+  @endif
 
   @if ($pessoas)
     <hr>

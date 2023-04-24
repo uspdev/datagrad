@@ -1,22 +1,23 @@
 @extends('layouts.app')
 
 @section('content')
-  <h4>Relatório complementar <i class="fas fa-angle-right"></i>
-    Forneça uma lista de nomes (1 por linha)
-  </h4>
+  <h4>Relatório complementar</h4>
 
   <form method="POST" action="">
     @csrf
     <div class="form-group">
-      <textarea name="nomes" class="form-control" id="exampleFormControlTextarea1" rows="4">{{ $nomes }}</textarea>
+      <label for="nomesTextarea">Forneça uma lista de nomes (1 por linha)</label>
+      <textarea name="nomes" class="form-control" id="nomesTextarea" rows="4">{{ $nomes }}</textarea>
     </div>
-    <div class="form-group form-inline">
+    <div class="form-group form-inline mb-0">
       Período de
-      <input class="form-control mx-2 col-1" type="number" name="anoIni" value="{{ $anoIni ?? date('Y') - 5 }}" min="1970" max="{{ date('Y') }}"> a
-      <input class="form-control mx-2 col-1" type="number" name="anoFim" value="{{ $anoFim ?? date('Y') - 1 }}" min="1970" max="{{ date('Y') }}">
+      <input class="form-control mx-2 col-1" type="number" name="anoIni" value="{{ $anoIni ?? date('Y') - 5 }}"
+        min="1970" max="{{ date('Y') }}"> a
+      <input class="form-control mx-2 col-1" type="number" name="anoFim" value="{{ $anoFim ?? date('Y') - 1 }}"
+        min="1970" max="{{ date('Y') }}">
     </div>
-    <button type="submit" class="btn btn-sm btn-primary spinner">Enviar</button>
-
+    <div class="small">Período em anos a ser considerado para contabilizar a produção</div>
+    <button type="submit" class="btn btn-sm btn-primary spinner mt-3">Enviar</button>
   </form>
 
   @if ($naoEncontrados)
@@ -26,7 +27,6 @@
       {{ $nome }}<br>
     @endforeach
   @endif
-
 
   @if ($pessoas)
     <hr>

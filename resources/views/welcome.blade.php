@@ -19,33 +19,26 @@
         <br />
       @endcannot
       @can('datagrad')
-      <div>
-        Utilize o menu para navegar pelo sistema.
-      </div>
-      <br />
+        <div>
+          Utilize o menu para navegar pelo sistema.
+        </div>
+        <br />
       @endcan
     @endcan
     <div>
-      Este sistema auxilia a coleta e organização de dados para o reconhecimento e renovação de reconhecimento de cursos
-      de graduação.<br />
-
-
-      Em particular, o sistema fornece subsídios para o preenchimento do item 5 do relatório síntese (anexo 9),
-      documento obrigatório do processo.
-    <br />
-    Conselho Estadual de Educação de São Paulo CEE
-
-    Além disso são fornecidas informações complementares que podem auxiliar a elaboração de relatório com informações complementares.
-
-    Dados extraídos da base USP carga horária, turmas, etc.
-    Dados extraidos principalmente do currículo lattes.
-
-    DELIBERAÇÃO CEE N° 171/2019
-Dispõe sobre a regulação, supervisão e avaliação de
-instituições de ensino superior e cursos superiores de
-graduação vinculados ao Sistema Estadual de Ensino de
-São Paulo
-
+      Este sistema auxilia a coleta e organização de dados para o <b>reconhecimento</b> e <b>renovação de
+        reconhecimento</b> de cursos de graduação junto ao Conselho Estadual de Educação de São Paulo - CEE,
+      conforme deliberação CEE 171/2019 que "Dispõe sobre a regulação, supervisão e avaliação de instituições de ensino
+      superior e cursos superiores de graduação vinculados ao Sistema Estadual de Ensino de São Paulo".<br />
+      <br>
+      Em particular, o sistema fornece subsídios para o preenchimento do item 1 - III do anexo 8 - <b>Relatório
+        síntese</b>, documento obrigatório do processo.<br>
+      Além disso são fornecidas outras informações que podem auxiliar a elaboração de <b>Relatório com informações
+        complementares</b>.<br>
+      <br>
+      Este sistema extrai dados da base USP como função, jornada, carga horária, turmas, etc, bem como dados do currículo
+      lattes como titulação, atividade docente, etc. <br>
+      Lembrando que o currículo lattes deve ser mantido atualizado pelo docente conforme item 3 do anexo 8.
 
     </div>
   </div>
