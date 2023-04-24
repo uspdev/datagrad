@@ -11,10 +11,10 @@
     </div>
     <div class="form-group form-inline mb-0">
       Período de
-      <input class="form-control mx-2 col-1" type="number" name="anoIni"
-        value="{{ old('anoIni') ?? (date('Y') - 5) }}" min="1970" max="{{ date('Y') }}"> a
-      <input class="form-control mx-2 col-1" type="number" name="anoFim"
-        value="{{ old('anoFim') ?? (date('Y') - 1) }}" min="1970" max="{{ date('Y') }}">
+      <input class="form-control mx-2 col-1" type="number" name="anoIni" value="{{ old('anoIni') ?? date('Y') - 5 }}"
+        min="1970" max="{{ date('Y') }}"> a
+      <input class="form-control mx-2 col-1" type="number" name="anoFim" value="{{ old('anoFim') ?? date('Y') - 1 }}"
+        min="1970" max="{{ date('Y') }}">
     </div>
     <div class="small">Período em anos a ser considerado para contabilizar a produção</div>
     <button type="submit" class="btn btn-sm btn-primary spinner mt-3">Enviar</button>
@@ -31,7 +31,7 @@
   @if ($pessoas)
     <hr>
     <div class="h4 mt-3">Resultados</div>
-    <table class="table table-bordered table-hover table-sm datatable-simples">
+    <table class="table table-bordered table-hover table-sm datatable-relatorio">
       <thead>
         <tr>
           <th>Unidade</th>
@@ -73,9 +73,7 @@
             <td>{{ $pessoa['unidade'] }}</td>
             <td>{{ $pessoa['departamento'] }}</td>
             <td>{{ $pessoa['codpes'] }}</td>
-            <td>
-              <a href="{{ route('pessoas.show', $pessoa['codpes']) }}" class="showPessoaModal">{{ $pessoa['nome'] }}</a>
-            </td>
+            <td>@include('grad.partials.pessoa-btn-modal')</td>
             <td>
               <a href="https://lattes.cnpq.br/{{ $pessoa['lattes'] }}" target="lattes">
                 https://lattes.cnpq.br/{{ $pessoa['lattes'] }}
@@ -120,26 +118,3 @@
 
 @endsection
 
-@section('javascripts_bottom')
-  @parent
-  <script>
-    // Example starter JavaScript for disabling form submissions if there are invalid fields
-    (function() {
-      'use strict';
-      window.addEventListener('load', function() {
-        // Fetch all the forms we want to apply custom Bootstrap validation styles to
-        var forms = document.getElementsByClassName('needs-validation');
-        // Loop over them and prevent submission
-        var validation = Array.prototype.filter.call(forms, function(form) {
-          form.addEventListener('submit', function(event) {
-            if (form.checkValidity() === false) {
-              event.preventDefault();
-              event.stopPropagation();
-            }
-            form.classList.add('was-validated');
-          }, false);
-        });
-      }, false);
-    })();
-  </script>
-@endsection

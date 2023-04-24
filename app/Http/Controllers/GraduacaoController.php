@@ -17,7 +17,7 @@ class GraduacaoController extends Controller
                 'nomes' => 'required',
             ]);
         }
-        if (!$request->old()) { //repopulando old() para mostrar no form
+        if (!$request->old()) { //repopulando old() para mostrar no form, mesmo no caso de sucesso
             session()->flashInput($request->input());
         }
 
@@ -43,7 +43,7 @@ class GraduacaoController extends Controller
             $pessoa['tipoJornada'] = Pessoa::retornarTipoJornada($pessoa['codpes']);
             $pessoa['lattes'] = Lattes::id($pessoa['codpes']);
             $pessoa['dtaultalt'] = Lattes::retornarDataUltimaAtualizacao($pessoa['codpes']);
-            $pessoa['orcid_id'] = Lattes::retornarOrcidId($pessoa['codpes']);
+            $pessoa['linkOrcid'] = Lattes::retornarLinkOrcid($pessoa['codpes']);
             $pessoa = array_merge($pessoa, Lattes::retornarFormacaoAcademicaFormatado($pessoa['codpes']));
 
             $pessoas[] = $pessoa;
@@ -61,8 +61,8 @@ class GraduacaoController extends Controller
         if ($request->method() == 'POST') {
             $request->validate([
                 'nomes' => 'required',
-                'anoIni' => 'required|integer|min:1970|max:' . date('Y'),
-                'anoFim' => 'required|integer|min:1970|max:' . date('Y'),
+                'anoIni' => 'nullable|integer|min:1970|max:' . date('Y'),
+                'anoFim' => 'nullable|integer|min:1970|max:' . date('Y'),
             ]);
         }
         if (!$request->old()) {

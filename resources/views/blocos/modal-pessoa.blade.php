@@ -1,5 +1,6 @@
-@section('javascripts_bottom')
-  @once
+{{-- O modal de pessoa e o js correspnodente precisa ser incluido 1x somente --}}
+@once
+  @section('javascripts_bottom')
     @parent
     <div class="modal fade" id="pessoaModal" tabindex="-1" aria-labelledby="pessoaModalLabel" aria-hidden="true">
       <div class="modal-dialog modal-lg">
@@ -32,7 +33,8 @@
 
           console.log(nome, route)
           // carregando spinner enquanto espera o ajax
-          $('#pessoaModal').find('.modal-body').html('<div class="spinner-border text-primary" role="status"><span class="sr-only">Loading...</span></div>')
+          let spinner = '<div class="spinner-border text-primary" role="status"><span class="sr-only">Loading...</span></div>'
+          $('#pessoaModal').find('.modal-body').html(spinner)
           $('#pessoaModal').modal('show')
 
           $.get(route, function(data) {
@@ -40,9 +42,7 @@
           })
         })
 
-
-
       })
     </script>
-  @endonce
-@endsection
+  @endsection
+@endonce

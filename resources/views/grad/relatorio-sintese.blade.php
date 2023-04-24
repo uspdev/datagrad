@@ -23,7 +23,7 @@
   @if ($pessoas)
     <hr>
     <div class="h4 mt-3">Resultados</div>
-    <table class="table table-bordered table-hover table-sm datatable-simples">
+    <table class="table table-bordered table-hover table-sm datatable-relatorio">
       <thead>
         <tr>
           <th>Unidade</th>
@@ -33,8 +33,8 @@
           <th>Nome Função</th>
           <th>Tipo Jornada</th>
           <th>Lattes</th>
-          <th>Orcid</th>
           <th>Data atual. Lattes</th>
+          <th>Orcid</th>
           <th>Graduação</th>
           <th>Mestrado</th>
           <th>Doutorado</th>
@@ -49,22 +49,16 @@
             <td>{{ $pessoa['unidade'] }}</td>
             <td>{{ $pessoa['departamento'] }}</td>
             <td>{{ $pessoa['codpes'] }}</td>
-            <td>
-              <a href="{{ route('pessoas.show', $pessoa['codpes']) }}" class="showPessoaModal">{{ $pessoa['nome'] }}</a>
-            </td>
+            <td>@include('grad.partials.pessoa-btn-modal')</td>
             <td>{{ $pessoa['nomeFuncao'] }}</td>
             <td>{{ $pessoa['tipoJornada'] }}</td>
             <td>
               <a href="https://lattes.cnpq.br/{{ $pessoa['lattes'] }}" target="lattes">
-                {{ $pessoa['lattes'] }}
-              </a>
-            </td>
-            <td>
-              <a href="{{ $pessoa['orcid_id'] }}" target="orcid">
-                {{ str_replace('https://orcid.org/', '', $pessoa['orcid_id']) }}
+                https://lattes.cnpq.br/{{ $pessoa['lattes'] }}
               </a>
             </td>
             <td>{{ $pessoa['dtaultalt'] ?? '-' }}</td>
+            <td>{!! $pessoa['linkOrcid'] !!}</td>
             <td>{{ $pessoa['graduacao'] ?? '-' }}</td>
             <td>{{ $pessoa['mestrado'] ?? '-' }}</td>
             <td>{{ $pessoa['doutorado'] ?? '-' }}</td>
