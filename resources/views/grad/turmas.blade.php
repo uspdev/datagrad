@@ -27,13 +27,21 @@
       </form>
     </div>
 
-    <form method="POST" action="{{ route('graduacao.relatorio.porNomes.post') }}">
+    <form method="POST" action="{{ route('graduacao.relatorio.sintese.post') }}">
       @csrf
       <input type="hidden" name="nomes" value="{!! $nomes !!}">
       <button class="btn btn-outline-info btn-spinner ml-3" type="submit" title="{{ $nomesCount }} nomes não repetidos">
-        Relatório por nomes <span class="badge badge-pill badge-primary">{{ $nomesCount }}</span>
+        Relatório síntese <span class="badge badge-pill badge-primary">{{ $nomesCount }}</span>
       </button>
     </form>
+
+    <form method="POST" action="{{ route('graduacao.relatorio.complementar.post') }}">
+        @csrf
+        <input type="hidden" name="nomes" value="{!! $nomes !!}">
+        <button class="btn btn-outline-info btn-spinner ml-3" type="submit" title="{{ $nomesCount }} nomes não repetidos">
+          Relatório complementar <span class="badge badge-pill badge-primary">{{ $nomesCount }}</span>
+        </button>
+      </form>
 
   </div>
 

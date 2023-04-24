@@ -4,9 +4,9 @@ namespace App\Replicado;
 
 use Exception;
 use GuzzleHttp\Client;
+use Illuminate\Support\Arr;
 use Uspdev\Replicado\DB;
 use Uspdev\Replicado\Lattes as LattesReplicado;
-use Uspdev\Replicado\Uteis;
 
 class Lattes extends LattesReplicado
 {
@@ -24,6 +24,9 @@ class Lattes extends LattesReplicado
         return $ret;
     }
 
+    /**
+     * Retorna o link do curriculo lattes formatado em html
+     */
     public static function retornarLinkCurriculo($codpes)
     {
         $id = SELF::id($codpes);
@@ -34,6 +37,9 @@ class Lattes extends LattesReplicado
         }
     }
 
+    /**
+     * Retorna o link para o orcid formatado em html
+     */
     public static function retornarLinkOrcid($codpes)
     {
         return ($orcid = Lattes::retornarOrcidID($codpes))
@@ -61,27 +67,6 @@ class Lattes extends LattesReplicado
         return substr($ret, 0, -2);
     }
 
-    /**
-     * Retorna data da última alteração fornecida pelo CNPq.
-     *
-     * Indica a data da última atualização nos dados do LATTES para esta pessoa
-     * (detectada pelo 'robô' do CurriculumCPNQ no site do LATTES).
-     *
-     * @param Int $codpes
-     * @return String formatado em dd/mm/yyyy
-     * @author Masaki K Neto, em 10/3/3023
-     */
-    public static function retornarDataUltimaAlteracao(int $codpes)
-    {
-        $query = "SELECT  CONVERT(VARCHAR(10), dtaultalt ,103) dtaultalt
-            FROM DIM_PESSOA_XMLUSP
-            WHERE codpes = convert(int,:codpes)";
-
-        $param['codpes'] = $codpes;
-        $result = DB::fetch($query, $param);
-
-        return $result ? $result['dtaultalt'] : false;
-    }
 
     /**
      * Retorna a foto do currículo lattes
@@ -89,6 +74,9 @@ class Lattes extends LattesReplicado
      * Este método consulta a url do curriculo lattes que redireciona para
      * outra url que usa um id que começa com k....
      * Com esse outro id é possível acessar a url de foto.
+     *
+     * Caso seja informado o $cachePath o método salvará o arquivo da foto
+     * com o nome id_lattes.jpg e usará como cache.
      *
      * @param Int $id Id lattes da pessoa
      * @param $cachePath (opt) Indica o caminho no filesystem para salvar a foto
@@ -111,7 +99,6 @@ class Lattes extends LattesReplicado
                 $foto = file_get_contents($cachePath . $filename);
             }
         }
-
         if (!$foto) {
             try {
                 $client = new Client();
@@ -122,12 +109,13 @@ class Lattes extends LattesReplicado
                 $foto = file_get_contents($fotoUrl . $idk);
 
                 // salvando cache
-                file_put_contents($cachePath . $filename, $foto);
+                if ($cachePath) {
+                    file_put_contents($cachePath . $filename, $foto);
+                }
             } catch (Exception $e) {
                 // gerar log do exception
             }
         }
-
         return $foto;
     }
 }

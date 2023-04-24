@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "5bcc0f4069a0965d02bee81f10311ba0",
+    "content-hash": "acaa3cff0e167d3eb646fd7571902d6b",
     "packages": [
         {
             "name": "asm89/stack-cors",
@@ -6288,16 +6288,16 @@
         },
         {
             "name": "uspdev/replicado",
-            "version": "1.16.4",
+            "version": "dev-lattes_update",
             "source": {
                 "type": "git",
                 "url": "https://github.com/uspdev/replicado.git",
-                "reference": "def4ce94514424db679906ab1b6ad5f640b2afc2"
+                "reference": "e8b3d4c786b97133a0b58cd0d1490f82362007ae"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/uspdev/replicado/zipball/def4ce94514424db679906ab1b6ad5f640b2afc2",
-                "reference": "def4ce94514424db679906ab1b6ad5f640b2afc2",
+                "url": "https://api.github.com/repos/uspdev/replicado/zipball/e8b3d4c786b97133a0b58cd0d1490f82362007ae",
+                "reference": "e8b3d4c786b97133a0b58cd0d1490f82362007ae",
                 "shasum": ""
             },
             "require": {
@@ -6331,9 +6331,9 @@
             "homepage": "https://github.com/uspdev/replicado",
             "support": {
                 "issues": "https://github.com/uspdev/replicado/issues",
-                "source": "https://github.com/uspdev/replicado/tree/1.16.4"
+                "source": "https://github.com/uspdev/replicado/tree/lattes_update"
             },
-            "time": "2023-03-20T17:18:59+00:00"
+            "time": "2023-04-20T20:17:33+00:00"
         },
         {
             "name": "uspdev/senhaunica-socialite",
@@ -9126,9 +9126,17 @@
             "time": "2021-07-28T10:34:58+00:00"
         }
     ],
-    "aliases": [],
+    "aliases": [
+        {
+            "package": "uspdev/replicado",
+            "version": "dev-lattes_update",
+            "alias": "1.16.5",
+            "alias_normalized": "1.16.5.0"
+        }
+    ],
     "minimum-stability": "dev",
     "stability-flags": {
+        "uspdev/replicado": 20,
         "uspdev/senhaunica-socialite": 20
     },
     "prefer-stable": true,

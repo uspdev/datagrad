@@ -42,8 +42,13 @@ $menu = [
         'can' => 'datagrad',
     ],
     [
-        'text' => 'Relatório por nomes',
-        'url' => 'graduacao/relatorio/nomes',
+        'text' => 'Relatório síntese',
+        'url' => 'graduacao/relatorio/sintese',
+        'can' => 'datagrad',
+    ],
+    [
+        'text' => 'Relatório complementar',
+        'url' => 'graduacao/relatorio/complementar',
         'can' => 'datagrad',
     ],
 ];
