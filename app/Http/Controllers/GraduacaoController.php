@@ -12,45 +12,45 @@ class GraduacaoController extends Controller
 {
     public function relatorioSintese(Request $request)
     {
+        if ($request->method() == 'POST') {
+            $request->validate([
+                'nomes' => 'required',
+            ]);
+        }
+        if (!$request->old()) { //repopulando old() para mostrar no form
+            session()->flashInput($request->input());
+        }
+
         $this->authorize('datagrad');
         \UspTheme::activeUrl('graduacao/relatorio/sintese');
 
+        $nomes = SELF::limparNomes($request->nomes);
         $pessoas = [];
         $naoEncontrados = [];
-
-        if ($request->nomes) {
-            $nomes = $request->nomes;
-            $nomes = str_replace("\r", '', $nomes); // remove carriage return, mantém new line
-            $nomes = explode(PHP_EOL, $nomes);
-            $nomes = array_filter($nomes); // remove elementos empty()
-            $nomes = array_map('trim', $nomes);
-            $nomes = array_unique($nomes); // sem repetidos
-
-            foreach ($nomes as $nome) {
-                // vamos procurar 1o por nome exato e depois por fonetico
-                $pessoaReplicado = Pessoa::procurarServidorPorNome($nome, $fonetico = false) ?? Pessoa::procurarServidorPorNome($nome, $fonetico = true);
-                if ($pessoaReplicado) {
-                    $pessoa = [];
-                    $pessoa['unidade'] = $pessoaReplicado['sglclgund'];
-                    $pessoa['nome'] = $pessoaReplicado['nompesttd'];
-                    $pessoa['codpes'] = $pessoaReplicado['codpes'];
-                    $pessoa['lattes'] = Lattes::id($pessoa['codpes']);
-                    $pessoa['nomeFuncao'] = $pessoaReplicado['nomfnc'];
-                    $pessoa['dtaultalt'] = Lattes::retornarDataUltimaAtualizacao($pessoa['codpes']);
-                    $pessoa['orcid_id'] = Lattes::retornarOrcidId($pessoa['codpes']);
-                    $pessoa['tipoJornada'] = Pessoa::retornarTipoJornada($pessoa['codpes']);
-                    $pessoa['departamento'] = Pessoa::retornarSetor($pessoa['codpes']);
-                    $pessoa = array_merge($pessoa, Lattes::retornarFormacaoAcademicaFormatado($pessoa['codpes']));
-
-                    $pessoas[] = $pessoa;
-                } else {
-                    $naoEncontrados[] = $nome;
-                }
+        foreach ($nomes as $nome) {
+            // vamos procurar 1o por nome exato e depois por fonetico
+            $pessoaReplicado = Pessoa::procurarServidorPorNome($nome, $fonetico = false) ?? Pessoa::procurarServidorPorNome($nome, $fonetico = true);
+            if (!$pessoaReplicado) {
+                $naoEncontrados[] = $nome;
+                continue;
             }
+            $pessoa = [];
+            $pessoa['unidade'] = $pessoaReplicado['sglclgund'];
+            $pessoa['departamento'] = Pessoa::retornarSetor($pessoaReplicado['codpes']);
+            $pessoa['codpes'] = $pessoaReplicado['codpes'];
+            $pessoa['nome'] = $pessoaReplicado['nompesttd'];
+            $pessoa['nomeFuncao'] = $pessoaReplicado['nomfnc'];
+            $pessoa['tipoJornada'] = Pessoa::retornarTipoJornada($pessoa['codpes']);
+            $pessoa['lattes'] = Lattes::id($pessoa['codpes']);
+            $pessoa['dtaultalt'] = Lattes::retornarDataUltimaAtualizacao($pessoa['codpes']);
+            $pessoa['orcid_id'] = Lattes::retornarOrcidId($pessoa['codpes']);
+            $pessoa = array_merge($pessoa, Lattes::retornarFormacaoAcademicaFormatado($pessoa['codpes']));
+
+            $pessoas[] = $pessoa;
         }
 
+        session()->flashInput($request->input());
         return view('grad.relatorio-sintese', [
-            'nomes' => $request->nomes,
             'pessoas' => $pessoas,
             'naoEncontrados' => $naoEncontrados,
         ]);
@@ -58,85 +58,86 @@ class GraduacaoController extends Controller
 
     public function relatorioComplementar(Request $request)
     {
+        if ($request->method() == 'POST') {
+            $request->validate([
+                'nomes' => 'required',
+                'anoIni' => 'required|integer|min:1970|max:' . date('Y'),
+                'anoFim' => 'required|integer|min:1970|max:' . date('Y'),
+            ]);
+        }
+        if (!$request->old()) {
+            session()->flashInput($request->input());
+        }
+
         $this->authorize('datagrad');
         \UspTheme::activeUrl('graduacao/relatorio/complementar');
 
-        // $request->validate(
-
-        // );
-
         $anoIni = $request->anoIni;
         $anoFim = $request->anoFim;
-
+        $nomes = SELF::limparNomes($request->nomes);
         $pessoas = [];
         $naoEncontrados = [];
-
-        if ($request->nomes) {
-            $nomes = $request->nomes;
-            $nomes = str_replace("\r", '', $nomes); // remove carriage return, mantém new line
-            $nomes = explode(PHP_EOL, $nomes);
-            $nomes = array_filter($nomes); // remove elementos empty()
-            $nomes = array_map('trim', $nomes);
-            $nomes = array_unique($nomes); // sem repetidos
-
-            foreach ($nomes as $nome) {
-                // vamos procurar 1o por nome exato e depois por fonetico
-                $pessoaReplicado = Pessoa::procurarServidorPorNome($nome, $fonetico = false) ?? Pessoa::procurarServidorPorNome($nome, $fonetico = true);
-                if ($pessoaReplicado) {
-                    $pessoa = [];
-                    $pessoa['codpes'] = $pessoaReplicado['codpes'];
-                    $pessoa['unidade'] = $pessoaReplicado['sglclgund'];
-                    $pessoa['departamento'] = Pessoa::retornarSetor($pessoa['codpes']);
-                    $pessoa['nome'] = $pessoaReplicado['nompesttd'];
-                    $pessoa['lattes'] = Lattes::id($pessoa['codpes']);
-
-                    $lattesArray = Lattes::obterArray($pessoa['codpes']);
-                    $pessoa['resumoCV'] = html_entity_decode(Lattes::retornarResumoCV($pessoa['codpes'], 'pt', $lattesArray)) ?: '';
-
-                    $params = [$pessoa['codpes'], $lattesArray, 'periodo', $anoIni, $anoFim];
-
-                    $pessoa['artigos'] = Lattes::listarArtigos(...$params) ?: [];
-                    $pessoa['livrosPublicados'] = Lattes::listarLivrosPublicados(...$params) ?: [];
-                    $pessoa['capitulosLivros'] = Lattes::listarCapitulosLivros(...$params) ?: [];
-                    $pessoa['textosJornaisRevistas'] = Lattes::listarTextosJornaisRevistas(...$params) ?: [];
-                    $pessoa['trabalhosAnais'] = Lattes::listarTrabalhosAnais(...$params) ?: [];
-                    $pessoa['apresentacaoTrabalho'] = Lattes::listarApresentacaoTrabalho(...$params) ?: [];
-                    $pessoa['outrasProducoesBibliograficas'] = Lattes::listarOutrasProducoesBibliograficas(...$params) ?: [];
-                    $pessoa['premios'] = Lattes::listarPremios(...$params) ?: [];
-                    $pessoa['trabalhosTecnicos'] = Lattes::listarTrabalhosTecnicos(...$params) ?: [];
-                    $pessoa['organizacaoEventos'] = Lattes::listarOrganizacaoEvento(...$params) ?: [];
-                    $pessoa['outrasProducoesTecnicas'] = Lattes::listarOutrasProducoesTecnicas(...$params) ?: [];
-                    $pessoa['cursosCurtaDuracao'] = Lattes::listarCursosCurtaDuracao(...$params) ?: [];
-                    $pessoa['materialDidaticoInstrucional'] = Lattes::listarMaterialDidaticoInstrucional(...$params) ?: [];
-                    $pessoa['orientacoesConcluidasIC'] = Lattes::listarOrientacoesConcluidasIC(...$params) ?: [];
-                    $pessoa['orientacoesEmAndamentoIC'] = Lattes::listarOrientacoesEmAndamentoIC(...$params) ?: [];
-                    $pessoa['orientacoesConcluidasTccGraduacao'] = Lattes::listarOrientacoesConcluidasTccGraduacao(...$params) ?: [];
-                    $pessoa['orientacoesEmAndamentoIC'] = Lattes::listarOrientacoesEmAndamentoIC(...$params) ?: [];
-                    $pessoa['orientacoesConcluidasMestrado'] = Lattes::listarOrientacoesConcluidasMestrado(...$params) ?: [];
-                    $pessoa['orientacoesEmAndamentoMestrado'] = Lattes::listarOrientacoesEmAndamentoMestrado(...$params) ?: [];
-                    $pessoa['orientacoesConcluidasDoutorado'] = Lattes::listarOrientacoesConcluidasDoutorado(...$params) ?: [];
-                    $pessoa['orientacoesEmAndamentoDoutorado'] = Lattes::listarOrientacoesEmAndamentoDoutorado(...$params) ?: [];
-                    $pessoa['orientacoesConcluidasPosDoutorado'] = Lattes::listarOrientacoesConcluidasPosDoutorado(...$params) ?: [];
-                    $pessoa['orientacoesEmAndamentoPosDoutorado'] = Lattes::listarOrientacoesEmAndamentoPosDoutorado(...$params) ?: [];
-                    $pessoa['monografiasConcluidasAperfeicoamentoEspecializacao'] = Lattes::listarMonografiasConcluidasAperfeicoamentoEspecializacao(...$params) ?: [];
-
-
-
-
-                    $pessoas[] = $pessoa;
-                } else {
-                    $naoEncontrados[] = $nome;
-                }
+        foreach ($nomes as $nome) {
+            // vamos procurar 1o por nome exato e depois por fonetico
+            $pessoaReplicado = Pessoa::procurarServidorPorNome($nome, $fonetico = false) ?? Pessoa::procurarServidorPorNome($nome, $fonetico = true);
+            if (!$pessoaReplicado) {
+                $naoEncontrados[] = $nome;
+                continue;
             }
-        }
+            $pessoa = [];
+            $pessoa['unidade'] = $pessoaReplicado['sglclgund'];
+            $pessoa['departamento'] = Pessoa::retornarSetor($pessoaReplicado['codpes']);
+            $pessoa['codpes'] = $pessoaReplicado['codpes'];
+            $pessoa['nome'] = $pessoaReplicado['nompesttd'];
+            $pessoa['lattes'] = Lattes::id($pessoa['codpes']);
+            $pessoa['dtaultalt'] = Lattes::retornarDataUltimaAtualizacao($pessoa['codpes']);
 
+            $lattesArray = Lattes::obterArray($pessoa['codpes']);
+            $params = [$pessoa['codpes'], $lattesArray, 'periodo', $anoIni, $anoFim];
+
+            $pessoa['resumoCV'] = html_entity_decode(Lattes::retornarResumoCV($pessoa['codpes'], 'pt', $lattesArray)) ?: '';
+            $pessoa['artigos'] = Lattes::listarArtigos(...$params) ?: [];
+            $pessoa['livrosPublicados'] = Lattes::listarLivrosPublicados(...$params) ?: [];
+            $pessoa['capitulosLivros'] = Lattes::listarCapitulosLivros(...$params) ?: [];
+            $pessoa['textosJornaisRevistas'] = Lattes::listarTextosJornaisRevistas(...$params) ?: [];
+            $pessoa['trabalhosAnais'] = Lattes::listarTrabalhosAnais(...$params) ?: [];
+            $pessoa['apresentacaoTrabalho'] = Lattes::listarApresentacaoTrabalho(...$params) ?: [];
+            $pessoa['outrasProducoesBibliograficas'] = Lattes::listarOutrasProducoesBibliograficas(...$params) ?: [];
+            $pessoa['premios'] = Lattes::listarPremios(...$params) ?: [];
+            $pessoa['trabalhosTecnicos'] = Lattes::listarTrabalhosTecnicos(...$params) ?: [];
+            $pessoa['organizacaoEventos'] = Lattes::listarOrganizacaoEvento(...$params) ?: [];
+            $pessoa['outrasProducoesTecnicas'] = Lattes::listarOutrasProducoesTecnicas(...$params) ?: [];
+            $pessoa['cursosCurtaDuracao'] = Lattes::listarCursosCurtaDuracao(...$params) ?: [];
+            $pessoa['materialDidaticoInstrucional'] = Lattes::listarMaterialDidaticoInstrucional(...$params) ?: [];
+            $pessoa['orientacoesConcluidasIC'] = Lattes::listarOrientacoesConcluidasIC(...$params) ?: [];
+            $pessoa['orientacoesEmAndamentoIC'] = Lattes::listarOrientacoesEmAndamentoIC(...$params) ?: [];
+            $pessoa['orientacoesConcluidasTccGraduacao'] = Lattes::listarOrientacoesConcluidasTccGraduacao(...$params) ?: [];
+            $pessoa['orientacoesEmAndamentoIC'] = Lattes::listarOrientacoesEmAndamentoIC(...$params) ?: [];
+            $pessoa['orientacoesConcluidasMestrado'] = Lattes::listarOrientacoesConcluidasMestrado(...$params) ?: [];
+            $pessoa['orientacoesEmAndamentoMestrado'] = Lattes::listarOrientacoesEmAndamentoMestrado(...$params) ?: [];
+            $pessoa['orientacoesConcluidasDoutorado'] = Lattes::listarOrientacoesConcluidasDoutorado(...$params) ?: [];
+            $pessoa['orientacoesEmAndamentoDoutorado'] = Lattes::listarOrientacoesEmAndamentoDoutorado(...$params) ?: [];
+            $pessoa['orientacoesConcluidasPosDoutorado'] = Lattes::listarOrientacoesConcluidasPosDoutorado(...$params) ?: [];
+            $pessoa['orientacoesEmAndamentoPosDoutorado'] = Lattes::listarOrientacoesEmAndamentoPosDoutorado(...$params) ?: [];
+            $pessoa['monografiasConcluidasAperfeicoamentoEspecializacao'] = Lattes::listarMonografiasConcluidasAperfeicoamentoEspecializacao(...$params) ?: [];
+
+            $pessoas[] = $pessoa;
+
+        }
         return view('grad.relatorio-complementar', [
-            'nomes' => $request->nomes,
             'pessoas' => $pessoas,
             'naoEncontrados' => $naoEncontrados,
-            'anoIni' => $anoIni,
-            'anoFim' => $anoFim,
         ]);
+    }
+
+    protected static function limparNomes($nomes)
+    {
+        $nomes = str_replace("\r", '', $nomes); // remove carriage return, mantém new line
+        $nomes = explode(PHP_EOL, $nomes);
+        $nomes = array_filter($nomes); // remove elementos empty()
+        $nomes = array_map('trim', $nomes);
+        $nomes = array_unique($nomes); // sem repetidos
+        return $nomes;
     }
 
     public function cursos()
