@@ -78,13 +78,13 @@
           <td>
             @foreach ($t['ministrantes'] as $m)
               {!! $m['stamis'] == 'N' ? '' : '<span class="badge badge-info" title="Quinzenal">15d</span>' !!}
-              <a href="{{ route('pessoas.show', $m['codpes']) }}" class="showPessoaModal">{{ $m['nompes'] }}</a><br />
+              @include('grad.partials.pessoa-btn-modal', ['pessoa' => $m])<br />
             @endforeach
           </td>
           <td>
             @foreach ($t['ativDidaticas'] as $a)
               ({{ $a['nomatv'] }})
-              <a href="{{ route('pessoas.show', $a['codpes']) }}" class="showPessoaModal">{{ $a['nompes'] }}</a><br />
+              @include('grad.partials.pessoa-btn-modal', ['pessoa' => $a])<br />
             @endforeach
           </td>
           <td>{{ $t['verdis'] }}</td>
