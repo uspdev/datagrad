@@ -10,11 +10,9 @@
 @include('laravel-usp-theme::blocos.spinner')
 
 {{-- Target: table; class: datatable-simples --}}
-{{-- @include('laravel-usp-theme::blocos.datatable-simples') --}}
+@include('laravel-usp-theme::blocos.datatable-simples')
 
 {{-- Fim de blocos do laravel-usp-theme --}}
-
-@include('blocos.datatable-relatorio')
 
 @section('title')
   @parent

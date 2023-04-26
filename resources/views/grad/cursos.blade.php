@@ -5,8 +5,8 @@
     Cursos
   </h4>
 
-  <table class="table table-sm table-hover datatable-simples">
-    <thead>
+  <table class="table table-sm table-hover datatable-simples dt-fixed-header">
+    <thead class="thead-light">
       <tr>
         <th></th>
         <th>Curso</th>

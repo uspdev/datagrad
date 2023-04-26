@@ -31,8 +31,8 @@
   @if ($pessoas)
     <hr>
     <div class="h4 mt-3">Resultados</div>
-    <table class="table table-bordered table-hover table-sm datatable-relatorio">
-      <thead>
+    <table class="table table-bordered table-hover table-sm datatable-simples dt-buttons dt-fixed-header">
+      <thead class="thead-light">
         <tr>
           <th>Unidade</th>
           <th>Depto</th>
@@ -64,7 +64,6 @@
           <th>Orientações concluídas de pós doutorado</th>
           <th>Orientações em andamento de pós doutorado</th>
           <th>Orientações concluídas de monografias de cursos de aperfeicoamento ou especialização</th>
-
         </tr>
       </thead>
       <tbody>
@@ -79,7 +78,7 @@
                 https://lattes.cnpq.br/{{ $pessoa['lattes'] }}
               </a>
             </td>
-            <td>{{ $pessoa['dtaultalt'] ?? '-' }}</td>
+            <td data-sort="{{ Uspdev\Utils\Generic::data_en($pessoa['dtaultalt']) }}">{{ $pessoa['dtaultalt'] ?? '-' }}</td>
             <td title="{{ $pessoa['resumoCV'] }}"
               style="max-width: 100px;overflow:hidden; white-space: nowrap; text-overflow: ellipsis;">
               {{ $pessoa['resumoCV'] }}
@@ -107,9 +106,6 @@
             <td>{{ count($pessoa['orientacoesConcluidasPosDoutorado']) }}</td>
             <td>{{ count($pessoa['orientacoesEmAndamentoPosDoutorado']) }}</td>
             <td>{{ count($pessoa['monografiasConcluidasAperfeicoamentoEspecializacao']) }}</td>
-
-
-
           </tr>
         @endforeach
       </tbody>
@@ -117,4 +113,3 @@
   @endif
 
 @endsection
-

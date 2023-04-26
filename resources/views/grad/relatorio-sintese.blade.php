@@ -23,8 +23,8 @@
   @if ($pessoas)
     <hr>
     <div class="h4 mt-3">Resultados</div>
-    <table class="table table-bordered table-hover table-sm datatable-relatorio">
-      <thead>
+    <table class="table table-bordered table-hover table-sm datatable-simples dt-buttons dt-fixed-header">
+      <thead class="thead-light">
         <tr>
           <th>Unidade</th>
           <th>Depto</th>
@@ -57,7 +57,7 @@
                 https://lattes.cnpq.br/{{ $pessoa['lattes'] }}
               </a>
             </td>
-            <td>{{ $pessoa['dtaultalt'] ?? '-' }}</td>
+            <td data-sort="{{ Uspdev\Utils\Generic::data_en($pessoa['dtaultalt']) }}">{{ $pessoa['dtaultalt'] ?? '-' }}</td>
             <td>{!! $pessoa['linkOrcid'] !!}</td>
             <td>{{ $pessoa['graduacao'] ?? '-' }}</td>
             <td>{{ $pessoa['mestrado'] ?? '-' }}</td>

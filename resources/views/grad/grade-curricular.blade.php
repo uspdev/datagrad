@@ -4,8 +4,8 @@
   @include('grad.partials.curso-menu', ['view' => 'Grade'])
   <hr />
 
-  <table class="table datatable-simples table-sm table-hover">
-    <thead>
+  <table class="table table-sm table-hover datatable-simples dt-fixed-header dt-buttons">
+    <thead class="thead-light">
       <tr>
         <th>Semestre ideal</th>
         <th>Código</th>

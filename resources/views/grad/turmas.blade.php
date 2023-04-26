@@ -30,28 +30,32 @@
     <form method="POST" action="{{ route('graduacao.relatorio.sintese.post') }}">
       @csrf
       <input type="hidden" name="nomes" value="{!! $nomes !!}">
-      <button class="btn btn-outline-info btn-spinner ml-3" type="submit" title="{{ $nomesCount }} nomes não repetidos">
+      <button class="btn btn-outline-info btn-spinner ml-3" type="submit"
+        title="{{ $nomesCount }} nomes não repetidos">
         Relatório síntese <span class="badge badge-pill badge-primary">{{ $nomesCount }}</span>
       </button>
     </form>
 
     <form method="POST" action="{{ route('graduacao.relatorio.complementar.post') }}">
-        @csrf
-        <input type="hidden" name="nomes" value="{!! $nomes !!}">
-        <button class="btn btn-outline-info btn-spinner ml-3" type="submit" title="{{ $nomesCount }} nomes não repetidos">
-          Relatório complementar <span class="badge badge-pill badge-primary">{{ $nomesCount }}</span>
-        </button>
-      </form>
+      @csrf
+      <input type="hidden" name="nomes" value="{!! $nomes !!}">
+      <button class="btn btn-outline-info btn-spinner ml-3" type="submit"
+        title="{{ $nomesCount }} nomes não repetidos">
+        Relatório complementar <span class="badge badge-pill badge-primary">{{ $nomesCount }}</span>
+      </button>
+    </form>
 
   </div>
 
   <div class="mt-3 ml-3">
-    Obs.: Exclui as turmas "não ativas"
+    Obs.: Exclui as turmas "não ativas"<br>
+    Obs2.: Carga hor: carga horária teórica/prática - contabiliza somente créditos aula, não contabiliza créditos trabalho
+    uma vez que não são créditos ministrados pelos docentes.
   </div>
   <hr />
 
-  <table class="table datatable-simples table-sm table-hover">
-    <thead>
+  <table class="table table-sm table-hover datatable-simples dt-buttons dt-fixed-header">
+    <thead class="thead-light">
       <tr>
         <th>Cód Turma</th>
         <th>Cód dis</th>

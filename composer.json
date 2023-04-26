@@ -23,10 +23,11 @@
         "laravel/tinker": "^2.5",
         "spatie/commonmark-highlighter": "^3.0",
         "uspdev/laravel-replicado": "^1.0",
-        "uspdev/replicado": "dev-lattes_update as 1.16.5",
         "uspdev/laravel-tools": "^1.2",
         "uspdev/laravel-usp-theme": "^2.7",
+        "uspdev/replicado": "dev-lattes_update as 1.16.5",
         "uspdev/senhaunica-socialite": "dev-permissions",
+        "uspdev/utils": "^1.1",
         "ybr-nx/laravel-mariadb": "^1.0"
     },
     "require-dev": {

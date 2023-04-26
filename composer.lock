@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "acaa3cff0e167d3eb646fd7571902d6b",
+    "content-hash": "7d41b35953335702c1158927f91f73c6",
     "packages": [
         {
             "name": "asm89/stack-cors",
@@ -3110,16 +3110,16 @@
         },
         {
             "name": "psy/psysh",
-            "version": "v0.11.15",
+            "version": "v0.11.16",
             "source": {
                 "type": "git",
                 "url": "https://github.com/bobthecow/psysh.git",
-                "reference": "5350ce0ec8ecf2c5b5cf554cd2496f97b444af85"
+                "reference": "151b145906804eea8e5d71fea23bfb470c904bfb"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/bobthecow/psysh/zipball/5350ce0ec8ecf2c5b5cf554cd2496f97b444af85",
-                "reference": "5350ce0ec8ecf2c5b5cf554cd2496f97b444af85",
+                "url": "https://api.github.com/repos/bobthecow/psysh/zipball/151b145906804eea8e5d71fea23bfb470c904bfb",
+                "reference": "151b145906804eea8e5d71fea23bfb470c904bfb",
                 "shasum": ""
             },
             "require": {
@@ -3180,9 +3180,9 @@
             ],
             "support": {
                 "issues": "https://github.com/bobthecow/psysh/issues",
-                "source": "https://github.com/bobthecow/psysh/tree/v0.11.15"
+                "source": "https://github.com/bobthecow/psysh/tree/v0.11.16"
             },
-            "time": "2023-04-07T21:57:09+00:00"
+            "time": "2023-04-26T12:53:57+00:00"
         },
         {
             "name": "ralouphie/getallheaders",
@@ -6238,16 +6238,16 @@
         },
         {
             "name": "uspdev/laravel-usp-theme",
-            "version": "2.7.1",
+            "version": "2.8.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/uspdev/laravel-usp-theme.git",
-                "reference": "78d5ccf2ca799b9cd2bc15fa7d366d9ac5ec3bfa"
+                "reference": "5c6caeb99e9a83701286e81a71aaa153ffe9c20b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/uspdev/laravel-usp-theme/zipball/78d5ccf2ca799b9cd2bc15fa7d366d9ac5ec3bfa",
-                "reference": "78d5ccf2ca799b9cd2bc15fa7d366d9ac5ec3bfa",
+                "url": "https://api.github.com/repos/uspdev/laravel-usp-theme/zipball/5c6caeb99e9a83701286e81a71aaa153ffe9c20b",
+                "reference": "5c6caeb99e9a83701286e81a71aaa153ffe9c20b",
                 "shasum": ""
             },
             "type": "library",
@@ -6282,9 +6282,9 @@
             "description": "usp theme for laravel",
             "support": {
                 "issues": "https://github.com/uspdev/laravel-usp-theme/issues",
-                "source": "https://github.com/uspdev/laravel-usp-theme/tree/2.7.1"
+                "source": "https://github.com/uspdev/laravel-usp-theme/tree/2.8.0"
             },
-            "time": "2023-04-11T15:02:55+00:00"
+            "time": "2023-04-25T12:30:40+00:00"
         },
         {
             "name": "uspdev/replicado",
@@ -6390,6 +6390,49 @@
                 "source": "https://github.com/uspdev/senhaunica-socialite/tree/permissions"
             },
             "time": "2023-04-18T13:12:59+00:00"
+        },
+        {
+            "name": "uspdev/utils",
+            "version": "1.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/uspdev/utils.git",
+                "reference": "ce9190d666daeb898d2d3a8944cd11f85e9ea5b8"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/uspdev/utils/zipball/ce9190d666daeb898d2d3a8944cd11f85e9ea5b8",
+                "reference": "ce9190d666daeb898d2d3a8944cd11f85e9ea5b8",
+                "shasum": ""
+            },
+            "require": {
+                "nesbot/carbon": "^2.48"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^8.5 || ^9.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Uspdev\\Utils\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Thiago Gomes Veríssimo",
+                    "email": "verissimotgv@gmail.com"
+                }
+            ],
+            "description": "Diversos métodos estáticos em PHP para as coisas mais úteis ou inúteis...",
+            "support": {
+                "issues": "https://github.com/uspdev/utils/issues",
+                "source": "https://github.com/uspdev/utils/tree/1.1.0"
+            },
+            "time": "2023-03-20T18:54:24+00:00"
         },
         {
             "name": "vlucas/phpdotenv",
