@@ -25,7 +25,7 @@
         "uspdev/laravel-replicado": "^1.0",
         "uspdev/laravel-tools": "^1.2",
         "uspdev/laravel-usp-theme": "^2.7",
-        "uspdev/replicado": "dev-lattes_update as 1.16.5",
+        "uspdev/replicado": "^1.17",
         "uspdev/senhaunica-socialite": "dev-permissions",
         "uspdev/utils": "^1.1",
         "ybr-nx/laravel-mariadb": "^1.0"
