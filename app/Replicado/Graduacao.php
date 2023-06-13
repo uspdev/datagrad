@@ -111,6 +111,29 @@ class Graduacao extends GraduacaoReplicado
     }
 
     /**
+     * Retorna dados da tabela CURSOGR e HABILITACAOGR e CURRICULOGR
+     */
+    public function obterCurso($codcur, $codhab)
+    {
+        $query = " SELECT C.*, H.*, CR.* FROM CURSOGR C
+        INNER JOIN HABILITACAOGR H ON C.codcur = H.codcur
+        INNER JOIN CURRICULOGR CR ON H.codcur = CR.codcur AND H.codhab = CR.codhab
+        WHERE H.codcur = :codcur
+            AND H.codhab = :codhab
+            AND ( C.dtaatvcur IS NOT NULL AND C.dtadtvcur IS NULL ) -- curso ativo
+            AND ( H.dtaatvhab IS NOT NULL AND H.dtadtvhab IS NULL ) -- habilitação ativa
+            AND ( CR.dtainicrl < GETDATE() AND CR.dtafimcrl > GETDATE() ) -- pega o CURRICULO ativo
+        ORDER BY C.nomcur, H.nomhab ASC";
+
+        $params = [
+            'codcur' => $codcur,
+            'codhab' => $codhab,
+        ];
+
+        return DB::fetch($query, $params);
+    }
+
+    /**
      * Obtém o curso ativo de um aluno de graduação, procurando em todas as unidades disponíveis na replicação
      *
      * Modificado de obterCursoAtivo para incluir a sigla da unidade e procurar em qualquer unidade
@@ -137,6 +160,9 @@ class Graduacao extends GraduacaoReplicado
         // return $ret;
     }
 
+    /**
+     * ????????????????
+     */
     public static function obterCursoFinalizadoUnidades($codpes)
     {
         $query = "SELECT V.*, C.nomcur, H.*, P.*, F.sglfusclgund AS sglund
@@ -155,30 +181,31 @@ class Graduacao extends GraduacaoReplicado
     /**
      * Disciplinas (grade curricular) para um currículo atual no JúpiterWeb
      *
+     * Se informado semestre, procura a grade ativa no semestre (não implementado ainda)
+     *
      * a partir do código do curso e da habilitação
      * adaptado de listarDisciplinasGradeCurricular
      *
      * @param String $codcur
      * @param Int $codhab
-     * @return Array(coddis, nomdis, verdis, numsemidl, tipobg)
+     * @return Array (coddis, nomdis, verdis, numsemidl, tipobg)
+     * @author Masakik, em 13/6/2023
      */
-    public static function listarGradeCurricular($codcur, $codhab)
+    public static function listarGradeCurricular($codcur, $codhab, $semestre = null)
     {
         // estava dando erro no TOP na FFLCH. Então tirei o top e incuí
         // o dtafimcrl para pegar o ativo.
         // acrescentado dtainicrl pois tem aqueles que ainda não inicaram
         // em tese deve retornar somente 1 codcrl
-        $query = "SELECT G.*, D.*
+        $query = "SELECT G.*, D.*, C.*
             FROM GRADECURRICULAR G
-                INNER JOIN DISCIPLINAGR D ON (G.coddis = D.coddis AND G.verdis = D.verdis)
-            WHERE G.codcrl IN (
-                SELECT codcrl
-                FROM CURRICULOGR
-                WHERE codcur = convert(int, :codcur)
-                    AND codhab = convert(int, :codhab)
-                    AND dtainicrl IS NOT NULL
-                    AND dtafimcrl is NULL
-            )";
+            INNER JOIN DISCIPLINAGR D ON (G.coddis = D.coddis AND G.verdis = D.verdis)
+            INNER JOIN CURRICULOGR C ON G.codcrl = C.codcrl
+            WHERE C.codcur = convert(int, :codcur)
+                AND C.codhab = convert(int, :codhab)
+                AND C.dtainicrl < GETDATE() -- pega o curriculogr vigente no dia de hoje
+                AND C.dtafimcrl > GETDATE()
+            ";
         $param = [
             'codcur' => $codcur,
             'codhab' => $codhab,
@@ -202,13 +229,18 @@ class Graduacao extends GraduacaoReplicado
 
         // turmas baseadas em habilturma
         $query = "SELECT T.*, D.*, H.*
+                , (nummtr + nummtrturcpl + nummtropt + nummtrecr+ nummtroptlre) as nummtrtot -- total de matriculados
+                , (numvagtur + numvagturcpl + numvagopt + numvagecr+ numvagoptlre) as numvagtot -- total de vagas
             FROM TURMAGR T
             INNER JOIN DISCIPLINAGR D ON D.coddis = T.coddis AND D.verdis = T.verdis
             INNER JOIN HABILTURMA H ON H.coddis = T.coddis AND H.verdis = T.verdis AND H.codtur = T.codtur
             -- INNER JOIN ATIVIDADEDOCENTE A ON A.coddis = T.coddis AND A.verdis = T.verdis AND A.codtur = T.codtur
-            WHERE T.codtur LIKE :semestre AND H.codcur = CONVERT(INT, :codcur) AND H.codhab = CONVERT(INT, :codhab)
+            WHERE T.codtur LIKE :semestre
+                AND H.codcur = CONVERT(INT, :codcur)
+                AND H.codhab = CONVERT(INT, :codhab)
                 AND T.coddis IN ('$strCoddis')
                 AND T.statur != 'D' -- exclui as não ativas
+                AND T.statur is not null -- exclui sem status
         ";
         $param['codcur'] = $codcur;
         $param['codhab'] = $codhab;
@@ -221,6 +253,8 @@ class Graduacao extends GraduacaoReplicado
 
         // lista baseada em listaCoddis menos as que já forma selecionadas de habilturma
         $query = "SELECT T.*, D.*
+                , (nummtr + nummtrturcpl + nummtropt + nummtrecr+ nummtroptlre) as nummtrtot
+                , (numvagtur + numvagturcpl + numvagopt + numvagecr+ numvagoptlre) as numvagtot
             FROM TURMAGR T
             INNER JOIN DISCIPLINAGR D ON D.coddis = T.coddis AND D.verdis = T.verdis
             WHERE T.codtur LIKE :semestre
@@ -258,6 +292,128 @@ class Graduacao extends GraduacaoReplicado
     }
 
     /**
+     * Lista as turmas que o professor ministrou aulas nos semestres informados
+     *
+     * Não está pegando as horas efetivas pois precisa juntar com os feriados do semestre
+     *
+     * @param Int $codpes
+     * @param Array $semestres Array no formato [20221, 20222, 20231, etc]
+     * @return Array
+     * @author Masakik, em 13/6/2023
+     */
+    public static function listarTurmasPorCodpes($codpes, $semestres)
+    {
+        $filterSemestres = " (";
+        foreach ($semestres as $semestre) {
+            $filterSemestres .= " T.codtur LIKE '$semestre%' OR";
+        }
+        $filterSemestres = substr($filterSemestres, 0, -3) . ")";
+
+        $commonSelect = "
+            M.stamis --semanal/quinzenal
+            , M.diasmnocp -- dia da semana
+            , CONVERT(VARCHAR, T.dtainitur, 103) as dtainitur -- inicio e
+            , CONVERT(VARCHAR, T.dtafimtur, 103) as dtafimtur -- fim das aulas
+            , D.nomdis -- nome da disciplina
+            , (T.numvagtur + T.numvagturcpl + T.numvagopt + T.numvagecr + T.numvagoptlre) as numvagtot -- total de vagas
+            , (T.nummtr + T.nummtrturcpl + T.nummtropt + T.nummtrecr + T.nummtroptlre) as nummtrtot -- total de matriculados
+            , T.codtur, T.coddis, T.cgahorteo, T.cgahorpra -- dados da turma
+            , PH.horsai, PH.horent
+            , CONVERT(varchar(5), DATEADD(minute, DATEDIFF(minute, PH.horent, PH.horsai), 0), 114) AS horas
+            , DATEDIFF(week, M.dtainiaul, M.dtafimaul) semanas --nro de semanas
+        ";
+
+        $commonJoin = "
+            INNER JOIN DISCIPLINAGR D ON D.coddis = T.coddis AND D.verdis = T.verdis
+            INNER JOIN MINISTRANTE M ON T.coddis = M.coddis AND T.verdis = M.verdis AND T.codtur = M.codtur
+            INNER JOIN PERIODOHORARIO PH ON M.codperhor = PH.codperhor
+        ";
+
+        $commonWhere = "
+            (T.nummtr + T.nummtrturcpl + T.nummtropt + T.nummtrecr + T.nummtroptlre) != 0 -- exclui turmas sem matriculados
+            AND $filterSemestres
+        ";
+
+        $query = "SELECT
+                    $commonSelect
+                    , 'Ministrante' nomatv
+                FROM TURMAGR T
+                $commonJoin
+                WHERE
+                    $commonWhere
+                    AND M.codpes = convert(int, :codpes)
+                    AND NOT EXISTS ( -- sem atividade docente
+                        SELECT 1
+                        FROM ATIVIDADEDOCENTE AD
+                        WHERE T.coddis = AD.coddis AND T.verdis = AD.verdis AND T.codtur = AD.codtur
+                    )
+            UNION ( --aqui pega as atividades de docentes senior
+                SELECT
+                    $commonSelect
+                    , AD.nomatv
+                FROM TURMAGR T
+                $commonJoin
+                INNER JOIN ATIVIDADEDOCENTE AD -- pega atividade docente que foi excluido antes
+                    ON T.coddis = AD.coddis AND T.verdis = AD.verdis AND T.codtur = AD.codtur
+                WHERE
+                    $commonWhere
+                    AND AD.codpes = convert(int, :codpes)
+            ) UNION ( -- atividades docente de estagio e tcc
+                SELECT
+                    'N' stamis -- N =semanal
+                    , '-' diasmnocp -- dia da semana
+                    , CONVERT(VARCHAR, T.dtainitur, 103) as dtainitur -- inicio e
+                    , CONVERT(VARCHAR, T.dtafimtur, 103) as dtafimtur -- fim das aulas
+                    , D.nomdis -- nome da disciplina
+                    , (T.numvagtur + T.numvagturcpl + T.numvagopt + T.numvagecr + T.numvagoptlre) as numvagtot -- total de vagas
+                    , (T.nummtr + T.nummtrturcpl + T.nummtropt + T.nummtrecr + T.nummtroptlre) as nummtrtot -- total de matriculados
+                    , T.codtur, T.coddis
+                    , AD.cgahoratv cgahorteo -- colocando a carga horaria da atividade na teorica
+                    , T.cgahorpra -- aqui deve ser zerado sempre, mas nao conferi
+                    , '-' horsai, '-' horent, '-' horas, '-' semanas
+                    , AD.nomatv
+                FROM TURMAGR T
+                INNER JOIN DISCIPLINAGR D ON D.coddis = T.coddis AND D.verdis = T.verdis
+                INNER JOIN ATIVIDADEDOCENTE AD -- pega atividade docente que foi excluido antes
+                    ON T.coddis = AD.coddis AND T.verdis = AD.verdis AND T.codtur = AD.codtur
+                WHERE
+                    $commonWhere
+                    AND AD.codpes = convert(int, :codpes)
+                    AND NOT EXISTS ( -- remove os já selecionados dos docentes senior
+                        SELECT 1
+                            FROM TURMAGR T
+                            $commonJoin
+                        INNER JOIN ATIVIDADEDOCENTE AD -- pega atividade docente que foi excluido antes
+                            ON T.coddis = AD.coddis AND T.verdis = AD.verdis AND T.codtur = AD.codtur
+                        WHERE
+                            $commonWhere
+                            AND AD.codpes = convert(int, :codpes)
+                    )
+        ) ORDER BY T.codtur, T.coddis
+        ";
+
+        // dd($query);
+        $res = DB::fetchAll($query, ['codpes' => $codpes]);
+        return $res;
+
+        $X = "
+        -- funcionou no dbeaver para contar feriados no periodo. Mas nao funcionou na query
+        -- precisa continuar investigando
+        select a.feriados
+        --datename(dw,dtacld) as semana,
+        --format(dtacld, 'ddd') data,
+        --cast('2022-03-14' as date) teste,
+        FROM (
+        SELECT count(dtacld) feriados
+        from dbo.CALENDLOCALIDADEUSP
+        WHERE codloc=4080
+        and dtacld > cast('2022-03-14' as date) and dtacld < cast('2022-07-23' as date)
+        and  format(dtacld, 'ddd','pt-br') = 'qui'
+        ) a
+        ";
+    }
+
+    /**
      * Lista os professores que constam na tabela ATIVIDADEDOCENTE de uma turma
      *
      * $turma são os dados de TURMAGR, especificamente coddis, verdis e codtur
@@ -282,5 +438,19 @@ class Graduacao extends GraduacaoReplicado
 
         $res = DB::fetchAll($query, $params);
         return empty($res) ? $res : array_unique($res, SORT_REGULAR);
+    }
+
+    /**
+     * Lista as turmas e os respectivos ministrantes
+     */
+    public static function listarTurmasMinistrantes(int $codcur, int $codhab, $semestre)
+    {
+        $turmas = Graduacao::listarTurmas($codcur, $codhab, $semestre);
+        $AtivDidaticas = [];
+        foreach ($turmas as &$turma) {
+            $turma['ministrantes'] = Graduacao::listarMinistrante($turma);
+            $turma['ativDidaticas'] = Graduacao::listarAtivDidaticas($turma);
+        }
+        return $turmas;
     }
 }

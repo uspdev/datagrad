@@ -45,6 +45,14 @@
       </button>
     </form>
 
+    <form method="POST">
+      @csrf
+      <input type="hidden" name="acao" value="cache_refresh">
+      <button class="btn btn-outline-warning btn-spinner ml-3" type="submit" title="Clique para atualizar o cache">
+        {{ $timestamp }} <i class="fas fa-sync-alt"></i>
+      </button>
+    </form>
+
   </div>
 
   <div class="mt-3 ml-3">
@@ -64,6 +72,8 @@
         <th>Ativ. Didática</th>
         <th>Versão</th>
         <th>Carga Hor.</th>
+        <th>Total Vagas</th>
+        <th>Total Matr.</th>
         <th>Tipo</th>
         <th>Status</th>
         <th>Obs</th>
@@ -89,6 +99,8 @@
           </td>
           <td>{{ $t['verdis'] }}</td>
           <td>{{ $t['cgahorteo'] }}/{{ $t['cgahorpra'] }}</td>
+          <td>{{ $t['numvagtot'] }}</td>
+          <td>{{ $t['nummtrtot'] }}</td>
           <td>{{ $t['tiptur'] }}</td>
           <td>{{ $graduacao::$statur[$t['statur']] }}</td>
           <td>{{ $t['obstur'] }}</td>

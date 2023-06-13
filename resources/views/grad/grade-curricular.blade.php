@@ -1,18 +1,65 @@
 @extends('layouts.app')
 
-@section('content')
-  @include('grad.partials.curso-menu', ['view' => 'Grade'])
-  <hr />
+@section('styles')
+  @parent
+  <style>
+    td {
+      max-width: 200px;
+      white-space: pre-wrap;
+    }
 
-  <table class="table table-sm table-hover datatable-simples dt-fixed-header dt-buttons">
+    .c1,
+    .c2,
+    .c4,
+    .c6 {
+      width: 50px;
+    }
+
+    .c5 {
+      width: 70px;
+    }
+  </style>
+@endsection
+
+@section('content')
+  @include('grad.partials.curso-menu', [
+      'view' => 'Grade (' . substr($curso['codcrl'], -3, -1) . '/' . substr($curso['codcrl'], -1) . ')',
+  ])
+  <div>
+    Curso: Ini: {{ formatarData($curso['dtaatvcur']) }} Fim: {{ formatarData($curso['dtadtvcur']) }}
+    | Habilitação: Ini: {{ formatarData($curso['dtaatvhab']) }} Fim: {{ formatarData($curso['dtadtvhab']) }}
+    | Currículo: Ini: {{ formatarData($curso['dtainicrl']) }} Fim: {{ formatarData($curso['dtafimcrl']) }};
+    Horas total:
+    <span class="btn-link" title="Carga horária total do curso (soma de todas as cargas horárias exceto a de estágio).">
+      {{ $curso['cgahortot'] }}</span>;
+    Horas AAC:
+    <span class="btn-link"
+      title="Carga horária total obrigatória de Atividades Acadêmicas Complementares (AAC) no currículo (1.a fase da RESOLUÇÃO CoG, CoCEx e CoPq Nº 7788, DE 26 DE AGOSTO DE 2019)">
+      {{ $curso['cgahorobgaac'] }}
+    </span>
+    @if (!empty($curso['obscrl']))
+      <button class="btn btn-link toggle-obscrl" title="Há observações do currículo: clique para ver."><i
+          class="fas fa-info-circle"></i></button>
+    @endif
+  </div>
+  <div class="obscrl alert-info toggle-obscrl" style="display:none">
+    <b>Observações do currículo</b><br>
+    {!! $curso['obscrl'] !!}
+  </div>
+  <hr />
+  {{-- @dd($curso) --}}
+  <table class="table table-sm table-striped table-hover datatable-simples dt-fixed-header dt-buttons">
     <thead class="thead-light">
       <tr>
-        <th>Semestre ideal</th>
-        <th>Código</th>
+        <th class="c1">Semestre ideal</th>
+        <th class="c2">Código</th>
         <th>Nome</th>
-        <th>Versão</th>
-        <th>Tipo</th>
-        <th>Créditos aula/trab</th>
+        <th class="c4">Versão</th>
+        <th class="c5">Tipo</th>
+        <th class="c6">Créditos aula/trab</th>
+        <th>Objetivos</th>
+        <th>Programa Resumido</th>
+        <th class="c9">Programa</th>
       </tr>
     </thead>
     <tbody>
@@ -24,8 +71,27 @@
           <td>{{ $d['verdis'] }}</td>
           <td>{{ App\Replicado\Graduacao::$tipobg[$d['tipobg']] }}</td>
           <td>{{ $d['creaul'] }}/{{ $d['cretrb'] }}</td>
+          <td class="text-truncate">{!! $d['objdis'] !!}</td>
+          <td class="text-truncate">{!! $d['pgmrsudis'] !!}</td>
+          <td class="text-truncate">{!! $d['pgmdis'] !!}</td>
         </tr>
       @endforeach
     </tbody>
   </table>
+@endsection
+
+@section('javascripts_bottom')
+  @parent
+  <script>
+    $(document).ready(function() {
+      $('.toggle-obscrl').on('click', function() {
+        $('.obscrl').toggle()
+      })
+
+      // expande/contrai uma coluna
+      $('tr').on('click', function() {
+        $(this).find('td').toggleClass('text-truncate')
+      })
+    })
+  </script>
 @endsection

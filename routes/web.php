@@ -27,6 +27,10 @@ Route::post('graduacao/relatorio/sintese', [GraduacaoController::class, 'relator
 Route::get('graduacao/relatorio/complementar', [GraduacaoController::class, 'relatorioComplementar'])->name('graduacao.relatorio.complementar');
 Route::post('graduacao/relatorio/complementar', [GraduacaoController::class, 'relatorioComplementar'])->name('graduacao.relatorio.complementar.post');
 
+Route::get('graduacao/relatorio/cargadidatica', [GraduacaoController::class, 'cargaDidatica'])->name('graduacao.relatorio.cargadidatica');
+Route::post('graduacao/relatorio/cargadidatica', [GraduacaoController::class, 'cargaDidatica'])->name('graduacao.relatorio.cargadidatica.post');
+
 Route::get('graduacao/cursos', [GraduacaoController::class, 'cursos'])->name('graduacao.cursos');
 Route::get('graduacao/cursos/{codcur}/{codhab}/gradeCurricular', [GraduacaoController::class, 'gradeCurricular'])->name('graduacao.gradeCurricular');
 Route::get('graduacao/cursos/{codcur}/{codhab}/turmas', [GraduacaoController::class, 'turmas'])->name('graduacao.turmas');
+Route::post('graduacao/cursos/{codcur}/{codhab}/turmas', [GraduacaoController::class, 'turmas'])->name('graduacao.turmas.post');

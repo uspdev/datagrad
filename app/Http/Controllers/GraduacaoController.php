@@ -6,6 +6,8 @@ use App\Replicado\Graduacao;
 use App\Replicado\Lattes;
 use App\Replicado\Pessoa;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Session;
 use Uspdev\Replicado\Uteis;
 
 class GraduacaoController extends Controller
@@ -44,8 +46,9 @@ class GraduacaoController extends Controller
             $pessoa['lattes'] = Lattes::id($pessoa['codpes']);
             $pessoa['dtaultalt'] = Lattes::retornarDataUltimaAtualizacao($pessoa['codpes']);
             $pessoa['linkOrcid'] = Lattes::retornarLinkOrcid($pessoa['codpes']);
+            $pessoa['created_at'] = now();
+            $pessoa['idade'] = date('Y') - substr($pessoaReplicado['dtanas'],0,4);
             $pessoa = array_merge($pessoa, Lattes::retornarFormacaoAcademicaFormatado($pessoa['codpes']));
-
             $pessoas[] = $pessoa;
         }
 
@@ -124,9 +127,77 @@ class GraduacaoController extends Controller
             $pessoas[] = $pessoa;
 
         }
+
         return view('grad.relatorio-complementar', [
             'pessoas' => $pessoas,
             'naoEncontrados' => $naoEncontrados,
+        ]);
+    }
+
+    public function cargaDidatica(Request $request)
+    {
+        $this->authorize('datagrad');
+        \UspTheme::activeUrl('graduacao/relatorio/cargadidatica');
+
+        $semestreIni = $request->semestreIni;
+        $semestreFim = $request->semestreFim;
+
+        $semestres = $this->iniFim($request->semestreIni, $request->semestreFim);
+
+        $nomes = SELF::limparNomes($request->nomes);
+        $pessoas = [];
+        $naoEncontrados = [];
+        foreach ($nomes as $nome) {
+            $pessoaReplicado = Pessoa::procurarServidorPorNome($nome, $fonetico = false) ?? Pessoa::procurarServidorPorNome($nome, $fonetico = true);
+            if (!$pessoaReplicado) {
+                $naoEncontrados[] = $nome;
+                continue;
+            }
+            $pessoa = [];
+            $pessoa['unidade'] = $pessoaReplicado['sglclgund'];
+            $pessoa['departamento'] = Pessoa::retornarSetor($pessoaReplicado['codpes']);
+            $pessoa['codpes'] = $pessoaReplicado['codpes'];
+            $pessoa['nome'] = $pessoaReplicado['nompesttd'];
+            $pessoa['turmas'] = Graduacao::listarTurmasPorCodpes($pessoa['codpes'], $semestres);
+
+            // vamos calcular as cargas horárias médias
+            $somaHorasTeorica = 0;
+            $somaHorasPratica = 0;
+            $count = 0;
+            if (!empty($pessoa['turmas'])) {
+                $k = 0;
+                $prev = $pessoa['turmas'][$k];
+                $divisorQuinzenal = ($prev['stamis'] == 'N') ? 1 : 2; // 'N' -> semanal
+                $somaHorasTeorica += (int) $prev['cgahorteo'] / $divisorQuinzenal;
+                $somaHorasPratica += (int) $prev['cgahorpra'] / $divisorQuinzenal;
+                $count++;
+                for ($k = 1; $k < count($pessoa['turmas']); $k++) {
+                    $turma = $pessoa['turmas'][$k];
+                    $divisorQuinzenal = ($turma['stamis'] == 'N') ? 1 : 2; // 'N' -> semanal
+                    if (!($prev['codtur'] == $turma['codtur'] && $prev['coddis'] == $turma['coddis'])) {
+                        $somaHorasTeorica += (int) $turma['cgahorteo'] / $divisorQuinzenal;
+                        $somaHorasPratica += (int) $turma['cgahorpra'] / $divisorQuinzenal;
+                        $count++;
+                    }
+                    $prev = $turma;
+                }
+            }
+            $pessoa['mediaHorasTeorica'] = $somaHorasTeorica / count($semestres);
+            $pessoa['mediaHorasPratica'] = $somaHorasPratica / count($semestres);
+            $pessoa['mediaTurmas'] = $count / count($semestres);
+
+            $pessoas[] = $pessoa;
+        }
+
+        session()->flashInput($request->input());
+
+        // dd($pessoas);
+        return view('grad.relatorio-cargadidatica', [
+            'pessoas' => $pessoas,
+            'naoEncontrados' => $naoEncontrados,
+            'semestreIni' => $semestreIni,
+            'semestreFim' => $semestreFim,
+            'turmaSelect' => $this->semestres(),
         ]);
     }
 
@@ -156,11 +227,7 @@ class GraduacaoController extends Controller
         $this->authorize('datagrad');
         \UspTheme::activeUrl('graduacao/cursos');
 
-        foreach (Graduacao::listarCursosHabilitacoes() as $curso) {
-            if ($curso['codcur'] == $codcur && $curso['codhab'] == $codhab) {
-                break;
-            }
-        }
+        $curso = Graduacao::obterCurso($codcur, $codhab);
 
         $disciplinas = Graduacao::listarGradeCurricular($codcur, $codhab);
         $disciplinas = collect($disciplinas)->sortBy(['numsemidl', ['tipobg', 'desc']]);
@@ -173,35 +240,85 @@ class GraduacaoController extends Controller
         $this->authorize('datagrad');
         \UspTheme::activeUrl('graduacao/cursos');
 
-        $semestres = ['20232', '20231', '20222', '20221', '20212', '20211'];
-        $semestreFim = date('Y') . (date('m') < 7 ? 1 : 2);
-        $semestreFim = $request->semestreFim ? $request->semestreFim : $semestreFim;
+        // dd($request->all());
 
-        $semestreIni = $semestres[array_search($semestreFim, $semestres) + 1];
-        $semestreIni = $request->semestreIni ? $request->semestreIni : $semestreIni;
-
-        foreach (Graduacao::listarCursosHabilitacoes() as $curso) {
-            if ($curso['codcur'] == $codcur && $curso['codhab'] == $codhab) {
-                break;
-            }
+        $key = sha1('turmas' . $codcur . $codhab . $request->semestreFim . $request->semestreIni);
+        if ((isset($request->acao) && $request->acao == 'cache_refresh')) {
+            $ret = $this->turmasNoCache($request, $codcur, $codhab);
+            Cache::put($key, $ret);
+            return back();
+        } elseif (Cache::has($key)) {
+            $ret = Cache::get($key);
+        } else {
+            $ret = $this->turmasNoCache($request, $codcur, $codhab);
+            Cache::put($key, $ret);
         }
 
-        $keyIni = array_search($semestreIni, $semestres);
+        return view('grad.turmas', [
+            // 'codtur' => $codtur,
+            'semestreFim' => $ret['semestreFim'],
+            'semestreIni' => $ret['semestreIni'],
+            'curso' => $ret['curso'],
+            'turmas' => $ret['turmas'],
+            'graduacao' => Graduacao::class,
+            'turmaSelect' => $this->semestres(),
+            'nomes' => $ret['nomes'],
+            'nomesCount' => $ret['nomesCount'],
+            'timestamp' => $ret['timestamp'],
+        ]);
+    }
+
+    /**
+     * Retorna os semestres entre $semestreIni e $semestreFim, inclusive
+     */
+    protected function iniFim($semestreIni, $semestreFim)
+    {
+        $semestres = $this->semestres();
+
+        if ($semestreFim < $semestreIni) {
+            $tmp = $semestreFim;
+            $semestreFim = $semestreIni;
+            $semestreIni = $tmp;
+        }
+        // dd($semestreIni, $semestreFim, $semestres);
+
+        $defaultSemestreFim = date('Y') . (date('m') < 7 ? 1 : 2);
+        $semestreFim = $semestreFim ? $semestreFim : $defaultSemestreFim;
+
+        $defaultSemestreIni = $semestres[array_search($semestreFim, $semestres) + 1];
+        $semestreIni = $semestreIni ? $semestreIni : $defaultSemestreIni;
+
+        $keyIni = array_search($semestreIni, $semestres); // chave do array correspondente ao semestreIni
         $keyFim = array_search($semestreFim, $semestres);
-        if ($keyFim > $keyIni) {
-            $tmp = $keyIni;
-            $keyIni = $keyFim;
-            $keyFim = $tmp;
-        }
+
+        $ret = array_slice($semestres, $keyFim, $keyIni - $keyFim + 1);
+        return $ret;
+    }
+
+    protected function semestres()
+    {
+        $semestres = ['20232', '20231', '20222', '20221', '20212', '20211', '20202', '20201', '20192', '20191', '20182', '20181'];
+        return $semestres;
+    }
+
+    protected function turmasNoCache(Request $request, int $codcur, int $codhab)
+    {
+        $this->authorize('datagrad');
+        \UspTheme::activeUrl('graduacao/cursos');
+
+        $semestreIni = $request->semestreIni;
+        $semestreFim = $request->semestreFim;
+
+        $curso = Graduacao::obterCurso($codcur, $codhab);
+
+        $semestres = $this->iniFim($request->semestreIni, $request->semestreFim);
         $turmas = [];
-        for ($i = $keyFim; $i <= $keyIni; $i++) {
-            $turmas = array_merge($turmas, Graduacao::listarTurmas($codcur, $codhab, $semestres[$i]));
+        foreach ($semestres as $semestre) {
+            $turmas = array_merge($turmas, Graduacao::listarTurmasMinistrantes($codcur, $codhab, $semestre));
         }
         $nomes = [];
         $AtivDidaticas = [];
         foreach ($turmas as &$turma) {
-            $turma['ministrantes'] = Graduacao::listarMinistrante($turma);
-            $turma['ativDidaticas'] = Graduacao::listarAtivDidaticas($turma);
             if ($turma['ativDidaticas']) {
                 $nomes = array_merge($nomes, $turma['ativDidaticas']);
             } else {
@@ -212,18 +329,9 @@ class GraduacaoController extends Controller
         $nomes = array_unique($nomes); // sem repetidos
         $nomesCount = count($nomes);
         $nomes = implode(PHP_EOL, $nomes);
+        $timestamp = now();
 
-        return view('grad.turmas', [
-            // 'codtur' => $codtur,
-            'semestreFim' => $semestreFim,
-            'semestreIni' => $semestreIni,
-            'curso' => $curso,
-            'turmas' => $turmas,
-            'graduacao' => Graduacao::class,
-            'turmaSelect' => $semestres,
-            'nomes' => $nomes,
-            'nomesCount' => $nomesCount,
-        ]);
+        return compact('semestres', 'semestreIni', 'semestreFim', 'curso', 'turmas', 'nomes', 'nomesCount', 'timestamp');
     }
 
     public function pessoa($codpes)

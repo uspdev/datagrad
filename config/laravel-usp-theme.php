@@ -1,40 +1,5 @@
 <?php
 
-$admin = [
-    [
-        'text' => '<i class="fas fa-atom"></i>  SubItem 1',
-        'url' => 'subitem1',
-    ],
-    [
-        'text' => 'SubItem 2',
-        'url' =>  '/subitem2',
-        'can' => 'admin',
-    ],
-    [
-        'type' => 'divider',
-    ],
-    [
-        'type' => 'header',
-        'text' => 'Cabeçalho',
-    ],
-    [
-        'text' => 'SubItem 3',
-        'url' => 'subitem3',
-    ],
-];
-
-$submenu2 = [
-    [
-        'text' => 'SubItem 1',
-        'url' => 'subitem1',
-    ],
-    [
-        'text' => 'SubItem 2',
-        'url' => 'subitem2',
-        'can' => 'admin',
-    ],
-];
-
 $menu = [
     [
         'text' => 'Cursos',
@@ -49,6 +14,11 @@ $menu = [
     [
         'text' => 'Relatório complementar',
         'url' => 'graduacao/relatorio/complementar',
+        'can' => 'datagrad',
+    ],
+    [
+        'text' => 'Relatório carga didática',
+        'url' => 'graduacao/relatorio/cargadidatica',
         'can' => 'datagrad',
     ],
 ];

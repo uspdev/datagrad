@@ -2,6 +2,7 @@
 
 //coloque o seu helper aqui
 
+use Carbon\Carbon;
 use League\CommonMark\Environment\Environment;
 use League\CommonMark\Extension\CommonMark\CommonMarkCoreExtension;
 use League\CommonMark\Extension\CommonMark\Node\Block\FencedCode;
@@ -33,5 +34,15 @@ if (!function_exists('md2html')) {
         $html = '<style>' . file_get_contents(base_path('vendor/scrivo/highlight.php/styles/' . $style)) . '</style>';
         $html .= $markdownConverter->convertToHtml($markdown);
         return $html;
+    }
+}
+
+if (!function_exists('formatarData')) {
+    function formatarData($dateString, $format = 'd/m/Y')
+    {
+        if (empty($dateString)) {
+            return '';
+        }
+        return Carbon::parse($dateString)->format($format);
     }
 }

@@ -23,6 +23,12 @@
   @if ($pessoas)
     <hr>
     <div class="h4 mt-3">Resultados</div>
+    <div class="alert alert-info">
+      <b>Observações</b><br />
+      1. Dados de graduação, mestrado, etc foram obtidos à partir do currículo lattes.<br />
+      2. A idade é a que completa no ano corrente.<br />
+      {{-- <button class="btn btn-info btn-sm">OK</button> --}}
+    </div>
     <table class="table table-bordered table-hover table-sm datatable-simples dt-buttons dt-fixed-header">
       <thead class="thead-light">
         <tr>
@@ -30,6 +36,7 @@
           <th>Depto</th>
           <th>No. USP</th>
           <th>Nome</th>
+          <th>Idade</th>
           <th>Nome Função</th>
           <th>Tipo Jornada</th>
           <th>Lattes</th>
@@ -50,6 +57,7 @@
             <td>{{ $pessoa['departamento'] }}</td>
             <td>{{ $pessoa['codpes'] }}</td>
             <td>@include('grad.partials.pessoa-btn-modal')</td>
+            <td>{{ $pessoa['idade'] }}</td>
             <td>{{ $pessoa['nomeFuncao'] }}</td>
             <td>{{ $pessoa['tipoJornada'] }}</td>
             <td>
@@ -57,7 +65,8 @@
                 https://lattes.cnpq.br/{{ $pessoa['lattes'] }}
               </a>
             </td>
-            <td data-sort="{{ Uspdev\Utils\Generic::data_en($pessoa['dtaultalt']) }}">{{ $pessoa['dtaultalt'] ?? '-' }}</td>
+            <td data-sort="{{ Uspdev\Utils\Generic::data_en($pessoa['dtaultalt']) }}">{{ $pessoa['dtaultalt'] ?? '-' }}
+            </td>
             <td>{!! $pessoa['linkOrcid'] !!}</td>
             <td>{{ $pessoa['graduacao'] ?? '-' }}</td>
             <td>{{ $pessoa['mestrado'] ?? '-' }}</td>

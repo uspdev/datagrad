@@ -69,7 +69,8 @@ class Pessoa extends PessoaReplicado
         if ($vinculos = Pessoa::listarVinculosAtivosDeVinculo($codpes)) {
             $tipoJornada = $vinculos[0]['tipjor'];
         } else {
-            $tipoJornada = '-';
+            // se nao tiver jornada deve ser aposentado ???
+            $tipoJornada = 'Aposentado';
         }
         return $tipoJornada;
     }
@@ -107,11 +108,16 @@ class Pessoa extends PessoaReplicado
 
     public static function procurarServidorPorNome($nome, $fonetico = true)
     {
+        // return PessoaReplicado::procurarPorCodigoOuNome($nome, true);
         foreach (PessoaReplicado::procurarPorNome($nome, $fonetico, $ativos = true) as $pessoa) {
             if (isset($pessoa['tipvin']) && $pessoa['tipvin'] == 'SERVIDOR') {
                 return $pessoa;
             }
         }
         return [];
+    }
+
+    public static function procurar() {
+
     }
 }

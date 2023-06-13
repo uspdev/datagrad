@@ -3,8 +3,18 @@
 Sistema que auxilia na elaboração do relatório de revalidação de cursos de graduação.
 ## Funcionalidades
 
-* Gera lista de disciplinas oferecidas por semestre por curso
-* Gera relatório de lista de nomes para relatório sintético
+* Gera lista de disciplinas por curso (grade curricular)
+* Gera lista de turmas oferecidas por curso em determinado período
+* Gera relatório de lista de nomes para relatório síntese
+* Gera relatório de lista de nomes para relatório complementar
+* Gera relatório de carga didática por lista de nomes e por período
+
+## Changelog
+
+13/6/2023
+* incluido relaorio de carga didática
+* melhorado grade curricular
+* implementado cache para algumas partes. A ser expandido.
 
 ## Requisitos
 
