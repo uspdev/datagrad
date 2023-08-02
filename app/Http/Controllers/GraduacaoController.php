@@ -235,6 +235,60 @@ class GraduacaoController extends Controller
         return view('grad.grade-curricular', compact('disciplinas', 'curso'));
     }
 
+    public function motrarGrade(Request $request) {
+
+        // if ($request->method() == 'POST') {
+        //     $request->validate([
+        //         'nomes' => 'required',
+        //     ]);
+        // }
+        if (!$request->old()) { //repopulando old() para mostrar no form, mesmo no caso de sucesso
+            session()->flashInput($request->input());
+        }
+
+        $this->authorize('datagrad');
+        \UspTheme::activeUrl('graduacao/relatorio/gradehoraria');
+
+        $nusps = SELF::limparNomes($request->nusps); //limpando os números usp na verdade
+
+        $alunos = [];
+        $naoEncontrados = [];
+        foreach ($nusps as $nusp) {
+            // recupera a grade completa do aluno
+            $alunograd = Graduacao::obterGradeHoraria($nusp);
+            if (!$alunograd) {
+                $naoEncontrados[] = $nusp;
+                continue;
+            }
+            $aluno = [];
+            $nome = Pessoa::obterNome($nusp);
+            //dd($alunograd);
+
+            foreach ($alunograd as $key => $value) {
+                $disc = [];
+                $disc['nome'] = $nome;
+                $disc['nusp'] = $nusp;
+                $disc['disciplina'] = $value['coddis'];
+                $disc['turma'] = $value['codtur'];
+                $disc['dia'] = $value['diasmnocp'];
+                $disc['horainicio'] = $value['horent'];
+                $disc['horafim'] = $value['horsai'];
+                array_push($aluno, $disc);
+            }            
+
+            $aluno = collect($aluno)->sortBy('dia')->toArray();
+            array_push($alunos, $aluno);
+        }
+
+        $alunos = collect($alunos)->sortBy('nome')->toArray();
+        //dd($alunos);
+
+        
+        
+        session()->flashInput($request->input());
+        return view('grad.relatorio-gradehoraria', compact('alunos', 'naoEncontrados'));
+    }
+
     public function turmas(Request $request, int $codcur, int $codhab)
     {
         $this->authorize('datagrad');
