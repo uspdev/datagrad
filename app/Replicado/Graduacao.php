@@ -122,7 +122,9 @@ class Graduacao extends GraduacaoReplicado
             AND H.codhab = :codhab
             AND ( C.dtaatvcur IS NOT NULL AND C.dtadtvcur IS NULL ) -- curso ativo
             AND ( H.dtaatvhab IS NOT NULL AND H.dtadtvhab IS NULL ) -- habilitação ativa
-            AND ( CR.dtainicrl < GETDATE() AND CR.dtafimcrl > GETDATE() ) -- pega o CURRICULO ativo
+            AND ( CR.dtainicrl < GETDATE() AND
+                (CR.dtafimcrl > GETDATE() OR CR.dtafimcrl IS NULL)
+            ) -- pega o CURRICULO ativo
         ORDER BY C.nomcur, H.nomhab ASC";
 
         $params = [
@@ -204,13 +206,15 @@ class Graduacao extends GraduacaoReplicado
             WHERE C.codcur = convert(int, :codcur)
                 AND C.codhab = convert(int, :codhab)
                 AND C.dtainicrl < GETDATE() -- pega o curriculogr vigente no dia de hoje
-                AND C.dtafimcrl > GETDATE()
+                AND
+                (C.dtafimcrl > GETDATE() OR C.dtafimcrl IS NULL)
             ";
         $param = [
             'codcur' => $codcur,
             'codhab' => $codhab,
         ];
-        return DB::fetchAll($query, $param);
+        $ret = DB::fetchAll($query, $param);
+        return $ret;
     }
 
     /**
