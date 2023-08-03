@@ -47,7 +47,7 @@ class GraduacaoController extends Controller
             $pessoa['dtaultalt'] = Lattes::retornarDataUltimaAtualizacao($pessoa['codpes']);
             $pessoa['linkOrcid'] = Lattes::retornarLinkOrcid($pessoa['codpes']);
             $pessoa['created_at'] = now();
-            $pessoa['idade'] = date('Y') - substr($pessoaReplicado['dtanas'],0,4);
+            $pessoa['idade'] = date('Y') - substr($pessoaReplicado['dtanas'], 0, 4);
             $pessoa = array_merge($pessoa, Lattes::retornarFormacaoAcademicaFormatado($pessoa['codpes']));
             $pessoas[] = $pessoa;
         }
@@ -232,10 +232,12 @@ class GraduacaoController extends Controller
         $disciplinas = Graduacao::listarGradeCurricular($codcur, $codhab);
         $disciplinas = collect($disciplinas)->sortBy(['numsemidl', ['tipobg', 'desc']]);
 
+        // dd($codcur, $curso);
         return view('grad.grade-curricular', compact('disciplinas', 'curso'));
     }
 
-    public function motrarGrade(Request $request) {
+    public function relatorioGradeHoraria(Request $request)
+    {
 
         // if ($request->method() == 'POST') {
         //     $request->validate([
@@ -251,42 +253,34 @@ class GraduacaoController extends Controller
 
         $nusps = SELF::limparNomes($request->nusps); //limpando os números usp na verdade
 
-        $alunos = [];
+        $horarios = [];
         $naoEncontrados = [];
-        foreach ($nusps as $nusp) {
+
+        foreach ($nusps as $codpes) {
             // recupera a grade completa do aluno
-            $alunograd = Graduacao::obterGradeHoraria($nusp);
-            if (!$alunograd) {
-                $naoEncontrados[] = $nusp;
+            $gradeAluno = Graduacao::obterGradeHoraria($codpes);
+            if (!$gradeAluno) {
+                $naoEncontrados[] = $codpes;
                 continue;
             }
-            $aluno = [];
-            $nome = Pessoa::obterNome($nusp);
-            //dd($alunograd);
 
-            foreach ($alunograd as $key => $value) {
-                $disc = [];
-                $disc['nome'] = $nome;
-                $disc['nusp'] = $nusp;
-                $disc['disciplina'] = $value['coddis'];
-                $disc['turma'] = $value['codtur'];
-                $disc['dia'] = $value['diasmnocp'];
-                $disc['horainicio'] = $value['horent'];
-                $disc['horafim'] = $value['horsai'];
-                array_push($aluno, $disc);
-            }            
-
-            $aluno = collect($aluno)->sortBy('dia')->toArray();
-            array_push($alunos, $aluno);
+            $nome = Pessoa::obterNome($codpes);
+            $gradeAluno = array_map(function ($horario) use ($nome, $codpes) {
+                $horario['nome'] = $nome;
+                $horario['codpes'] = $codpes;
+                return $horario;
+            }, $gradeAluno);
+            $horarios = array_merge($horarios, $gradeAluno);
         }
+        $diaSemana = ['seg' => 1, 'ter' => 2, 'qua' => 3, 'qui' => 4, 'sex' => 5, 'sab' => 6];
+        $horarios = collect($horarios)->sortBy([
+            ['nome', 'asc'],
+            fn($a, $b) => $diaSemana[$a['diasmnocp']] <=> $diaSemana[$b['diasmnocp']],
+            ['horent', 'asc'],
+        ])->toArray();
 
-        $alunos = collect($alunos)->sortBy('nome')->toArray();
-        //dd($alunos);
-
-        
-        
-        session()->flashInput($request->input());
-        return view('grad.relatorio-gradehoraria', compact('alunos', 'naoEncontrados'));
+        // session()->flashInput($request->input());
+        return view('grad.relatorio-gradehoraria', compact('horarios', 'naoEncontrados'));
     }
 
     public function turmas(Request $request, int $codcur, int $codhab)

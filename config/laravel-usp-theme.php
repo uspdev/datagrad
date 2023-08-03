@@ -22,9 +22,9 @@ $menu = [
         'can' => 'datagrad',
     ],
     [
-        'text' => 'Relatório Grade Horária',
+        'text' => 'Relatório grade horária',
         'url' => 'graduacao/relatorio/gradehoraria',
-       
+
     ],
 ];
 

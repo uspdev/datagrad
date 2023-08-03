@@ -1,6 +1,6 @@
 # Datagrad
 
-Sistema que auxilia na elaboração do relatório de revalidação de cursos de graduação.
+Sistema que auxilia na elaboração do relatório de revalidação de cursos de graduação, e outras informações relacionadas à graduação.
 ## Funcionalidades
 
 * Gera lista de disciplinas por curso (grade curricular)
@@ -8,11 +8,15 @@ Sistema que auxilia na elaboração do relatório de revalidação de cursos de 
 * Gera relatório de lista de nomes para relatório síntese
 * Gera relatório de lista de nomes para relatório complementar
 * Gera relatório de carga didática por lista de nomes e por período
+* Gera relatório de grade horária por lista de nomes/codpes
 
 ## Changelog
 
+xx/08/2023
+* incluído relatório de grade horária
+
 13/6/2023
-* incluido relaorio de carga didática
+* incluído relatório de carga didática
 * melhorado grade curricular
 * implementado cache para algumas partes. A ser expandido.
 
