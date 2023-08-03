@@ -21,6 +21,11 @@ $menu = [
         'url' => 'graduacao/relatorio/cargadidatica',
         'can' => 'datagrad',
     ],
+    [
+        'text' => 'Relatório grade horária',
+        'url' => 'graduacao/relatorio/gradehoraria',
+
+    ],
 ];
 
 $right_menu = [

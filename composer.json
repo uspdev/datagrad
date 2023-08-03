@@ -1,7 +1,7 @@
 {
-    "name": "uspdev/starter",
+    "name": "uspdev/datagrad",
     "type": "project",
-    "description": "Esqueleto para nova aplicação Uspdev",
+    "description": "Dados da graduação",
     "authors": [
         {
             "name": "Masaki Kawabata Neto",
@@ -11,7 +11,8 @@
     ],
     "keywords": [
         "uspdev",
-        "starter"
+        "datagrad",
+        "graduação"
     ],
     "license": "MIT",
     "require": {

@@ -21,6 +21,9 @@ Route::get('/', function () {
 # Graduação
 Route::get('pessoas/{codpes}', [GraduacaoController::class, 'pessoa'])->name('pessoas.show');
 
+Route::get('graduacao/relatorio/gradehoraria', [GraduacaoController::class, 'relatorioGradeHoraria'])->name('graduacao.relatorio.gradehoraria');
+Route::post('graduacao/relatorio/gradehoraria', [GraduacaoController::class, 'relatorioGradeHoraria'])->name('graduacao.relatorio.gradehoraria.post');
+
 Route::get('graduacao/relatorio/sintese', [GraduacaoController::class, 'relatorioSintese'])->name('graduacao.relatorio.sintese');
 Route::post('graduacao/relatorio/sintese', [GraduacaoController::class, 'relatorioSintese'])->name('graduacao.relatorio.sintese.post');
 
