@@ -279,7 +279,7 @@ class GraduacaoController extends Controller
             ['horent', 'asc'],
         ])->toArray();
 
-        // session()->flashInput($request->input());
+        session()->flashInput($request->input());
         return view('grad.relatorio-gradehoraria', compact('horarios', 'naoEncontrados'));
     }
 
