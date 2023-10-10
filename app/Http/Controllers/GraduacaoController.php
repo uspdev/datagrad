@@ -412,4 +412,10 @@ class GraduacaoController extends Controller
             ]);
         }
     }
+
+    public function relatorioEvasao()
+    {
+
+        return view('grad.relatorio-evasao');
+    }
 }

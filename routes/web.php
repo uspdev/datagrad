@@ -1,7 +1,7 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\GraduacaoController;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -12,7 +12,7 @@ use App\Http\Controllers\GraduacaoController;
 | routes are loaded by the RouteServiceProvider within a group which
 | contains the "web" middleware group. Now create something great!
 |
-*/
+ */
 
 Route::get('/', function () {
     return view('welcome');
@@ -32,6 +32,8 @@ Route::post('graduacao/relatorio/complementar', [GraduacaoController::class, 're
 
 Route::get('graduacao/relatorio/cargadidatica', [GraduacaoController::class, 'cargaDidatica'])->name('graduacao.relatorio.cargadidatica');
 Route::post('graduacao/relatorio/cargadidatica', [GraduacaoController::class, 'cargaDidatica'])->name('graduacao.relatorio.cargadidatica.post');
+
+Route::get('graduacao/relatorio/evasao', [GraduacaoController::class, 'relatorioEvasao'])->name('graduacao.relatorio.evasao');
 
 Route::get('graduacao/cursos', [GraduacaoController::class, 'cursos'])->name('graduacao.cursos');
 Route::get('graduacao/cursos/{codcur}/{codhab}/gradeCurricular', [GraduacaoController::class, 'gradeCurricular'])->name('graduacao.gradeCurricular');
