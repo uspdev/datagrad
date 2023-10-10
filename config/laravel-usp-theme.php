@@ -26,6 +26,10 @@ $menu = [
         'url' => 'graduacao/relatorio/gradehoraria',
 
     ],
+    [
+        'text' => 'Relatório de Evasão',
+        'url' => 'graduacao/relatorio/evasao',
+    ],
 ];
 
 $right_menu = [
