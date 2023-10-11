@@ -2,13 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Replicado\Graduacao;
+use App\Services\Evasao;
 use App\Replicado\Lattes;
 use App\Replicado\Pessoa;
+use Uspdev\Replicado\Uteis;
+use App\Replicado\Graduacao;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Session;
-use Uspdev\Replicado\Uteis;
 
 class GraduacaoController extends Controller
 {
@@ -415,7 +416,10 @@ class GraduacaoController extends Controller
 
     public function relatorioEvasao()
     {
+        $this->authorize('evasao');
+        \UspTheme::activeUrl('graduacao/relatorio/evasao');
 
-        return view('grad.relatorio-evasao');
+        $taxaEvasao = Evasao::taxaEvasao(2011, 97001);
+        return view('grad.relatorio-evasao', compact('taxaEvasao'));
     }
 }

@@ -456,4 +456,40 @@ class Graduacao extends GraduacaoReplicado
         }
         return $turmas;
     }
+
+    /**
+     * Retorna lista de alunos que ingressaram em determinado ano
+     *
+     * Se passado codcur, retorna somente do curso
+     *
+     * @param Int $anoIngresso
+     * @param Int $codcur (opcional)
+     * @return Array
+     * @author Masakik, em 11/10/2023
+     */
+    public static function listarAlunosIngressantesPorAnoIngresso(int $anoIngresso, int $codcur = null)
+    {
+        $query = "SELECT p.codpes, p.tipencpgm, YEAR(p.dtaini) ano
+        FROM PROGRAMAGR AS p
+        JOIN HABILPROGGR AS h ON (p.codpes = h.codpes AND p.codpgm = h.codpgm)
+        JOIN CURSOGR AS c ON (h.codcur = c.codcur)
+        JOIN HABILITACAOGR as a ON (h.codhab = a.codhab AND c.codcur = a.codcur)
+        JOIN PESSOA ps ON (p.codpes = ps.codpes)
+        WHERE
+            c.codclg IN (__codundclgs__)
+            AND YEAR(p.dtaing) = :anoIngresso -- ingresso no ano
+            __filtroCurso__
+            ORDER BY p.dtaini, p.tipencpgm
+        ";
+        $params['anoIngresso'] = $anoIngresso;
+
+        if ($codcur) {
+            $query = str_replace('__filtroCurso__', 'AND c.codcur = :codcur', $query);
+            $params['codcur'] = $codcur;
+        } else {
+            $query = str_replace('__filtroCurso__', '', $query);
+        }
+        return DB::fetchAll($query, $params);
+    }
+
 }
