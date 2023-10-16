@@ -2,14 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Services\Evasao;
+use App\Replicado\Graduacao;
 use App\Replicado\Lattes;
 use App\Replicado\Pessoa;
-use Uspdev\Replicado\Uteis;
-use App\Replicado\Graduacao;
+use App\Services\Evasao;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Session;
+use Uspdev\Replicado\Uteis;
 
 class GraduacaoController extends Controller
 {
@@ -414,12 +414,61 @@ class GraduacaoController extends Controller
         }
     }
 
-    public function relatorioEvasao()
+    public function relatorioEvasao(Request $request)
     {
+
         $this->authorize('evasao');
         \UspTheme::activeUrl('graduacao/relatorio/evasao');
 
-        $taxaEvasao = Evasao::taxaEvasao(2011, 97001);
-        return view('grad.relatorio-evasao', compact('taxaEvasao'));
+        $CodcurNomecur = SELF::retornarCodNomeCurso();
+
+        if ($request->isMethod('get')) {
+
+            return view('grad.relatorio-evasao', ['cursoOpcao' => $CodcurNomecur]);
+        }
+
+        $request->validate([
+            'tipo' => 'required|in:curso,unidade',
+            'curso' => 'required_if:tipo,curso',
+            'ano' => 'required',
+        ]);
+
+        $taxaEvasao = Evasao::taxaEvasao($request->ano, ($request->tipo !== 'unidade' ? $request->curso : null));
+
+        $cursoRequest = ($request->tipo !== 'unidade' ? SELF::retornarCodNomeCurso((int) $request->curso) : null);
+
+        return view('grad.relatorio-evasao', ['taxaEvasao' => $taxaEvasao, 'cursoRequest' => $cursoRequest]);
     }
+
+    /**
+     * Retorna código e nome de todos os cursos (uni 18 e 97) em uma array.
+     * Caso tiver o parâmetro $cod, ele retorna apenas o cod e nome de um curso.
+     */
+
+    protected static function retornarCodNomeCurso(int $cod = null)
+    {
+
+        $cursos = Graduacao::listarCursosHabilitacoes();
+
+        $cursosTratados = [];
+
+        foreach ($cursos as $curso) {
+
+            $elem = array(
+                'cod' => "{$curso['codcur']}",
+                'nome' => "{$curso['nomcur']}");
+
+            if (!in_array($elem, $cursosTratados)) {
+                $cursosTratados[] = $elem;
+            }
+
+            if ($cod == $elem['cod']) {
+                return $elem;
+            }
+
+        }
+
+        return $cursosTratados;
+    }
+
 }
