@@ -105,8 +105,6 @@ class Graduacao extends GraduacaoReplicado
             AND ( (H.dtaatvhab IS NOT NULL) AND (H.dtadtvhab IS NULL) ) -- habilitação ativa
         ORDER BY C.nomcur, H.nomhab ASC";
 
-        $query = str_replace("__codundclgs__", Config::getInstance()->codundclgs, $query);
-
         return DB::fetchAll($query);
     }
 
