@@ -2,14 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Services\Evasao;
+use App\Replicado\Graduacao;
 use App\Replicado\Lattes;
 use App\Replicado\Pessoa;
-use Uspdev\Replicado\Uteis;
-use App\Replicado\Graduacao;
+use App\Services\Evasao;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Session;
+use Uspdev\Replicado\Uteis;
 
 class GraduacaoController extends Controller
 {
@@ -414,12 +414,29 @@ class GraduacaoController extends Controller
         }
     }
 
-    public function relatorioEvasao()
+    public function relatorioEvasao(Request $request)
     {
         $this->authorize('evasao');
         \UspTheme::activeUrl('graduacao/relatorio/evasao');
 
-        $taxaEvasao = Evasao::taxaEvasao(2011, 97001);
-        return view('grad.relatorio-evasao', compact('taxaEvasao'));
+        $CodcurNomecur = Evasao::retornarCodcurNomcur();
+
+        if ($request->isMethod('get')) {
+            return view('grad.relatorio-evasao', ['cursoOpcao' => $CodcurNomecur]);
+        }
+
+        $request->validate([
+            'curso' => 'nullable',
+            'ano' => 'required|integer|between:2015,' . (date('Y') - 1),
+        ]);
+
+        $taxaEvasao = Evasao::taxaEvasao($request->ano, $request->curso);
+
+        $formRequest = ($request->curso !== null ? Evasao::retornarCodcurNomcur((int) $request->curso) : ['codcur'=>'18', 'nomcur'=>'Todos os cursos']);
+
+        $formRequest = array_merge($formRequest, ['anoIngresso' => $request->ano]);
+
+        return view('grad.relatorio-evasao', ['taxaEvasao' => $taxaEvasao, 'formRequest' => $formRequest, 'cursoOpcao' => $CodcurNomecur]);
     }
+
 }

@@ -34,6 +34,7 @@ Route::get('graduacao/relatorio/cargadidatica', [GraduacaoController::class, 'ca
 Route::post('graduacao/relatorio/cargadidatica', [GraduacaoController::class, 'cargaDidatica'])->name('graduacao.relatorio.cargadidatica.post');
 
 Route::get('graduacao/relatorio/evasao', [GraduacaoController::class, 'relatorioEvasao'])->name('graduacao.relatorio.evasao');
+Route::post('graduacao/relatorio/evasao', [GraduacaoController::class, 'relatorioEvasao'])->name('graduacao.relatorio.evasao.post');
 
 Route::get('graduacao/cursos', [GraduacaoController::class, 'cursos'])->name('graduacao.cursos');
 Route::get('graduacao/cursos/{codcur}/{codhab}/gradeCurricular', [GraduacaoController::class, 'gradeCurricular'])->name('graduacao.gradeCurricular');
