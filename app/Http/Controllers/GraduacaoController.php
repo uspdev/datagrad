@@ -420,7 +420,7 @@ class GraduacaoController extends Controller
         $this->authorize('evasao');
         \UspTheme::activeUrl('graduacao/relatorio/evasao');
 
-        $CodcurNomecur = SELF::retornarCodNomeCurso();
+        $CodcurNomecur = Evasao::retornarCodcurNomcur();
 
         if ($request->isMethod('get')) {
 
@@ -428,47 +428,17 @@ class GraduacaoController extends Controller
         }
 
         $request->validate([
-            'tipo' => 'required|in:curso,unidade',
-            'curso' => 'required_if:tipo,curso',
-            'ano' => 'required',
+            'curso' => 'nullable',
+            'ano' => 'required|integer|between:2015,' . (date('Y') - 1),
         ]);
 
-        $taxaEvasao = Evasao::taxaEvasao($request->ano, ($request->tipo !== 'unidade' ? $request->curso : null));
+        $taxaEvasao = Evasao::taxaEvasao($request->ano, ($request->curso !== null ? $request->curso : null));
 
-        $cursoRequest = ($request->tipo !== 'unidade' ? SELF::retornarCodNomeCurso((int) $request->curso) : null);
+        $formRequest = ($request->curso !== null ? Evasao::retornarCodcurNomcur((int) $request->curso) : null);
 
-        return view('grad.relatorio-evasao', ['taxaEvasao' => $taxaEvasao, 'cursoRequest' => $cursoRequest]);
-    }
+        $formRequest = array_merge($formRequest, ['anoIngresso' => $request->ano]);
 
-    /**
-     * Retorna código e nome de todos os cursos (uni 18 e 97) em uma array.
-     * Caso tiver o parâmetro $cod, ele retorna apenas o cod e nome de um curso.
-     */
-
-    protected static function retornarCodNomeCurso(int $cod = null)
-    {
-
-        $cursos = Graduacao::listarCursosHabilitacoes();
-
-        $cursosTratados = [];
-
-        foreach ($cursos as $curso) {
-
-            $elem = array(
-                'cod' => "{$curso['codcur']}",
-                'nome' => "{$curso['nomcur']}");
-
-            if (!in_array($elem, $cursosTratados)) {
-                $cursosTratados[] = $elem;
-            }
-
-            if ($cod == $elem['cod']) {
-                return $elem;
-            }
-
-        }
-
-        return $cursosTratados;
+        return view('grad.relatorio-evasao', ['taxaEvasao' => $taxaEvasao, 'formRequest' => $formRequest, 'cursoOpcao' => $CodcurNomecur]);
     }
 
 }
