@@ -63,7 +63,8 @@ class Evasao
     }
 
     /**
-     * Retorna código e nome de todos os cursos (uni 18 e 97) em uma array.
+     * Retorna código e nome de todos os cursos em uma array
+     *
      * Caso tiver o parâmetro $cod, ele retorna apenas o cod e nome de um curso.
      */
 
@@ -76,10 +77,12 @@ class Evasao
 
         foreach ($cursos as $curso) {
 
+            // aqui está personalizado para EESC
             if ($curso['codcur'] == 18083) {
                 continue;
             }
 
+            // aqui está personalizado para EESC
             if ($curso['codcur'] == 18045 | $curso['codcur'] == 18050) {
                 $curso['nomcur'] = "{$curso['nomcur']} ({$curso['codhab']}) {$curso['nomhab']}";
             }

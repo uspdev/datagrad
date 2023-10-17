@@ -1,6 +1,5 @@
 @extends('layouts.app')
 
-
 @section('content')
 
   @isset($formRequest)
@@ -18,8 +17,6 @@
       @endif
     </h4>
   @endisset
-
-
 
   @include('grad.partials.evasao-form')
 
