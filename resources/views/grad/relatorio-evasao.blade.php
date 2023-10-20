@@ -21,6 +21,7 @@
   @include('grad.partials.evasao-form')
 
   @isset($taxaEvasao)
+    @include('grad.partials.grafico-evasao')
     <br>
     <table class="table table-bordered table-hover">
       <tr>
