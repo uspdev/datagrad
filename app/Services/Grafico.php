@@ -16,7 +16,7 @@ class Grafico
         $graph = new Graph\Graph(800, 500);
         $graph->SetScale('textlin', 0, 100);
         $graph->SetShadow();
-        $graph->title->Set("Evasão da turma de {$formRequest['anoIngresso']} de ({$formRequest['codcur']}) {$formRequest['nomcur']}");
+        $graph->title->Set("Evasão da Turma de {$formRequest['anoIngresso']} de ({$formRequest['codcur']}) {$formRequest['nomcur']}");
         $graph->xaxis->SetTickLabels($anos);
         $graph->xaxis->title->Set("anos");
         $graph->yaxis->title->Set("%");
