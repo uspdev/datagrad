@@ -433,11 +433,11 @@ class GraduacaoController extends Controller
 
         $taxaEvasao = Evasao::taxaEvasao($request->ano, $request->curso);
 
-        $formRequest = ($request->curso !== null ? Evasao::retornarCodcurNomcur((int) $request->curso) : ['codcur'=>'18', 'nomcur'=>'Todos os cursos']);
+        $formRequest = ($request->curso !== null ? Evasao::retornarCodcurNomcur((int) $request->curso) : ['codcur' => '18', 'nomcur' => 'Todos os cursos']);
 
         $formRequest = array_merge($formRequest, ['anoIngresso' => $request->ano]);
 
-        $imagemEvasao = Grafico::criarGrafico($taxaEvasao, $formRequest);
+        $imagemEvasao = Grafico::criarGraficoEvasao($taxaEvasao, $formRequest);
 
         return view('grad.relatorio-evasao', ['taxaEvasao' => $taxaEvasao, 'formRequest' => $formRequest, 'cursoOpcao' => $CodcurNomecur, 'imagemEvasao' => $imagemEvasao]);
     }
