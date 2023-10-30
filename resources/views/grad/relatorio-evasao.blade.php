@@ -21,7 +21,7 @@
   @include('grad.partials.evasao-form')
 
   @isset($taxaEvasao)
-    @include('grad.partials.grafico-evasao')
+    <img src="data:image/png;base64, {{ $imagemEvasao }}" alt="Gráfico em base64">
     <br>
     <table class="table table-bordered table-hover">
       <tr>

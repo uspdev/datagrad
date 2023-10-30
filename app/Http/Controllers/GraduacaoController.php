@@ -6,6 +6,7 @@ use App\Replicado\Graduacao;
 use App\Replicado\Lattes;
 use App\Replicado\Pessoa;
 use App\Services\Evasao;
+use App\Services\Grafico;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Session;
@@ -436,7 +437,9 @@ class GraduacaoController extends Controller
 
         $formRequest = array_merge($formRequest, ['anoIngresso' => $request->ano]);
 
-        return view('grad.relatorio-evasao', ['taxaEvasao' => $taxaEvasao, 'formRequest' => $formRequest, 'cursoOpcao' => $CodcurNomecur]);
+        $imagemEvasao = Grafico::criarGrafico($taxaEvasao, $formRequest);
+
+        return view('grad.relatorio-evasao', ['taxaEvasao' => $taxaEvasao, 'formRequest' => $formRequest, 'cursoOpcao' => $CodcurNomecur, 'imagemEvasao' => $imagemEvasao]);
     }
 
 }
