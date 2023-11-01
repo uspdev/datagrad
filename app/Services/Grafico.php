@@ -16,14 +16,14 @@ class Grafico
         $graph = new Graph\Graph(800, 500);
         $graph->SetScale('textlin', 0, 100);
         $graph->SetShadow();
-        $graph->title->Set("Evasão da turma de {$formRequest['anoIngresso']} de ({$formRequest['codcur']}) {$formRequest['nomcur']}");
+        $graph->title->Set("Evasão dos Ingressantes em {$formRequest['anoIngresso']} de ({$formRequest['codcur']}) {$formRequest['nomcur']}");
         $graph->xaxis->SetTickLabels($anos);
         $graph->xaxis->title->Set("anos");
         $graph->yaxis->title->Set("%");
 
         foreach ([['txPermanencia', 'blue', 'Taxa de Permanência'],
-            ['txDesistenciaAcc', 'red', 'Taxa de Desistência'],
-            ['txConclusaoAcc', 'orange', 'Taxa de Conclusão']] as $tipo) {
+            ['txDesistenciaAcc', 'red', 'Taxa de Desistência Acumulada'],
+            ['txConclusaoAcc', 'orange', 'Taxa de Conclusão Acumulada']] as $tipo) {
 
             $dados_tipo = [];
 
