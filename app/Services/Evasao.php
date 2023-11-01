@@ -73,18 +73,24 @@ class Evasao
 
         $cursos = Graduacao::listarCursosHabilitacoes();
 
+        $codcur_ignorados = json_decode(env('CODCUR_IGNORADOS'), true) ?? [];
+
+        $codcur_hab_ignorados = json_decode(env('CODCUR_HAB_IGNORADOS'), true) ?? [];
+
         $cursosTratados = [];
 
         foreach ($cursos as $curso) {
 
-            // aqui está personalizado para EESC
-            if ($curso['codcur'] == 18083) {
+            if (in_array($curso['codcur'], $codcur_ignorados)) {
                 continue;
             }
 
-            // aqui está personalizado para EESC
-            if ($curso['codcur'] == 18045 | $curso['codcur'] == 18050) {
-                $curso['nomcur'] = "{$curso['nomcur']} ({$curso['codhab']}) {$curso['nomhab']}";
+            if (in_array($curso['codcur'], $codcur_hab_ignorados)) {
+                $curso['nomcur'] = $curso['nomcur'];
+
+            } else {
+                $curso['nomcur'] = ($curso['nomcur'] == $curso['nomhab']) ? $curso['nomcur'] : "{$curso['nomcur']} ({$curso['codhab']}) {$curso['nomhab']}";
+
             }
 
             $elem = array(
