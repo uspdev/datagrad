@@ -27,7 +27,7 @@ $menu = [
 
     ],
     [
-        'text' => 'Relatório de Evasão',
+        'text' => 'Relatório de evasão',
         'url' => 'graduacao/relatorio/evasao',
         'can' => 'evasao',
     ],

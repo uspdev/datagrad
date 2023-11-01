@@ -9,8 +9,12 @@ Sistema que auxilia na elaboração do relatório de revalidação de cursos de 
 * Gera relatório de lista de nomes para relatório complementar
 * Gera relatório de carga didática por lista de nomes e por período
 * Gera relatório de grade horária por lista de nomes/codpes
+* Gera relatório de evasão por curso e ano de ingresso dos alunos
 
 ## Changelog
+
+30/10/2023
+* incluído relatório de evasão
 
 xx/08/2023
 * incluído relatório de grade horária

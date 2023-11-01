@@ -4,17 +4,13 @@
 
   @isset($formRequest)
     <h4>
-      <a href="{{ route('graduacao.relatorio.evasao') }}">Relatório de Evasão</a>
-      <i class="fas fa-angle-right"></i> {{ $formRequest['codcur'] }} - {{ $formRequest['nomcur'] }}
+      <a href="{{ route('graduacao.relatorio.evasao') }}">Relatório de evasão</a>
+      <i class="fas fa-angle-right"></i>
+      {{ $formRequest['codcur'] == 18 ? $formRequest['nomcur'] : "{$formRequest['codcur']} - {$formRequest['nomcur']}" }}
     </h4>
   @else
     <h4>
-      @if (isset($taxaEvasao))
-        <a href="{{ route('graduacao.relatorio.evasao') }}">Relatório de Evasão</a>
-        <i class="fas fa-angle-right"></i> Todos os Cursos
-      @else
-        Relatório de Evasão
-      @endif
+      Relatório de evasão
     </h4>
   @endisset
 
