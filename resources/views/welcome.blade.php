@@ -43,8 +43,7 @@
       Outras funcionalidades:<br>
       - <b>Relatório de carga didática</b>: mostra a carga didática de docentes em determinado período;<br>
       - <b>Relatório grade horária</b>: mostra a grade horária corrente para a lista de alunos informada;<br>
-      - <b>Relatório de evasão</b>: calcula e gera um gráfico e uma tabela de evasão de um curso para alunos que entraram
-      em um determinado ano.
+      - <b>Relatório de evasão</b>: mostra gráfico e tabela de evasão por curso e por ano de ingresso.
     </div>
   </div>
 @endsection

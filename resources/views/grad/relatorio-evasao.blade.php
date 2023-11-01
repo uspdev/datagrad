@@ -4,13 +4,13 @@
 
   @isset($formRequest)
     <h4>
-      <a href="{{ route('graduacao.relatorio.evasao') }}">Relatório de Evasão</a>
+      <a href="{{ route('graduacao.relatorio.evasao') }}">Relatório de evasão</a>
       <i class="fas fa-angle-right"></i>
       {{ $formRequest['codcur'] == 18 ? $formRequest['nomcur'] : "{$formRequest['codcur']} - {$formRequest['nomcur']}" }}
     </h4>
   @else
     <h4>
-      Relatório de Evasão
+      Relatório de evasão
     </h4>
   @endisset
 
