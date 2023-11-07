@@ -73,9 +73,9 @@ class Evasao
 
         $cursos = Graduacao::listarCursosHabilitacoes();
 
-        $codcur_ignorados = json_decode(env('CODCUR_IGNORADOS'), true) ?? [];
+        $codcur_ignorados = config('datagrad.codcur_ignorados');
 
-        $codcur_hab_ignorados = json_decode(env('CODCUR_HAB_IGNORADOS'), true) ?? [];
+        $codcur_hab_ignorados = config('datagrad.codcur_hab_ignorados');
 
         $cursosTratados = [];
 
