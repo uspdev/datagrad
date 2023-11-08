@@ -22,9 +22,9 @@
     <table class="table table-bordered table-hover">
       <tr>
         <th>Ano</th>
-        <th>Taxa de Permanência(%)</th>
-        <th>Taxa de Desistência Acumulada(%)</th>
-        <th>Taxa de Conclusão Acumulada(%)</th>
+        <th>Taxa de permanência (%)</th>
+        <th>Taxa de evasão acumulada (%)</th>
+        <th>Taxa de conclusão acumulada (%)</th>
       </tr>
       @foreach ($taxaEvasao as $ano => $taxa)
         <tr>
