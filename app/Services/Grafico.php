@@ -16,19 +16,20 @@ class Grafico
         $graph = new Graph\Graph(800, 500);
         $graph->SetScale('textlin', 0, 100);
         $graph->SetShadow();
-        $graph->title->Set("Evasão da turma de {$formRequest['anoIngresso']} de ({$formRequest['codcur']}) {$formRequest['nomcur']}");
+        $graph->title->Set("Fluxo de alunos - {$formRequest['nomcur']} ({$formRequest['codcur']}) - Ingressantes {$formRequest['anoIngresso']}");
         $graph->xaxis->SetTickLabels($anos);
         $graph->xaxis->title->Set("anos");
         $graph->yaxis->title->Set("%");
 
-        foreach ([['txPermanencia', 'blue', 'Taxa de Permanência'],
-            ['txDesistenciaAcc', 'red', 'Taxa de Desistência'],
-            ['txConclusaoAcc', 'orange', 'Taxa de Conclusão']] as $tipo) {
+        $tipos = [
+            ['txPermanencia', 'blue', 'Taxa de permanência'],
+            ['txDesistenciaAcc', 'red', 'Taxa de evasão acumulada'],
+            ['txConclusaoAcc', 'orange', 'Taxa de conclusão acumulada'],
+        ];
 
+        foreach ($tipos as $tipo) {
             $dados_tipo = [];
-
             foreach ($taxaEvasao as $dados) {
-
                 array_push($dados_tipo, $dados[$tipo[0]]);
             }
             $lineplot = new Plot\LinePlot($dados_tipo);
