@@ -2,7 +2,6 @@
 
 return [
 
-    'codcur_ignorados' => explode(',', env('CODCUR_IGNORADOS', null)),
-
-    'codcur_hab_ignorados' => explode(',', env('CODCUR_HAB_IGNORADOS', null)),
+    'evasaoCodcurIgnorados' => explode(',', env('EVASAO_CODCUR_IGNORADOS', null)),
+    'evasaoCodcurHabIgnorados' => explode(',', env('EVASAO_CODCUR_HAB_IGNORADOS', null)),
 ];

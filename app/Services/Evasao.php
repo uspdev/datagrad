@@ -19,7 +19,6 @@ class Evasao
         $alunos = Graduacao::listarAlunosIngressantesPorAnoIngresso($anoIngresso, $codcur);
 
         for ($ano = $anoIngresso; $ano <= date('Y'); $ano++) {
-            $contagem[$ano]['countP'] = 0;
             $contagem[$ano]['countD'] = 0;
             $contagem[$ano]['countC'] = 0;
         }
@@ -35,6 +34,7 @@ class Evasao
                 default:
                     $contagem[$aluno['ano']]['countD']++;
             }
+
         }
 
         // calculando taxa de evasão por ano
@@ -58,7 +58,6 @@ class Evasao
                 break;
             }
         }
-
         return $evasao;
     }
 
@@ -70,32 +69,26 @@ class Evasao
 
     public static function retornarCodcurNomcur(int $codcur = null)
     {
-
-        $cursos = Graduacao::listarCursosHabilitacoes();
-
-        $codcur_ignorados = config('datagrad.codcur_ignorados');
-
-        $codcur_hab_ignorados = config('datagrad.codcur_hab_ignorados');
-
         $cursosTratados = [];
+        foreach (Graduacao::listarCursosHabilitacoes() as $curso) {
 
-        foreach ($cursos as $curso) {
-
-            if (in_array($curso['codcur'], $codcur_ignorados)) {
+            if (in_array($curso['codcur'], config('datagrad.evasaoCodcurIgnorados'))) {
                 continue;
             }
 
-            if (in_array($curso['codcur'], $codcur_hab_ignorados)) {
+            if (in_array($curso['codcur'], config('datagrad.evasaoCodcurHabIgnorados'))) {
                 $curso['nomcur'] = $curso['nomcur'];
-
             } else {
-                $curso['nomcur'] = ($curso['nomcur'] == $curso['nomhab']) ? $curso['nomcur'] : "{$curso['nomcur']} ({$curso['codhab']}) {$curso['nomhab']}";
-
+                $curso['nomcur'] =
+                ($curso['nomcur'] == $curso['nomhab'])
+                ? $curso['nomcur']
+                : "{$curso['nomcur']} ({$curso['codhab']}) {$curso['nomhab']}";
             }
 
-            $elem = array(
-                'codcur' => "{$curso['codcur']}",
-                'nomcur' => "{$curso['nomcur']}");
+            $elem = [
+                'codcur' => $curso['codcur'],
+                'nomcur' => $curso['nomcur'],
+            ];
 
             if (!in_array($elem, $cursosTratados)) {
                 $cursosTratados[] = $elem;
@@ -104,9 +97,7 @@ class Evasao
             if ($codcur == $elem['codcur']) {
                 return $elem;
             }
-
         }
-
         return $cursosTratados;
     }
 
