@@ -15,13 +15,14 @@
       @endforeach
     </select>
   </div>
-  <label for="anoIngresso">Ano de ingresso da turma: </label>
+  <label for="anoIngresso">Ano de ingresso:</label>
   <select id="anoIngresso" name="ano">
     <option value=''></option>
     @foreach (range(2015, date('Y') - 1) as $ano)
       @if (isset($formRequest))
         <option value={{ $ano }} {{ $formRequest['anoIngresso'] == $ano ? 'selected' : '' }}>
-          {{ $ano }}</option>
+          {{ $ano }}
+        </option>
       @else
         <option value={{ $ano }} {{ old('ano') == $ano ? 'selected' : '' }}>{{ $ano }}</option>
       @endif
