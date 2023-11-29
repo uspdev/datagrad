@@ -24,7 +24,7 @@ $menu = [
     [
         'text' => 'Relatório grade horária',
         'url' => 'graduacao/relatorio/gradehoraria',
-
+        'can' => 'datagrad',
     ],
     [
         'text' => 'Relatório de evasão',
