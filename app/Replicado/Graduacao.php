@@ -116,8 +116,8 @@ class Graduacao extends GraduacaoReplicado
         $query = " SELECT C.*, H.*, CR.* FROM CURSOGR C
         INNER JOIN HABILITACAOGR H ON C.codcur = H.codcur
         INNER JOIN CURRICULOGR CR ON H.codcur = CR.codcur AND H.codhab = CR.codhab
-        WHERE H.codcur = :codcur
-            AND H.codhab = :codhab
+        WHERE H.codcur = CONVERT(INT, :codcur)
+            AND H.codhab = CONVERT(INT, :codhab)
             AND ( C.dtaatvcur IS NOT NULL AND C.dtadtvcur IS NULL ) -- curso ativo
             AND ( H.dtaatvhab IS NOT NULL AND H.dtadtvhab IS NULL ) -- habilitação ativa
             AND (
@@ -201,8 +201,8 @@ class Graduacao extends GraduacaoReplicado
             FROM GRADECURRICULAR G
             INNER JOIN DISCIPLINAGR D ON (G.coddis = D.coddis AND G.verdis = D.verdis)
             INNER JOIN CURRICULOGR C ON G.codcrl = C.codcrl
-            WHERE C.codcur = convert(int, :codcur)
-                AND C.codhab = convert(int, :codhab)
+            WHERE C.codcur = CONVERT(INT, :codcur)
+                AND C.codhab = CONVERT(INT, :codhab)
                 AND C.dtainicrl < GETDATE() -- pega o curriculogr vigente no dia de hoje
                 AND (C.dtafimcrl > GETDATE() OR C.dtafimcrl IS NULL)
             ";
@@ -482,7 +482,7 @@ class Graduacao extends GraduacaoReplicado
         $params['anoIngresso'] = $anoIngresso;
 
         if ($codcur) {
-            $query = str_replace('__filtroCurso__', 'AND c.codcur = :codcur', $query);
+            $query = str_replace('__filtroCurso__', 'AND c.codcur = CONVERT(INT, :codcur)', $query);
             $params['codcur'] = $codcur;
         } else {
             $query = str_replace('__filtroCurso__', '', $query);
