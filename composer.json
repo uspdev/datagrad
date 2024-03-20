@@ -28,7 +28,7 @@
         "uspdev/laravel-tools": "^1.2",
         "uspdev/laravel-usp-theme": "^2.7",
         "uspdev/replicado": "^1.17",
-        "uspdev/senhaunica-socialite": "dev-permissions",
+        "uspdev/senhaunica-socialite": "^4.0",
         "uspdev/utils": "^1.1",
         "ybr-nx/laravel-mariadb": "^1.0"
     },
