@@ -43,7 +43,7 @@ php artisan migrate
 ## Instalação
 
 ### Básico
-
+```sh
 git clone git@github.com:uspdev/datagrad
 composer install --no-dev
 composer require uspdev/laravel-usp-theme
