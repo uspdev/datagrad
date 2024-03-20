@@ -67,13 +67,13 @@
         <tr>
           <td>{{ $d['numsemidl'] }}</td>
           <td>{{ $d['coddis'] }}</td>
-          <td>{{ $d['nomdis'] }}</td>
+          <td>{{ $d['nomdis'] }} <div class="text-info">{{ $d['nomdisigl'] }}</div></td>
           <td>{{ $d['verdis'] }}</td>
           <td>{{ App\Replicado\Graduacao::$tipobg[$d['tipobg']] }}</td>
           <td>{{ $d['creaul'] }}/{{ $d['cretrb'] }}</td>
-          <td class="text-truncate">{!! $d['objdis'] !!}</td>
-          <td class="text-truncate">{!! $d['pgmrsudis'] !!}</td>
-          <td class="text-truncate">{!! $d['pgmdis'] !!}</td>
+          <td class="text-truncate">{!! $d['objdis'] !!} <div class="text-info">{!! $d['objdisigl'] !!}</div></td>
+          <td class="text-truncate">{!! $d['pgmrsudis'] !!} <div class="text-info">{!! $d['pgmrsudisigl'] !!}</div></td>
+          <td class="text-truncate">{!! $d['pgmdis'] !!} <div class="text-info">{!! $d['pgmdisigl'] !!}</div></td>
         </tr>
       @endforeach
     </tbody>
