@@ -475,7 +475,7 @@ class Graduacao extends GraduacaoReplicado
         JOIN PESSOA ps ON (p.codpes = ps.codpes)
         WHERE
             c.codclg IN (__codundclgs__)
-            AND YEAR(p.dtaing) = :anoIngresso -- ingresso no ano
+            AND YEAR(p.dtaing) = CONVERT(INT, :anoIngresso) -- ingresso no ano
             __filtroCurso__
             ORDER BY p.dtaini, p.tipencpgm
         ";

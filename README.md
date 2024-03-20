@@ -42,18 +42,21 @@ php artisan migrate
 
 ## Instalação
 
-[Descreva como instalar a aplicação]
-
 ### Básico
-
 ```sh
-git clone git@github.com:uspdev/chamados
-composer install
+git clone git@github.com:uspdev/datagrad
+composer install --no-dev
+composer require uspdev/laravel-usp-theme
+composer require uspdev/replicado
+composer require uspdev/senhaunica-socialite
+
+#Configure o .env conforme a necessidade
 cp .env.example .env
+
 php artisan key:generate
 ```
 
-Configure o .env conforme a necessidade
+
 
 ### Cache (opcional)
 
