@@ -5,7 +5,6 @@ namespace App\Replicado;
 use Uspdev\Replicado\DB;
 use Uspdev\Replicado\Graduacao as GraduacaoReplicado;
 use Uspdev\Replicado\Replicado;
-use Uspdev\Replicado\Replicado as Config;
 
 class Graduacao extends GraduacaoReplicado
 {
@@ -69,11 +68,23 @@ class Graduacao extends GraduacaoReplicado
     //OBS: O ciclo é utilizado apenas para as disciplinas obrigatórias.
     // Sem uso ainda
     public static $cicdisgdecrl = [
-        'B' => 'Basico',
+        'B' => 'Básico',
         'P' => 'Profissional',
         'T' => 'Profissionalizante',
         'E' => 'Estágio',
         'C' => 'TCC',
+    ];
+
+    //Indica a situação em que a disciplina se encontra:
+    //PE- pendente, AU- aguardando análise da própria UNIDADE, AO- aguardando análise de OUTRAS unidades, AT- ativada, AP- aprovada, DT- desativada.
+    //Esta coluna indica em qual parte do fluxo de aprovação se encontra a disciplina.
+    public static $sitdis = [
+        'PE' => 'Pendente',
+        'AU' => 'Aguardando análise da própria unidade',
+        'AO' => 'Aguardando análise de outras unidades',
+        'AT' => 'Ativada',
+        'AP' => 'Aprovada',
+        'DT' => 'Desativada',
     ];
 
     /**
@@ -86,16 +97,16 @@ class Graduacao extends GraduacaoReplicado
      */
     public static function listarCursosHabilitacoes()
     {
-        $query = " SELECT CC.codpesdct codpescoord, CC.dtainicdn, CC.dtafimcdn, P.nompes nompescoord,
-            C.*, H.* FROM CURSOGR C
-            INNER JOIN HABILITACAOGR H ON C.codcur = H.codcur
-            INNER JOIN CURSOGRCOORDENADOR CC ON CC.codcur = C.codcur AND CC.codhab = H.codhab
-            INNER JOIN PESSOA P ON P.codpes = CC.codpesdct
-            WHERE C.codclg IN (__codundclgs__)
-                AND CC.dtafimcdn > GETDATE() -- mandato vigente do coordenador
-                AND ( (C.dtaatvcur IS NOT NULL) AND (C.dtadtvcur IS NULL) ) -- curso ativo
-                AND ( (H.dtaatvhab IS NOT NULL) AND (H.dtadtvhab IS NULL) ) -- habilitação ativa
-            ORDER BY C.nomcur, H.nomhab ASC";
+        // $query = " SELECT CC.codpesdct codpescoord, CC.dtainicdn, CC.dtafimcdn, P.nompes nompescoord,
+        //     C.*, H.* FROM CURSOGR C
+        //     INNER JOIN HABILITACAOGR H ON C.codcur = H.codcur
+        //     INNER JOIN CURSOGRCOORDENADOR CC ON CC.codcur = C.codcur AND CC.codhab = H.codhab
+        //     INNER JOIN PESSOA P ON P.codpes = CC.codpesdct
+        //     WHERE C.codclg IN (__codundclgs__)
+        //         AND CC.dtafimcdn > GETDATE() -- mandato vigente do coordenador
+        //         AND ( (C.dtaatvcur IS NOT NULL) AND (C.dtadtvcur IS NULL) ) -- curso ativo
+        //         AND ( (H.dtaatvhab IS NOT NULL) AND (H.dtadtvhab IS NULL) ) -- habilitação ativa
+        //     ORDER BY C.nomcur, H.nomhab ASC";
 
         // aqui está sem o coordenador que estava dando problema na dupla formacao iau
         $query = " SELECT C.*, H.* FROM CURSOGR C
@@ -195,7 +206,7 @@ class Graduacao extends GraduacaoReplicado
     {
         // estava dando erro no TOP na FFLCH. Então tirei o top e incuí
         // o dtafimcrl para pegar o ativo.
-        // acrescentado dtainicrl pois tem aqueles que ainda não inicaram
+        // acrescentado dtainicrl pois tem aqueles que ainda não iniciaram
         // em tese deve retornar somente 1 codcrl
         $query = "SELECT G.*, D.*, C.*
             FROM GRADECURRICULAR G
@@ -488,6 +499,110 @@ class Graduacao extends GraduacaoReplicado
             $query = str_replace('__filtroCurso__', '', $query);
         }
         return DB::fetchAll($query, $params);
+    }
+
+    /**
+     * Método para obter informações de uma disciplina de graduação
+     *
+     * Pode retornar informações de disciplina de qualquer unidade USP
+     * Inclui também 'maxverdis' que corresponde ao maior verdis da disciplina.
+     *   - Usado para paginar as versões em datatagrad.
+     *
+     * @param Array $arrCoddis
+     * @return Array
+     * @author Masaki K Neto em 25/3/2024
+     */
+    public static function obterDisciplina($coddis, $verdis = null)
+    {
+        $query = "SELECT verdis, dtaatvdis, dtadtvdis
+            FROM DISCIPLINAGR
+            WHERE coddis = :coddis
+            ORDER BY verdis DESC
+        ";
+        $dis = DB::fetchAll($query, ['coddis' => $coddis]);
+        if (!$dis) {
+            return false;
+        }
+        $maxverdis = $dis[0]['verdis'];
+        if ($verdis == null) {
+            foreach ($dis as $d) {
+                if ($d['dtaatvdis'] && date_create($d['dtaatvdis']) < date_create() && (!$d['dtadtvdis'] || date_create($d['dtadtvdis']) > date_create())) {
+                    // versão vigente da disciplina
+                    $verdis = $d['verdis'];
+                }
+            }
+        }
+
+        $query = " SELECT D.*, DA.*, DB.* FROM DISCIPLINAGR D
+            INNER JOIN DISCIPGRAVALIACAO DA ON DA.coddis = D.coddis AND (DA.dtafimifmavl IS NULL OR DA.dtafimifmavl >=GETDATE()) -- avaliação
+            INNER JOIN DISCIPGRBIBLIOG DB ON DB.coddis = D.coddis AND (DB.dtafimbbg IS NULL OR DB.dtafimbbg >= GETDATE()) -- bibliografia
+            WHERE D.coddis = :coddis
+            AND D.verdis = CONVERT(INT, :verdis)
+        ";
+        $params['verdis'] = $verdis;
+        $params['coddis'] = $coddis;
+
+        $ret = DB::fetch($query, $params);
+        if ($ret) {
+            $ret['maxverdis'] = $maxverdis;
+            $ret['sitdistxt'] = SELF::$sitdis[$ret['sitdis']] ?? '';
+        }
+        // dd($ret);
+        return $ret;
+    }
+
+    /**
+     * Retorna os responsáveis de uma disciplina
+     *
+     * @param String $coddis
+     * @return Array
+     */
+    public static function listarResponsaveisDisciplina($coddis)
+    {
+        $query = "SELECT DR.*, P.nompesttd FROM DISCIPGRRESP DR
+            INNER JOIN PESSOA P ON P.codpes = DR.codpes
+            WHERE coddis = :coddis
+            AND dtafimrsp is NULL
+        ";
+
+        $params['coddis'] = $coddis;
+
+        return DB::fetchAll($query, $params);
+
+    }
+
+    /**
+     * Lista os cursos/habilitações que uma disciplina está presente
+     *
+     * Para separar as habilitações de sua unidade das outras, pode-se filtrar no laravel com
+     * stripos(config('replicado.codundclgs'), $curso['codclg']) !== false
+     *
+     * @param String $coddis
+     * @return Array
+     */
+    public function listarCursosDisciplina($coddis)
+    {
+        $query = "SELECT F.sglfusclgund, F.codfusclgund,
+                CG.nomcur, CG.codclg,
+                H.nomhab,  G.*, C.* FROM GRADECURRICULAR  G
+            INNER JOIN CURRICULOGR C ON G.codcrl = C.codcrl AND C.dtainicrl < GETDATE() AND C.dtafimcrl IS NULL -- pega os curriculos ativos
+            INNER JOIN CURSOGR CG ON CG.codcur = C.codcur --AND CG.codclg IN (__codundclgs__)
+            INNER JOIN HABILITACAOGR H ON H.codcur = C.codcur AND H.codhab = C.codhab -- dados da habilitação
+            INNER JOIN FUSAOCOLEGIADOUNIDADE F ON F.codoriclgund = CG.codclg -- pega dados de o colegiado de cursos interunidades
+                AND F.codfusclgund < 3000 -- somente graduação (grad +2000, pos +3000, etc)
+            WHERE G.coddis = :coddis
+            ORDER BY CG.codclg, CG.nomcur -- ordena por colegiado e depois por curso
+        ";
+
+        $ret = DB::fetchAll($query, ['coddis' => $coddis]);
+
+        foreach ($ret as &$r) {
+            // adicionando texto correspondente às siglas de alguns campos, conforme definição nesta classe
+            $r['cicdisgdecrltxt'] = SELF::$cicdisgdecrl[$r['cicdisgdecrl']] ?? '';
+            $r['tipobgtxt'] = SELF::$tipobg[$r['tipobg']] ?? '';
+        }
+
+        return $ret;
     }
 
 }

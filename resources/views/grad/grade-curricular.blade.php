@@ -51,26 +51,28 @@
   <table class="table table-sm table-striped table-hover datatable-simples dt-fixed-header dt-buttons">
     <thead class="thead-light">
       <tr>
-        <th class="c1">Semestre ideal</th>
+        <th class="c1">Sem. ideal</th>
         <th class="c2">Código</th>
         <th>Nome</th>
         <th class="c4">Versão</th>
         <th class="c5">Tipo</th>
         <th class="c6">Créditos aula/trab</th>
+        <th class="c6 text-center" title="Possui atividade de extensão cadastrada">Atv. extensão</th>
         <th>Objetivos</th>
         <th>Programa Resumido</th>
-        <th class="c9">Programa</th>
+        <th>Programa</th>
       </tr>
     </thead>
     <tbody>
       @foreach ($disciplinas as $d)
         <tr>
           <td>{{ $d['numsemidl'] }}</td>
-          <td>{{ $d['coddis'] }}</td>
+          <td><a href="{{ route('disciplinas.show', $d['coddis']) }}">{{ $d['coddis'] }}</a></td>
           <td>{{ $d['nomdis'] }} <div class="text-info">{{ $d['nomdisigl'] }}</div></td>
-          <td>{{ $d['verdis'] }}</td>
+          <td class="text-center">{{ $d['verdis'] }}</td>
           <td>{{ App\Replicado\Graduacao::$tipobg[$d['tipobg']] }}</td>
-          <td>{{ $d['creaul'] }}/{{ $d['cretrb'] }}</td>
+          <td class="text-center">{{ $d['creaul'] }}/{{ $d['cretrb'] }}</td>
+          <td class="text-center">{{ $d['cgahoratvext'] ? 'Sim' : 'Não' }}</td>
           <td class="text-truncate">{!! $d['objdis'] !!} <div class="text-info">{!! $d['objdisigl'] !!}</div></td>
           <td class="text-truncate">{!! $d['pgmrsudis'] !!} <div class="text-info">{!! $d['pgmrsudisigl'] !!}</div></td>
           <td class="text-truncate">{!! $d['pgmdis'] !!} <div class="text-info">{!! $d['pgmdisigl'] !!}</div></td>

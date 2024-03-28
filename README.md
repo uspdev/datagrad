@@ -10,13 +10,17 @@ Sistema que auxilia na elaboração do relatório de revalidação de cursos de 
 * Gera relatório de carga didática por lista de nomes e por período
 * Gera relatório de grade horária por lista de nomes/codpes
 * Gera relatório de evasão por curso e ano de ingresso dos alunos
+* Facilita a alteração de disciplinas, principalmente no processo de tradução para inglês e cadastro de atividade extensionista (em andamento)
 
 ## Changelog
+
+03/2024
+* iniciando gerenciamento de alteração de disicplinas
 
 30/10/2023
 * incluído relatório de evasão
 
-xx/08/2023
+01/08/2023
 * incluído relatório de grade horária
 
 13/6/2023
@@ -46,17 +50,12 @@ php artisan migrate
 ```sh
 git clone git@github.com:uspdev/datagrad
 composer install --no-dev
-composer require uspdev/laravel-usp-theme
-composer require uspdev/replicado
-composer require uspdev/senhaunica-socialite
 
-#Configure o .env conforme a necessidade
+# Configure o .env conforme a necessidade
 cp .env.example .env
 
 php artisan key:generate
 ```
-
-
 
 ### Cache (opcional)
 

@@ -330,7 +330,6 @@ class GraduacaoController extends Controller
             $semestreFim = $semestreIni;
             $semestreIni = $tmp;
         }
-        // dd($semestreIni, $semestreFim, $semestres);
 
         $defaultSemestreFim = date('Y') . (date('m') < 7 ? 1 : 2);
         $semestreFim = $semestreFim ? $semestreFim : $defaultSemestreFim;
@@ -384,6 +383,9 @@ class GraduacaoController extends Controller
         return compact('semestres', 'semestreIni', 'semestreFim', 'curso', 'turmas', 'nomes', 'nomesCount', 'timestamp');
     }
 
+    /**
+     * Retorna dados da pessoa nos relatórios síntese e complementar
+     */
     public function pessoa($codpes)
     {
         $this->authorize('datagrad');

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\GraduacaoController;
+use App\Http\Controllers\DisciplinaController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -40,3 +41,6 @@ Route::get('graduacao/cursos', [GraduacaoController::class, 'cursos'])->name('gr
 Route::get('graduacao/cursos/{codcur}/{codhab}/gradeCurricular', [GraduacaoController::class, 'gradeCurricular'])->name('graduacao.gradeCurricular');
 Route::get('graduacao/cursos/{codcur}/{codhab}/turmas', [GraduacaoController::class, 'turmas'])->name('graduacao.turmas');
 Route::post('graduacao/cursos/{codcur}/{codhab}/turmas', [GraduacaoController::class, 'turmas'])->name('graduacao.turmas.post');
+
+Route::resource('disciplinas', DisciplinaController::class);
+// Route::get('disciplinas/')

@@ -31,6 +31,11 @@ $menu = [
         'url' => 'graduacao/relatorio/evasao',
         'can' => 'evasao',
     ],
+    [
+        'text' => 'Disciplinas',
+        'url' => 'disciplinas',
+        'can' => 'datagrad',
+    ],
 ];
 
 $right_menu = [
