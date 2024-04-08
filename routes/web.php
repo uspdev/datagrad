@@ -43,4 +43,3 @@ Route::get('graduacao/cursos/{codcur}/{codhab}/turmas', [GraduacaoController::cl
 Route::post('graduacao/cursos/{codcur}/{codhab}/turmas', [GraduacaoController::class, 'turmas'])->name('graduacao.turmas.post');
 
 Route::resource('disciplinas', DisciplinaController::class);
-// Route::get('disciplinas/')

@@ -32,10 +32,7 @@
         <div>Número de vagas/Number of places: <b>{{ $disciplina['numvagdis'] }}</b></div>
         <div>Duração (semanas): <b>{{ $disciplina['durdis'] }}</b></div>
         <div>
-          Responsáveis/Professors:
-          @foreach ($responsaveis as $r)
-            <b>{{ $r['codpes'] }} - {{ $r['nompesttd'] }}</b>,
-          @endforeach
+          Responsáveis/Professors: <b>{{ collect($responsaveis)->implode('nompesttd', ', ') }}</b>
         </div>
 
       </div>

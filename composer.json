@@ -23,6 +23,7 @@
         "laravel/framework": "^8.75",
         "laravel/sanctum": "^2.11",
         "laravel/tinker": "^2.5",
+        "lolli42/finediff": "^1.0",
         "spatie/commonmark-highlighter": "^3.0",
         "uspdev/laravel-replicado": "^1.0",
         "uspdev/laravel-tools": "^1.2",

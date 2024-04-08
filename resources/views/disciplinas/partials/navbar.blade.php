@@ -13,7 +13,7 @@
         </a>
       @endif
 
-      {{-- badge extensao --}}
+      {{-- badge animais --}}
       @if ($disciplina['stapsuatvani'] == 'S')
         <span class="badge badge-warning ml-2" data-toggle="popover" data-trigger="hover" data-placement="bottom"
           data-content="Atividades práticas com animais e/ou materiais biológicos">
@@ -25,7 +25,7 @@
       <a href="https://uspdigital.usp.br/jupiterweb/obterDisciplina?nomdis=&sgldis={{ $disciplina['coddis'] }}"
         class="badge badge-secondary ml-2" target="_BLANK">Jupiter Web <i class="fas fa-link"></i></a>
 
-      <button class="btn btn-sm btn-warning ml-2" type="submit">Nova alteração / em andamento</button>
+      <a href="{{ route('disciplinas.edit', $disciplina['coddis']) }}" class="btn btn-sm btn-warning ml-2" type="submit">Formulário de alteração</a>
     @else
       Digite o código da disciplina:
     @endif
@@ -40,5 +40,5 @@
       </div>
     </form>
 
-</div>
+  </div>
 </div>

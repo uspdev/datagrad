@@ -505,6 +505,9 @@ class Graduacao extends GraduacaoReplicado
      * Método para obter informações de uma disciplina de graduação
      *
      * Pode retornar informações de disciplina de qualquer unidade USP
+     * Se informado verdis = 'max', retornará a maior versão, mesmo que não esteja vigente
+     * Se não informado verdis, retornará a versão vigente
+     *
      * Inclui também 'maxverdis' que corresponde ao maior verdis da disciplina.
      *   - Usado para paginar as versões em datatagrad.
      *
@@ -524,6 +527,10 @@ class Graduacao extends GraduacaoReplicado
             return false;
         }
         $maxverdis = $dis[0]['verdis'];
+
+        if ($verdis == 'max') {
+            $verdis = $maxverdis;
+        }
         if ($verdis == null) {
             foreach ($dis as $d) {
                 if ($d['dtaatvdis'] && date_create($d['dtaatvdis']) < date_create() && (!$d['dtadtvdis'] || date_create($d['dtadtvdis']) > date_create())) {

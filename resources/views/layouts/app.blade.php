@@ -14,20 +14,45 @@
 
 {{-- Fim de blocos do laravel-usp-theme --}}
 
-@section('title')
-  @parent
-@endsection
-
-@section('styles')
-  @parent
-  <style>
-    /*seus estilos*/
-  </style>
-@endsection
+@section('flash')
+  <div class="flash-message fixed-top w-50 ml-auto mr-auto" style="margin-top: 60px">
+    @foreach (['danger', 'warning', 'success', 'info'] as $msg)
+      @if (Session::has('alert-' . $msg))
+        <p class="alert alert-{{ $msg }} border border-dark rounded">{{ Session::get('alert-' . $msg) }}
+          <a href="#" class="close" data-dismiss="alert" aria-label="fechar">&times;</a>
+        </p>
+      @endif
+    @endforeach
+  </div>
 
 @section('javascripts_bottom')
   @parent
   <script>
-    // Seu código .js
+    $(function() {
+      $(".flash-message").fadeTo(5000, 500).slideUp(500, function() {
+        $(".flash-message").slideUp(500);
+      });
+    })
   </script>
+@endsection
+
+@endsection
+
+
+@section('title')
+@parent
+@endsection
+
+@section('styles')
+@parent
+<style>
+  /*seus estilos*/
+</style>
+@endsection
+
+@section('javascripts_bottom')
+@parent
+<script>
+  // Seu código .js
+</script>
 @endsection
