@@ -14,8 +14,8 @@
     }
 
     /* * {
-          scroll-behavior: smooth;
-        } */
+                        scroll-behavior: smooth;
+                      } */
   </style>
 @endsection
 
@@ -30,7 +30,7 @@
         <span class="h5">
           Formulário de alteração: {{ $disc['coddis'] }} - {{ $disc['nomdis'] }}
         </span>
-        <button id="mostrar-ocultar-original" class="btn btn-sm ml-2" style="background-color: lightgray;">
+        <button id="mostrar-ocultar-diff" class="btn btn-sm ml-2" style="background-color: lightgray;">
           Mostrar/ocultar diferenças
         </button>
       </div>
@@ -38,8 +38,10 @@
       <div class="">
         <a href="{{ route('disciplinas.show', $disc['coddis']) }}" class="btn btn-sm btn-secondary"
           type="submit">Cancelar</a>
-        <button class="btn btn-sm btn-primary ml-2" type="submit" name="submit" value="save">Salvar e continuar</button>
-        <button class="btn btn-sm btn-success ml-2" type="submit" name="submit" value="preview">Salvar e visualizar documento</button>
+        <button class="btn btn-sm btn-primary ml-2" type="submit" name="submit" value="save">Salvar e
+          continuar</button>
+        <button class="btn btn-sm btn-success ml-2" type="submit" name="submit" value="preview">Salvar e visualizar
+          documento</button>
       </div>
 
     </div>
@@ -49,6 +51,11 @@
         @include('disciplinas.partials.card-curso')
       </fieldset>
   </form>
+
+  {{-- <pre>
+  {{ json_encode($disc, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}
+</pre> --}}
+
   </div>
 @endsection
 
@@ -71,11 +78,35 @@
       })
 
       // mostrar ocultar original
-      $('#mostrar-ocultar-original').on('click', function(e) {
-        e.preventDefault();
-        $('.diff').toggleClass('d-none')
+      var mostrarDiff = sessionStorage.getItem('mostrarDiff') == 'sim' ? true : false
+      sessionStorage.removeItem('mostrarDiff');
+
+      var mostrarOcultarDiff = function() {
+        if (mostrarDiff == false) {
+          $('.diff').addClass('d-none')
+        } else {
+          $('.diff').removeClass('d-none')
+        }
         $('textarea').height(0).height(this.scrollHeight).trigger('change')
+      }
+
+      if (mostrarDiff == true) {
+        mostrarOcultarDiff()
+        console.log('typeof', mostrarDiff)
+      }
+
+      // $(window).bind('beforeunload', function() {
+      //   return '>>>>>Before You Go<<<<<<<< \n Your custom message go here';
+      // });
+
+      $('#mostrar-ocultar-diff').on('click', function(e) {
+        e.preventDefault();
+        mostrarDiff = !mostrarDiff
+        mostrarOcultarDiff()
+        console.log(mostrarDiff)
       })
+
+
 
 
 
@@ -83,7 +114,7 @@
       var computarDiff = function(el) {
         // console.log(el.val())
         el.closest('table').prettyTextDiff({
-          cleanup: false,
+          cleanup: true,
           debug: false,
           originalContainer: false,
           changedContainer: false,
@@ -117,8 +148,10 @@
         sessionStorage.removeItem('scrollpos');
       }
 
+      // ao submeter form vamos salvar algumas variáveis
       $('form').on('submit', function() {
         sessionStorage.setItem('scrollpos', window.scrollY);
+        sessionStorage.setItem('mostrarDiff', mostrarDiff == true ? 'sim' : 'nao');
       })
 
 
