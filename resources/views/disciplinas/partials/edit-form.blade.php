@@ -59,7 +59,7 @@
     </div> --}}
 
     <div class="form-group row my-0">
-      <label class="col-form-label" for="atividade-extensao">Atividades extensionistas</label>
+      <label class="col-form-label" for="atividade-extensao">Atividade extensionista</label>
       <div>
         <select class="form-control form-control-sm mx-3" name="atividade_extensionista" id="atividade-extensionista">
           <option value="1" {{ $disc->atividade_extensionista ? 'selected' : '' }}>Sim</option>
@@ -141,10 +141,6 @@
     <textarea class="form-control changed" name="justificativa">{{ $disc->justificativa }}</textarea>
   </div>
 </div>
-
-{{-- <pre>
-  {{ json_encode($disc, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}
-</pre> --}}
 
 
 @section('javascripts_bottom')

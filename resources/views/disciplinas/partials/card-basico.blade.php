@@ -42,7 +42,7 @@
           Atividades práticas com animais e/ou materiais biológicos: <b>{!! $disciplina['stapsuatvani'] == 'S' ? '<span class="text-danger">Sim</span>' : 'Não' !!}</b>
         </div>
         <div>
-          Atividades de extensão: <b>{!! $disciplina['cgahoratvext'] ? '<span class="text-danger">Sim</span>' : 'Não' !!}</b>
+          Atividade extensionista: <b>{!! $disciplina['cgahoratvext'] ? '<span class="text-danger">Sim</span>' : 'Não' !!}</b>
         </div>
         <div>@include('disciplinas.partials.vigencia')</div>
         <div>Última versão: <b>{{ $disciplina['maxverdis'] }}</b></div>
