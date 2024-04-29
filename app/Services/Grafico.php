@@ -9,7 +9,7 @@ class Grafico
     /**
      * Retorna o gráfico da evasão em base64.
      */
-    function criarGraficoEvasao($taxaEvasao, $formRequest)
+    public static function criarGraficoEvasao($taxaEvasao, $formRequest)
     {
         $anos = array_keys($taxaEvasao);
 
