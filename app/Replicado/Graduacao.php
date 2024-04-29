@@ -122,7 +122,7 @@ class Graduacao extends GraduacaoReplicado
     /**
      * Retorna dados da tabela CURSOGR e HABILITACAOGR e CURRICULOGR
      */
-    public function obterCurso($codcur, $codhab)
+    public static function obterCurso($codcur, $codhab)
     {
         $query = " SELECT C.*, H.*, CR.* FROM CURSOGR C
         INNER JOIN HABILITACAOGR H ON C.codcur = H.codcur
@@ -587,7 +587,7 @@ class Graduacao extends GraduacaoReplicado
      * @param String $coddis
      * @return Array
      */
-    public function listarCursosDisciplina($coddis)
+    public static function listarCursosDisciplina($coddis)
     {
         $query = "SELECT F.sglfusclgund, F.codfusclgund,
                 CG.nomcur, CG.codclg,
