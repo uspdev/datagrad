@@ -3,6 +3,7 @@
 /*
 @preserve jQuery.PrettyTextDiff 1.0.4
 See https://github.com/arnab/jQuery.PrettyTextDiff/
+Alterado por Masaki em 4/2024
  */
 
 (function() {

@@ -1,8 +1,8 @@
-Vigência <span class="badge badge-secondary">versão {{ $disciplina['verdis'] }}</span>:
+Vigência <span class="badge badge-secondary">versão {{ $dr['verdis'] }}</span>:
 
-@if ($disciplina['dtaatvdis'])
-  a partir de <b>{{ formatarData($disciplina['dtaatvdis']) }}</b>
+@if ($dr['dtaatvdis'])
+  a partir de <b>{{ formatarData($dr['dtaatvdis']) }}</b>
 @endif
-@if ($disciplina['dtadtvdis'])
-  até <b>{{ formatarData($disciplina['dtadtvdis']) }}</b>
+@if ($dr['dtadtvdis'])
+  até <b>{{ formatarData($dr['dtadtvdis']) }}</b>
 @endif

@@ -43,6 +43,10 @@ composer install --no-dev
 php artisan migrate
 ```
 
+## Dicas
+
+* Copy to clipboard só funciona em conexão https
+
 
 ## Instalação
 

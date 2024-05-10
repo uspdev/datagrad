@@ -34,7 +34,7 @@ $menu = [
     [
         'text' => 'Disciplinas',
         'url' => 'disciplinas',
-        'can' => 'datagrad',
+        'can' => 'disciplinas',
     ],
 ];
 

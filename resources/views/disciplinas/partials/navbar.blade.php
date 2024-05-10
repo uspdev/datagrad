@@ -1,20 +1,24 @@
-<div class="navbar navbar-light bg-light card-header-sticky">
-  <div class="h5 form-inline">
-    @if ($disciplina)
-      Disciplina {{ $disciplina['coddis'] }} - {{ $disciplina['nomdis'] }}
-
-      @include('disciplinas.partials.badge-vigencia')
+<div class="navbar navbar-light card-header-sticky justify-content-between" style="background-color: #d6eeff;">
+  <div>
+    <span class="h5">
+      <a href="{{ route('disciplinas.index') }}">Disciplinas</a>
+    </span>
+    @if ($dr)
+      <span class="h5">
+        <i class="fas fa-chevron-right"></i> Disciplina {{ $dr['coddis'] }} - {{ $dr['nomdis'] }}
+      </span>
+      {{-- @include('disciplinas.partials.badge-vigencia') --}}
 
       {{-- badge extensao --}}
-      @if ($disciplina['cgahoratvext'])
+      @if ($dr['cgahoratvext'])
         <a href="{{ Request::getRequestUri() }}#card-extensao" class="badge badge-info ml-2" data-toggle="popover"
           data-trigger="hover" data-placement="bottom" data-content="Possui atividades de extensão">
-          Extensão: {{ $disciplina['cgahoratvext'] }}
+          Extensão: {{ $dr['cgahoratvext'] }}
         </a>
       @endif
 
       {{-- badge animais --}}
-      @if ($disciplina['stapsuatvani'] == 'S')
+      @if ($dr['stapsuatvani'] == 'S')
         <span class="badge badge-warning ml-2" data-toggle="popover" data-trigger="hover" data-placement="bottom"
           data-content="Atividades práticas com animais e/ou materiais biológicos">
           BIO <i class="fas fa-biohazard"></i>
@@ -22,23 +26,19 @@
       @endif
 
       {{-- link jupiter --}}
-      <a href="https://uspdigital.usp.br/jupiterweb/obterDisciplina?nomdis=&sgldis={{ $disciplina['coddis'] }}"
+      <a href="https://uspdigital.usp.br/jupiterweb/obterDisciplina?nomdis=&sgldis={{ $dr['coddis'] }}"
         class="badge badge-secondary ml-2" target="_BLANK">Jupiter Web <i class="fas fa-link"></i></a>
 
-      <a href="{{ route('disciplinas.edit', $disciplina['coddis']) }}" class="btn btn-sm btn-warning ml-2" type="submit">Formulário de alteração</a>
-    @else
-      Digite o código da disciplina:
+      @can('update', $disc)
+        <a href="{{ route('disciplinas.edit', $dr['coddis']) }}" class="btn btn-sm btn-warning ml-2" type="submit">
+          @if ($disc->id)
+            Editar alteração em andamento
+          @else
+            Propor alteração da disciplina
+          @endif
+        </a>
+      @endcan
     @endif
-
-    <form id="disciplina-form" method="get" action="">
-      <div class="input-group ml-2">
-        <input class="form-control form-control-sm" type="text" name="coddis" required
-          placeholder="Codigo da disciplina ..">
-        <div class="input-group-append">
-          <button class="btn btn-sm btn-primary" type="submit">{!! $disciplina ? '<i class="fas fa-exchange-alt"></i>' : 'OK' !!}</button>
-        </div>
-      </div>
-    </form>
-
   </div>
+  <div>@include('disciplinas.partials.consultar-form')</div>
 </div>

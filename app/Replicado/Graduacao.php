@@ -8,7 +8,6 @@ use Uspdev\Replicado\Replicado;
 
 class Graduacao extends GraduacaoReplicado
 {
-
     /**
      * tipoObrigatoriedade da tabela GRADECURRICULAR
      *
@@ -315,11 +314,11 @@ class Graduacao extends GraduacaoReplicado
      */
     public static function listarTurmasPorCodpes($codpes, $semestres)
     {
-        $filterSemestres = " (";
+        $filterSemestres = ' (';
         foreach ($semestres as $semestre) {
             $filterSemestres .= " T.codtur LIKE '$semestre%' OR";
         }
-        $filterSemestres = substr($filterSemestres, 0, -3) . ")";
+        $filterSemestres = substr($filterSemestres, 0, -3) . ')';
 
         $commonSelect = "
             M.stamis --semanal/quinzenal
@@ -458,7 +457,6 @@ class Graduacao extends GraduacaoReplicado
     public static function listarTurmasMinistrantes(int $codcur, int $codhab, $semestre)
     {
         $turmas = Graduacao::listarTurmas($codcur, $codhab, $semestre);
-        $AtivDidaticas = [];
         foreach ($turmas as &$turma) {
             $turma['ministrantes'] = Graduacao::listarMinistrante($turma);
             $turma['ativDidaticas'] = Graduacao::listarAtivDidaticas($turma);
@@ -511,8 +509,9 @@ class Graduacao extends GraduacaoReplicado
      * Inclui também 'maxverdis' que corresponde ao maior verdis da disciplina.
      *   - Usado para paginar as versões em datatagrad.
      *
-     * @param Array $arrCoddis
-     * @return Array
+     * @param String $coddis
+     * @param Int|Null $verdis
+     * @return Array|Null
      * @author Masaki K Neto em 25/3/2024
      */
     public static function obterDisciplina($coddis, $verdis = null)
@@ -552,9 +551,9 @@ class Graduacao extends GraduacaoReplicado
         $ret = DB::fetch($query, $params);
         if ($ret) {
             $ret['maxverdis'] = $maxverdis;
-            $ret['sitdistxt'] = SELF::$sitdis[$ret['sitdis']] ?? '';
+            $ret['sitdistxt'] = self::$sitdis[$ret['sitdis']] ?? '';
         }
-        // dd($ret);
+
         return $ret;
     }
 
@@ -564,7 +563,7 @@ class Graduacao extends GraduacaoReplicado
      * @param String $coddis
      * @return Array
      */
-    public static function listarResponsaveisDisciplina($coddis)
+    public static function listarResponsaveisDisciplina($coddis): array
     {
         $query = "SELECT DR.*, P.nompesttd FROM DISCIPGRRESP DR
             INNER JOIN PESSOA P ON P.codpes = DR.codpes
@@ -575,28 +574,29 @@ class Graduacao extends GraduacaoReplicado
         $params['coddis'] = $coddis;
 
         return DB::fetchAll($query, $params);
-
     }
 
     /**
      * Lista os cursos/habilitações que uma disciplina está presente
      *
-     * Para separar as habilitações de sua unidade das outras, pode-se filtrar no laravel com
+     * Para separar as habilitações de sua unidade das outras, pode-se filtrar com
      * stripos(config('replicado.codundclgs'), $curso['codclg']) !== false
      *
      * @param String $coddis
      * @return Array
      */
-    public static function listarCursosDisciplina($coddis)
+    public static function listarCursosDisciplina($coddis): array
     {
         $query = "SELECT F.sglfusclgund, F.codfusclgund,
                 CG.nomcur, CG.codclg,
                 H.nomhab,  G.*, C.* FROM GRADECURRICULAR  G
-            INNER JOIN CURRICULOGR C ON G.codcrl = C.codcrl AND C.dtainicrl < GETDATE() AND C.dtafimcrl IS NULL -- pega os curriculos ativos
+            INNER JOIN CURRICULOGR C ON G.codcrl = C.codcrl
+            --   AND C.dtainicrl < GETDATE() -- exclui futuros
+              AND (C.dtafimcrl > GETDATE() OR C.dtafimcrl IS NULL) -- pega os curriculos ativos
             INNER JOIN CURSOGR CG ON CG.codcur = C.codcur --AND CG.codclg IN (__codundclgs__)
             INNER JOIN HABILITACAOGR H ON H.codcur = C.codcur AND H.codhab = C.codhab -- dados da habilitação
             INNER JOIN FUSAOCOLEGIADOUNIDADE F ON F.codoriclgund = CG.codclg -- pega dados de o colegiado de cursos interunidades
-                AND F.codfusclgund < 3000 -- somente graduação (grad +2000, pos +3000, etc)
+              AND F.codfusclgund < 3000 -- somente graduação (grad +2000, pos +3000, etc)
             WHERE G.coddis = :coddis
             ORDER BY CG.codclg, CG.nomcur -- ordena por colegiado e depois por curso
         ";
@@ -605,11 +605,31 @@ class Graduacao extends GraduacaoReplicado
 
         foreach ($ret as &$r) {
             // adicionando texto correspondente às siglas de alguns campos, conforme definição nesta classe
-            $r['cicdisgdecrltxt'] = SELF::$cicdisgdecrl[$r['cicdisgdecrl']] ?? '';
-            $r['tipobgtxt'] = SELF::$tipobg[$r['tipobg']] ?? '';
+            $r['cicdisgdecrltxt'] = self::$cicdisgdecrl[$r['cicdisgdecrl']] ?? '';
+            $r['tipobgtxt'] = self::$tipobg[$r['tipobg']] ?? '';
         }
 
         return $ret;
     }
 
+    /**
+     * Retorna lista de disciplinas de responsabilidade de $codpes
+     *
+     * @param Integer $codpes
+     * @return Array
+     */
+    public static function listarDisciplinasPorResponsavel($codpes): array
+    {
+        $query = 'SELECT DR.codpes, DR.dtainirsp, D.*
+            FROM DISCIPGRRESP DR
+            INNER JOIN DISCIPLINAGR D on D.coddis = DR.coddis
+                AND D.verdis = (SELECT max(verdis) FROM DISCIPLINAGR where coddis = DR.coddis)
+            WHERE DR.dtafimrsp is NULL
+                AND DR.codpes = CONVERT(INT,:codpes)
+            ORDER BY D.coddis';
+
+        $params['codpes'] = $codpes;
+
+        return DB::fetchAll($query, $params);
+    }
 }

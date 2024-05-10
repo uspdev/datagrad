@@ -1,8 +1,9 @@
 <?php
 
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ArquivoController;
 use App\Http\Controllers\GraduacaoController;
 use App\Http\Controllers\DisciplinaController;
-use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -42,4 +43,7 @@ Route::get('graduacao/cursos/{codcur}/{codhab}/gradeCurricular', [GraduacaoContr
 Route::get('graduacao/cursos/{codcur}/{codhab}/turmas', [GraduacaoController::class, 'turmas'])->name('graduacao.turmas');
 Route::post('graduacao/cursos/{codcur}/{codhab}/turmas', [GraduacaoController::class, 'turmas'])->name('graduacao.turmas.post');
 
-Route::resource('disciplinas', DisciplinaController::class);
+Route::resource('disciplinas', DisciplinaController::class)->parameters(['disciplinas' => 'coddis']);
+Route::get('disciplinas/{coddis}/preview',[DisciplinaController::class, 'preview'])->name('disciplinas.preview');
+
+Route::get('arquivos/download',[ArquivoController::class, 'download'])->name('arquivos.download');

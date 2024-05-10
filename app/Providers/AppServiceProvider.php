@@ -2,7 +2,10 @@
 
 namespace App\Providers;
 
+use DateTime;
 use Spatie\Permission\Models\Role;
+use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\ServiceProvider;
 use Spatie\Permission\Models\Permission;
 
@@ -25,6 +28,15 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        // criando role e tribuindo permissões a ela
+        // URL temporária
+        Storage::disk('local')->buildTemporaryUrlsUsing(
+            function (string $path, DateTime $expiration, array $options) {
+                return URL::temporarySignedRoute(
+                    'arquivos.download',
+                    $expiration,
+                    array_merge($options, ['path' => $path])
+                );
+            }
+        );
     }
 }

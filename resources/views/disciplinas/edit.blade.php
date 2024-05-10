@@ -13,9 +13,19 @@
       padding-bottom: 6px;
     }
 
+    /* formatando as cores do diff */
+    ins {
+      /* background-color: lightgreen; // setado no JS */
+      text-decoration: none;
+    }
+
+    del {
+      background-color: lightsalmon;
+    }
+
     /* * {
-                        scroll-behavior: smooth;
-                      } */
+          scroll-behavior: smooth;
+        } */
   </style>
 @endsection
 
@@ -24,41 +34,17 @@
     @csrf
     @method('put')
     <input type="hidden" name="id" value={{ $disc->id }}>
+    <input type="hidden" name="coddis" value={{ $disc->coddis }}>
+    @include('disciplinas.partials.navbar-edit')
 
-    <div class="navbar bg-warning card-header-sticky justify-content-between">
-      <div>
-        <span class="h5">
-          Formulário de alteração: {{ $disc['coddis'] }} - {{ $disc['nomdis'] }}
-        </span>
-        <button id="mostrar-ocultar-diff" class="btn btn-sm ml-2" style="background-color: lightgray;">
-          Mostrar/ocultar diferenças
-        </button>
-      </div>
-
-      <div class="">
-        <a href="{{ route('disciplinas.show', $disc['coddis']) }}" class="btn btn-sm btn-secondary"
-          type="submit">Cancelar</a>
-        <button class="btn btn-sm btn-primary ml-2" type="submit" name="submit" value="save">Salvar e
-          continuar</button>
-        <button class="btn btn-sm btn-success ml-2" type="submit" name="submit" value="preview">Salvar e visualizar
-          documento</button>
-      </div>
-
-    </div>
-    <div>
-      <fieldset>
-        @include('disciplinas.partials.edit-form')
-        @include('disciplinas.partials.card-curso')
-      </fieldset>
+    <fieldset>
+      @include('disciplinas.partials.edit-form')
+      {{-- @include('disciplinas.partials.card-curso') --}}
+    </fieldset>
   </form>
-
-  {{-- <pre>
-  {{ json_encode($disc, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}
-</pre> --}}
-
-  </div>
 @endsection
 
+@include('blocos.textarea-autoexpand')
 @section('javascripts_bottom')
   @parent
   <script src="{{ asset('js/diff-match-patch.js') }}"></script>
@@ -66,53 +52,57 @@
   <script>
     $(document).ready(function() {
 
-      // textarea auto expand
-      // https://stackoverflow.com/questions/2948230/auto-expand-a-textarea-using-jquery
-      $('body').on('change keyup keydown paste cut', 'textarea', function() {
-        $(this).height(0).height(this.scrollHeight)
-      }).find('textarea').trigger('change')
-
       // habilitando popover
       $(function() {
         $('[data-toggle="popover"]').popover()
       })
 
-      // mostrar ocultar original
-      var mostrarDiff = sessionStorage.getItem('mostrarDiff') == 'sim' ? true : false
-      sessionStorage.removeItem('mostrarDiff');
-
+      // mostrar-ocultar diffs *******************************
       var mostrarOcultarDiff = function() {
-        if (mostrarDiff == false) {
-          $('.diff').addClass('d-none')
-        } else {
+        if (mostrarDiff == true) {
           $('.diff').removeClass('d-none')
+          $('ins').css('background-color', 'lightgreen')
+          $('ins').css('text-decoration', 'underline')
+        } else {
+          $('.diff').addClass('d-none')
+          $('ins').css('background-color', 'inherit')
+          $('ins').css('text-decoration', 'inherit')
         }
         $('textarea').height(0).height(this.scrollHeight).trigger('change')
       }
 
-      if (mostrarDiff == true) {
-        mostrarOcultarDiff()
-        console.log('typeof', mostrarDiff)
-      }
-
-      // $(window).bind('beforeunload', function() {
-      //   return '>>>>>Before You Go<<<<<<<< \n Your custom message go here';
-      // });
-
+      // botão de mostrar/ocultar diffs
       $('#mostrar-ocultar-diff').on('click', function(e) {
         e.preventDefault();
         mostrarDiff = !mostrarDiff
         mostrarOcultarDiff()
-        console.log(mostrarDiff)
       })
 
+      // ao submeter form vamos salvar estado do diff
+      $('form').on('submit', function() {
+        sessionStorage.setItem('mostrarDiff', mostrarDiff == true ? 'sim' : 'nao');
+      })
 
+      // mostrar diff valor padrão
+      var mostrarDiff = true
 
+      // restaura estado do mostrarDiff ao carregar página
+      var sessionDiff = sessionStorage.getItem('mostrarDiff')
+      if (sessionDiff == 'sim') {
+        mostrarDiff = true
+      }
+      if (sessionDiff == 'nao') {
+        mostrarDiff = false
+      }
+      sessionStorage.removeItem('mostrarDiff');
 
+      if (mostrarDiff == true) {
+        mostrarOcultarDiff()
+      }
 
-      //   https://github.com/arnab/jQuery.PrettyTextDiff
+      // calcula diff e aplica sempre que necessário ***********
+      // https://github.com/arnab/jQuery.PrettyTextDiff
       var computarDiff = function(el) {
-        // console.log(el.val())
         el.closest('table').prettyTextDiff({
           cleanup: true,
           debug: false,
@@ -122,25 +112,31 @@
           changedContent: el.val() + ' ',
           diffContainer: '.diff',
         })
+        mostrarOcultarDiff()
       }
-      $('textarea').each(function() {
+
+      // calcula diff no carregamento da página
+      $('textarea, input').each(function() {
         computarDiff($(this))
+        mostrarOcultarDiff()
       })
 
+      // aplica diff depois de 1000ms
       var diff_timer = null
       $('body').on('change keyup keydown paste cut', 'textarea, input', function() {
         if (diff_timer) {
           clearTimeout(diff_timer)
         }
-        var el = $(this)
+        // var el = $(this)
         diff_timer = setTimeout(computarDiff, 1000, $(this))
       })
 
-      $('body').on('blur', 'textarea', function() {
+      // aplica diff ao mudar o foco do input (blur)
+      $('body').on('blur', 'textarea, input', function() {
         computarDiff($(this))
       })
 
-
+      // restaura posição do scroll ao carregar a página
       // https://stackoverflow.com/questions/17642872/refresh-page-and-keep-scroll-position
       var scrollpos = sessionStorage.getItem('scrollpos');
       if (scrollpos) {
@@ -148,13 +144,10 @@
         sessionStorage.removeItem('scrollpos');
       }
 
-      // ao submeter form vamos salvar algumas variáveis
+      // ao submeter form vamos salvar posição do scroll
       $('form').on('submit', function() {
         sessionStorage.setItem('scrollpos', window.scrollY);
-        sessionStorage.setItem('mostrarDiff', mostrarDiff == true ? 'sim' : 'nao');
       })
-
-
 
     })
   </script>

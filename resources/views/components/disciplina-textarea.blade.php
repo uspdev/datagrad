@@ -2,9 +2,10 @@
     'class' => '',
     'name' => '',
     'model' => '',
+    'id' => $name . rand(10000, 99999),
 ])
 
-<table class="table table-bordered table-sm {{ $model->meta[$name]['class'] ?? '' }}">
+<table class="table table-bordered table-sm {{ $model->meta[$name]['class'] ?? '' }}" id="{{ $id }}">
   <tr>
     <th colspan="2" class="titulo text-center" style="background-color: aliceBlue">
       {{ $model->meta[$name]['titulo'] }}
@@ -15,19 +16,13 @@
         </span>
       @endif
 
-      {{-- @if (!isset($model->meta[$name]['class']))
-        <button class="traduzir-btn btn btn-secondary float-right py-0 mt-1 ml-2" data-toggle="popover"
-          data-trigger="hover" title="Copia o conteúdo e abre google translator">
-          <i class="fas fa-globe"></i>
-        </button>
-      @endif
-
-      <button class="btn" type="button" data-clipboard-text="Just because you can doesn't mean you should — clipboard.js">
+      {{-- <button class="btn copy-to-clipboard" type="button" data-clipboard-target="#{{ $id }}" data-clipboard-action="copy">
         Copy to clipboard
-      </button> --}}
+      </button>
+       --}}
 
-      <button class="copiar-btn btn btn-secondary float-right py-0 mt-1" data-clipboard-target="#foo" data-toggle="popover" data-trigger="hover"
-        title="Copia o conteúdo para a área de transferência">
+      <button class="copiar-btn btn btn-secondary float-right py-0 mt-1" data-placement="left">
+        {{-- data-toggle="popover" data-trigger="hover" title="Copia o conteúdo para a área de transferência"> --}}
         <i class="fas fa-copy"></i>
       </button>
 
@@ -46,38 +41,50 @@
 @once
   @section('javascripts_bottom')
     @parent
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.11/clipboard.min.js"></script>
+    {{-- <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.11/clipboard.min.js"></script> --}}
     <script>
       $(document).ready(function() {
-
-        navigator.permissions.query({ name: "clipboard-write" }).then((result) => {
-  if (result.state === "granted" || result.state === "prompt") {
-    /* write to the clipboard now */
-  }
-});
-
-        new ClipboardJS('textarea');
+        // new ClipboardJS('.copy-to-clipboard');
 
         // https://stackoverflow.com/questions/37658524/copying-text-of-textarea-in-clipboard-when-button-is-clicked
-        $('.traduzir-btn').on('click', function(e) {
-          e.preventDefault()
-          var copyText = $(this).parent().parent().parent().find('textarea')
-          copyText.select();
-        //   navigator.clipboard.writeText(copyText.value);
-            document.execCommand('copy');
-          window.open('https://translate.google.com.br', "_blank")
-        })
+        // $('.traduzir-btn').on('click', function(e) {
+        //   e.preventDefault()
+        //   var copyText = $(this).parent().parent().parent().find('textarea')
+        //   copyText.select();
+        //   //   navigator.clipboard.writeText(copyText.value);
+        //   document.execCommand('copy');
+        //   window.open('https://translate.google.com.br', "_blank")
+        // })
 
         $('.copiar-btn').on('click', function(e) {
           e.preventDefault()
-          var copyText = $(this).parent().parent().parent().find('textarea')
-          // console.log(copyText)
-          // navigator.clipboard.writeText(copyText);
-          copyText.select();
-          document.execCommand('copy');
+
+          var copyText = $(this).parent().parent().parent().find('textarea').val()
+
+          // compativel somente com https
+          navigator.clipboard.writeText(copyText);
+
+          // compatível com http
+          // copyText.select();
+          // document.execCommand('copy');
+
+          var thistooltip = $(this)
+          thistooltip.attr('title', 'Copiado')
+          thistooltip.tooltip('toggle')
+          setTimeout(function() {
+            thistooltip.tooltip('dispose')
+          }, 800)
+
         })
 
       })
     </script>
   @endsection
+  
+  @section('styles')
+  @parent
+  <style>
+
+  </style>
+@endsection
 @endonce

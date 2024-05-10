@@ -12,13 +12,13 @@
   <div class="card-header">
     Bibliografia/references
     <span class="badge badge-info">
-      a partir de {{ formatarData($disciplina['dtainibbg']) }}
-      @if ($disciplina['dtafimbbg'])
-        até {{ formatarData($disciplina['dtafimbbg']) }}
+      a partir de {{ formatarData($dr['dtainibbg']) }}
+      @if ($dr['dtafimbbg'])
+        até {{ formatarData($dr['dtafimbbg']) }}
       @endif
     </span>
   </div>
   <div class="card-body">
-    <textarea class="form-control" disabled>{!! htmlspecialchars_decode($disciplina['dscbbgdis']) !!}</textarea>
+    <textarea class="form-control" disabled>{!! htmlspecialchars_decode($dr['dscbbgdis']) !!}</textarea>
   </div>
 </div>

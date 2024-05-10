@@ -6,12 +6,20 @@
       border-top: 3px solid Bisque;
     }
 
-    ins {
-      background-color: lightgreen;
+    /* Atividades extensionistas ficarão em um card com cor diferenciada */
+    #card-extensao {
+      border: 1px solid brown;
+      border-top: 3px solid brown;
     }
 
-    del {
-      background-color: lightsalmon;
+    #card-extensao .card-header {
+      text-align: center;
+      font-weight: bold;
+      background-color: bisque;
+    }
+
+    #card-extensao .titulo {
+      background-color: beige !important;
     }
   </style>
 @endsection
@@ -19,82 +27,30 @@
 <div class="row mt-3">
   <div class="col-md-6">
 
-    <div>Código: <b>{{ $disc['coddis'] }}</b></div>
-    <div>Nome/Title: <b>{{ $disc['nomdis'] }} / {{ $disc['nomdisigl'] }}</b></div>
-    <div>Tipo/Type:
-      <b>
-        @if ($disc['tipdis'] == 'S')
-          Semestral
-        @elseif($disc['tipdis'] == 'A')
-          Anual
-        @elseif($disc['tipdis'] == 'Q')
-          Quadrimestral
-        @endif
-      </b>
-    </div>
-    <div>Créditos-aula/Semester hour credits: <b>{{ $disc['creaul'] }}</b></div>
-    <div>Créditos-trabalho/Practice hour credits: <b>{{ $disc['cretrb'] }}</b></div>
-    <div>Número de vagas/Number of places: <b>{{ $disc['numvagdis'] }}</b></div>
-    <div>Duração (semanas): <b>{{ $disc['durdis'] }}</b></div>
-    <div>
-      Responsáveis/Professors:
-      @foreach ($responsaveis as $r)
-        <b>{{ $r['codpes'] }} - {{ $r['nompesttd'] }}</b>,
-      @endforeach
-    </div>
+    @include('disciplinas.partials.form-ano-semestre')
+
+    <hr class="my-1" />
+
+    @include('disciplinas.partials.form-tipo')
+
+    <x-disciplina-numero name="creaul" :model="$disc"></x-disciplina-numero>
+    <x-disciplina-numero name="cretrb" :model="$disc"></x-disciplina-numero>
+    <x-disciplina-numero name="numvagdis" :model="$disc"></x-disciplina-numero>
+    {{-- <x-disciplina-numero name="durdis" :model="$disc"></x-disciplina-numero> --}}
+
+    @include('disciplinas.partials.form-ativ-extensionista')
 
   </div>
   <div class="col-md-6">
-
-    {{-- <div class="form-group row my-0">
-      <label class="col-form-label" for="atividade-animais">
-        Atividades práticas com animais e/ou materiais biológicos
-      </label>
-      <div>
-        <select class="form-control form-control-sm mx-3" name="stapsuatvani" id="atividade-animais">
-          <option value="S" {{ $disc['stapsuatvani'] == 'S' ? 'selected' : '' }}>Sim</option>
-          <option value="N" {{ $disc['stapsuatvani'] != 'S' ? 'selected' : '' }}>Não</option>
-        </select>
-      </div>
-    </div> --}}
-
-    <div class="form-group row my-0">
-      <label class="col-form-label" for="atividade-extensao">Atividade extensionista</label>
-      <div>
-        <select class="form-control form-control-sm mx-3" name="atividade_extensionista" id="atividade-extensionista">
-          <option value="1" {{ $disc->atividade_extensionista ? 'selected' : '' }}>Sim</option>
-          <option value="0" {{ $disc->atividade_extensionista ? '' : 'selected' }}>Não</option>
-        </select>
-      </div>
-    </div>
-
-    <div class="form-group row my-0 form-inline">
-      <label class="col-form-label">Alteração para o ano/semestre de </label>
-      <select class="form-control form-control-sm mx-2" name="ano" id="ano">
-        <option>Ano ..</option>
-        <option {{ $disc->ano == '2024' ? 'selected' : '' }}>2024</option>
-        <option {{ $disc->ano == '2025' ? 'selected' : '' }}>2025</option>
-      </select>
-      <select class="form-control form-control-sm mx-2" name="semestre" id="semestre">
-        <option>Semestre ..</option>
-        <option {{ $disc->semestre == '1' ? 'selected' : '' }}>1</option>
-        <option {{ $disc->semestre == '2' ? 'selected' : '' }}>2</option>
-      </select>
-    </div>
-
-    <div class="row mt-3">
-      Criado por: {{ $disc->criadoPor->name }} em {{ $disc->created_at->format('d/m/Y') }}
-    </div>
-    <div class="row">
-      Última alteração por: {{ $disc->atualizadoPor->name }} em {{ $disc->updated_at->format('d/m/Y') }}
-    </div>
+    {{-- @include('disciplinas.partials.form-ativ-animais') --}}
+    @include('disciplinas.partials.form-responsaveis')
 
   </div>
 </div>
+<x-disciplina-text name="nomdis" :model="$disc"></x-disciplina-text>
+<x-disciplina-text name="nomdisigl" :model="$disc"></x-disciplina-text>
 
-</div>
-
-<hr />
+<div class="my-1">&nbsp;</div>
 
 <x-disciplina-textarea name="objdis" :model="$disc"></x-disciplina-textarea>
 <x-disciplina-textarea name="objdisigl" :model="$disc"></x-disciplina-textarea>
@@ -116,51 +72,30 @@
 
 <x-disciplina-textarea name="dscbbgdis" :model="$disc"></x-disciplina-textarea>
 
-<div id="div-extensao">
-  <x-disciplina-text name="cgahoratvext" :model="$disc"></x-disciplina-text>
-  {{-- <x-disciplina-text titulo="Extensão: Carga horária (horas)" :campo="$disc['cgahoratvext']"></x-disciplina-text> --}}
+<div class="card atividade-extensionista" id="card-extensao">
+  <div class="card-header">Atividade extensionista</div>
+  <div class="card-body">
+    {{-- <x-disciplina-text name="cgahoratvext" :model="$disc"></x-disciplina-text> --}}
 
-  <x-disciplina-textarea name="grpavoatvext" :model="$disc"></x-disciplina-textarea>
-  <x-disciplina-textarea name="grpavoatvextigl" :model="$disc"></x-disciplina-textarea>
+    <x-disciplina-textarea name="grpavoatvext" :model="$disc"></x-disciplina-textarea>
+    <x-disciplina-textarea name="grpavoatvextigl" :model="$disc"></x-disciplina-textarea>
 
-  <x-disciplina-textarea name="objatvext" :model="$disc"></x-disciplina-textarea>
-  <x-disciplina-textarea name="objatvextigl" :model="$disc"></x-disciplina-textarea>
+    <x-disciplina-textarea name="objatvext" :model="$disc"></x-disciplina-textarea>
+    <x-disciplina-textarea name="objatvextigl" :model="$disc"></x-disciplina-textarea>
 
-  <x-disciplina-textarea name="dscatvext" :model="$disc"></x-disciplina-textarea>
-  <x-disciplina-textarea name="dscatvextigl" :model="$disc"></x-disciplina-textarea>
+    <x-disciplina-textarea name="dscatvext" :model="$disc"></x-disciplina-textarea>
+    <x-disciplina-textarea name="dscatvextigl" :model="$disc"></x-disciplina-textarea>
 
-  <x-disciplina-textarea name="idcavlatvext" :model="$disc"></x-disciplina-textarea>
-  <x-disciplina-textarea name="idcavlatvextigl" :model="$disc"></x-disciplina-textarea>
+    <x-disciplina-textarea name="idcavlatvext" :model="$disc"></x-disciplina-textarea>
+    <x-disciplina-textarea name="idcavlatvextigl" :model="$disc"></x-disciplina-textarea>
+  </div>
 </div>
 
 <div class="card">
   <div class="card-header text-center">
-    Proposta (justificativa)
+    Justificativa da alteração
   </div>
   <div class="card-body p-1">
     <textarea class="form-control changed" name="justificativa">{{ $disc->justificativa }}</textarea>
   </div>
 </div>
-
-
-@section('javascripts_bottom')
-  @parent
-  <script>
-    $(document).ready(function() {
-
-      var mostrarOcultarExtensao = function() {
-        // console.log('extensao', $('#atividade-extensao').val())
-        if ($('#atividade-extensionista').val() == 1) {
-          $('#div-extensao').removeClass('d-none')
-        } else {
-          $('#div-extensao').addClass('d-none')
-        }
-      }
-      mostrarOcultarExtensao()
-      $('#atividade-extensionista').on('change', mostrarOcultarExtensao)
-
-
-
-    })
-  </script>
-@endsection

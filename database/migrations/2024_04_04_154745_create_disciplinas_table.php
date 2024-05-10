@@ -22,6 +22,7 @@ class CreateDisciplinasTable extends Migration
             $table->string('creaul')->nullable(); // creditos aula
             $table->string('cretrb')->nullable(); // creditos trabalho
             $table->string('numvagdis')->nullable(); // número de vagas
+            $table->string('durdis')->nullable(); // duração
 
             $table->text('objdis')->nullable(); // objetivos
             $table->text('objdisigl')->nullable();
@@ -53,10 +54,15 @@ class CreateDisciplinasTable extends Migration
             $table->string('semestre')->nullable();
             $table->text('justificativa')->nullable();
             $table->boolean('atividade_extensionista')->nullable();
-            $table->string('responsaveis')->nullable(); // codpes dos responsáveis pela disciplina, separados por vírgula
+            $table->string('stapsuatvani')->nullable(); // Atividades práticas com animais e/ou materiais biológicos
+            $table->json('responsaveis')->nullable(); // codpes dos responsáveis pela disciplina, separados por vírgula
+            $table->string('pdf')->nullable();
+            $table->datetime('pdf_date')->nullable();
+            $table->string('estado')->nullable(); // criar, editar, finalizado
             $table->foreignId('criado_por_id')->nullable()->constrained('users');
             $table->foreignId('atualizado_por_id')->nullable()->constrained('users');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

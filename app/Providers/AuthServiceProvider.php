@@ -2,8 +2,11 @@
 
 namespace App\Providers;
 
-use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
+use App\Models\User;
+use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Gate;
+use Spatie\Permission\Models\Permission;
+use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -13,7 +16,7 @@ class AuthServiceProvider extends ServiceProvider
      * @var array<class-string, class-string>
      */
     protected $policies = [
-        // 'App\Models\Model' => 'App\Policies\ModelPolicy',
+        'App\Models\Disciplina' => 'App\Policies\DisciplinaPolicy',
     ];
 
     /**
@@ -25,6 +28,22 @@ class AuthServiceProvider extends ServiceProvider
     {
         $this->registerPolicies();
 
-        //
+        // disciplinas autorizado para servidores, docentes e estagiários
+        Gate::define('disciplinas', function (User $user) {
+            return Gate::check('senhaunica.servidor')
+            || Gate::check('senhaunica.estagiario')
+            || Gate::check('senhaunica.docente');
+        });
+
+        $permission = Permission::firstOrCreate(['name' => 'disciplina-cg']);
+        $permission = Permission::firstOrCreate(['name' => 'disciplina-cc']); // coordenador de curso
+        $permission = Permission::firstOrCreate(['name' => 'disciplina-chefe']);
+        $permission = Permission::firstOrCreate(['name' => 'disciplina']); //professor, comum
+
+        // deve ir para migration
+        // comissão de graduação. tem todas as permissões
+        $role = Role::firstOrCreate(['name' => 'CG']);
+        $role->givePermissionTo(['datagrad', 'evasao', 'disciplina', 'disciplina-cg']);
+
     }
 }

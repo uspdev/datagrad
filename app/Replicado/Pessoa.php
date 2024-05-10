@@ -109,7 +109,8 @@ class Pessoa extends PessoaReplicado
     public static function procurarServidorPorNome($nome, $fonetico = true)
     {
         // return PessoaReplicado::procurarPorCodigoOuNome($nome, true);
-        foreach (PessoaReplicado::procurarPorNome($nome, $fonetico, $ativos = true) as $pessoa) {
+        $procurar = PessoaReplicado::procurarPorNome($nome, $fonetico, $ativos = true);
+        foreach ($procurar as $pessoa) {
             if (isset($pessoa['tipvin']) && $pessoa['tipvin'] == 'SERVIDOR') {
                 return $pessoa;
             }

@@ -14,11 +14,13 @@
     <div class="row">
       <div class="col-6">
         <b>Minha unidade</b><hr>
-        @foreach ($cursos as $curso)
+        @foreach ($dr['cursos'] as $curso)
           @if (stripos(config('replicado.codundclgs'), $curso['codclg']) !== false)
             <div class="mb-3">
-              Curso: <b>{{ $curso['sglfusclgund'] }} / {{ $curso['nomcur'] }}</b> - habilitação:
-              <b>{{ $curso['nomhab'] }}</b><br />
+              Curso: <b>{{ $curso['sglfusclgund'] }} / {{ $curso['nomcur'] }}</b>
+               - habilitação: <b>{{ $curso['nomhab'] }}</b>
+               (de {{ formatarData($curso['dtainicrl']) }} a {{ formatarData($curso['dtafimcrl']) }})
+               <br />
               &nbsp; Período ideal: {{ $curso['numsemidl'] }} | Ciclo: {{ $curso['cicdisgdecrltxt'] }}
               | Tipo: {{ $curso['tipobgtxt'] }}
               {{-- | Requisitos: ainda não implementado<br> --}}
@@ -28,11 +30,13 @@
       </div>
       <div class="col-6">
         <b>Outras unidades</b><hr>
-        @foreach ($cursos as $curso)
+        @foreach ($dr['cursos'] as $curso)
           @if (stripos(config('replicado.codundclgs'), $curso['codclg']) === false)
             <div class="mb-3">
-              Curso: <b>{{ $curso['sglfusclgund'] }} / {{ $curso['nomcur'] }}</b> - habilitação:
-              <b>{{ $curso['nomhab'] }}</b><br />
+              Curso: <b>{{ $curso['sglfusclgund'] }} / {{ $curso['nomcur'] }}</b> 
+              - habilitação: <b>{{ $curso['nomhab'] }}</b>
+               (de {{ formatarData($curso['dtainicrl']) }} a {{ formatarData($curso['dtafimcrl']) }})
+              <br />
               &nbsp; Período ideal: {{ $curso['numsemidl'] }} | Ciclo: {{ $curso['cicdisgdecrltxt'] }}
               | Tipo: {{ $curso['tipobgtxt'] }}
             </div>
