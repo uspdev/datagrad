@@ -8,7 +8,7 @@
     }
 
     .navbar-index-cg {
-      background-color: #fdecc5;
+      background-color: bisque;
       border-bottom: 3px solid red;
     }
   </style>

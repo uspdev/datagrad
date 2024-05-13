@@ -135,11 +135,11 @@ class DisciplinaController extends Controller
         $disc = Disciplina::primeiroOuNovo($coddis);
         $this->authorize('update', $disc);
 
-        if ($add = $request->responsavel_add) {
+        if ($add = $request->codpes_add) {
             $disc->adicionarResponsavel($add);
         }
 
-        if ($rem = $request->responsavel_rem) {
+        if ($rem = $request->codpes_rem) {
             $disc->removerResponsavel($rem);
         }
 

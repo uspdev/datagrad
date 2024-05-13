@@ -1,12 +1,12 @@
-<button type="button" class="btn btn-sm btn-outline-primary senhaunicaUseraddBtn py-0">
+<button type="button" class="btn btn-sm btn-outline-primary codpes-adicionar-btn py-0">
   <i class="fas fa-plus"></i>
 </button>
 
-<div class="modal fade" id="adicionar-responsavel-modal" tabindex="-1">
+<div class="modal fade" id="adicionar-codpes-modal" tabindex="-1">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="modalLabel">Adicionar Responsável</h5>
+        <h5 class="modal-title" id="modalLabel">Adicionar Pessoa</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
@@ -15,7 +15,7 @@
 
         <div class="form" data-ajax="{{ route('SenhaunicaFindUsers') }}">
           <div class="mb-3">
-            <select name="responsavel_add" class="form-control form-control-sm">
+            <select name="codpes_add" class="form-control form-control-sm">
               <option value="0">Digite o nome ou codpes..</option>
             </select>
           </div>
@@ -38,11 +38,11 @@
   <script>
     $(document).ready(function() {
 
-      var senhaunicaUserModal = $('#adicionar-responsavel-modal')
-      var $oSelect2 = senhaunicaUserModal.find(':input[name=responsavel_add]')
+      var senhaunicaUserModal = $('#adicionar-codpes-modal')
+      var $oSelect2 = senhaunicaUserModal.find(':input[name=codpes_add]')
       var dataAjax = senhaunicaUserModal.find('.form').data('ajax')
 
-      $('.senhaunicaUseraddBtn').on('click', function() {
+      $('.codpes-adicionar-btn').on('click', function() {
         senhaunicaUserModal.modal();
       })
 

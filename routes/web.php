@@ -49,4 +49,4 @@ Route::get('disciplinas/{coddis}/preview',[DisciplinaController::class, 'preview
 
 Route::get('arquivos/download',[ArquivoController::class, 'download'])->name('arquivos.download');
 
-Route::get('/roles', [RoleController::class,'index'])->name('roles.index');
+Route::resource('/roles', RoleController::class);

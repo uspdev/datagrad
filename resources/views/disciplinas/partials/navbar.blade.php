@@ -30,7 +30,7 @@
         class="badge badge-secondary ml-2" target="_BLANK">Jupiter Web <i class="fas fa-link"></i></a>
 
       @can('update', $disc)
-        <a href="{{ route('disciplinas.edit', $dr['coddis']) }}" class="btn btn-sm btn-warning ml-2 disabled" type="submit">
+        <a href="{{ route('disciplinas.edit', $dr['coddis']) }}" class="btn btn-sm btn-warning ml-2" type="submit">
           @if ($disc->id)
             Editar alteração em andamento
           @else

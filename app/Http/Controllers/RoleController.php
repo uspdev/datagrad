@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Closure;
+use App\Models\User;
 use App\Models\Disciplina;
 use Illuminate\Http\Request;
 use Spatie\Permission\Models\Role;
@@ -23,7 +24,7 @@ class RoleController extends Controller
     public function index()
     {
         $roles = Role::where('name', 'not like', 'disciplinas%')->get();
-        
+
         $roleCG = Role::where('name', 'CG')->first();
         $departamentos = [];
         foreach (Disciplina::listarPrefixosDisciplinas() as $prefixo) {
@@ -69,10 +70,25 @@ class RoleController extends Controller
 
     /**
      * Update the specified resource in storage.
+     * 
+     * Este update não segue o padrão do laravel.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, string $role_name)
     {
-        //
+        if ($add = $request->codpes_add) {
+            $user = User::findOrCreateFromReplicado($add);
+            if ($user) {
+                $user->assignRole($role_name);
+            }
+        }
+
+        if ($rem = $request->codpes_rem) {
+            $user = User::where('codpes', $rem)->first();
+            if ($user) {
+                $user->removeRole($role_name);
+            }
+        }
+        return back();
     }
 
     /**

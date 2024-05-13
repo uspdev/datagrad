@@ -1,7 +1,7 @@
-<button class="remover-responsavel-btn btn btn-sm py-0" data-codpes="{{ $r['codpes'] }}">
+<button class="remover-codpes-btn btn btn-sm py-0" data-codpes="{{ $codpes }}">
   <i class="fas fa-trash text-danger"></i>
 </button>
-<input type="hidden" name="responsavel_rem" value="0">
+<input type="hidden" name="codpes_rem" value="0">
 
 @once
   @section('javascripts_bottom')
@@ -9,9 +9,9 @@
     <script>
       $(document).ready(function() {
 
-        $('.remover-responsavel-btn').on('click', function() {
+        $('.remover-codpes-btn').on('click', function() {
           if( confirm('Tem certeza?')) {
-            $(':input[name=responsavel_rem]').val($(this).data('codpes'))
+            $(':input[name=codpes_rem]').val($(this).data('codpes'))
           } else {
             return false
           }
