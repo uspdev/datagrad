@@ -50,11 +50,12 @@ class CreateDisciplinasTable extends Migration
 
             $table->text('dscbbgdis')->nullable(); // bibliografia
 
+            $table->string('stapsuatvani')->nullable(); // Atividades práticas com animais e/ou materiais biológicos
+            
             $table->string('ano')->nullable(); // alteração para o ano / semestre
             $table->string('semestre')->nullable();
             $table->text('justificativa')->nullable();
             $table->boolean('atividade_extensionista')->nullable();
-            $table->string('stapsuatvani')->nullable(); // Atividades práticas com animais e/ou materiais biológicos
             $table->json('responsaveis')->nullable(); // codpes dos responsáveis pela disciplina, separados por vírgula
             $table->string('pdf')->nullable();
             $table->datetime('pdf_date')->nullable();
