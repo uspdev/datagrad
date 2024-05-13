@@ -16,6 +16,7 @@ Sistema que auxilia na elaboração do relatório de revalidação de cursos de 
 
 03/2024
 * iniciando gerenciamento de alteração de disicplinas
+* atualizado laravel 10 / PHP 8.3
 
 30/10/2023
 * incluído relatório de evasão

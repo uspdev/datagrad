@@ -40,6 +40,11 @@ $menu = [
 
 $right_menu = [
     [
+        'text' => '<span class="text-danger"><i class="fas fa-user-tag"></i> Funções</span>',
+        'url' => 'roles',
+        'can' => 'disciplina-cg',
+    ],
+    [
         // menu utilizado para views da biblioteca senhaunica-socialite.
         'key' => 'senhaunica-socialite',
     ],
@@ -47,7 +52,6 @@ $right_menu = [
         'key' => 'laravel-tools',
     ],
 ];
-
 
 return [
     # valor default para a tag title, dentro da section title.

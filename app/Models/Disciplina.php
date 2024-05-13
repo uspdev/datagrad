@@ -31,7 +31,7 @@ class Disciplina extends Model
 
     /** Dados que vem do replicado */
     public $dr;
-    
+
     /** Dados dos campos do formulário de alteração de disciplina */
     public $meta = [
         'tipdis' => [
@@ -201,7 +201,7 @@ class Disciplina extends Model
 
     /**
      * Cria nova disciplina e preenche com valores padrão, sem persistir no BD
-     * 
+     *
      * @param $dr Se informado preenche o objeto com os dados
      */
     public static function novo($dr = null)
@@ -211,7 +211,7 @@ class Disciplina extends Model
         if ($dr) {
             // precisa remover elementos do replicado que são array e não estão no BD
             $disc->fill(array_diff_key($dr, array_flip(['responsaveis', 'cursos'])));
-            
+
             $disc->atividade_extensionista = $dr['cgahoratvext'] ? true : false;
 
             $resps = [];
@@ -297,7 +297,7 @@ class Disciplina extends Model
 
     /**
      * Lista todas as diciplinas sob responsabilidade de $codpes
-     * 
+     *
      * Vai incluir as disciplinas do replicado e as disciplinas locais, mas sem repetição
      */
     public static function listarDisciplinasPorResponsavel($codpes)
@@ -313,7 +313,7 @@ class Disciplina extends Model
 
     /**
      * Lista todas as disciplinas da unidade - visão CG
-     * 
+     *
      * Guarda em cache do Laravel por 24h pois é uma consulta demorada.
      * O cache é renovado quando há alteração da diciplina no sistema passando $refresh = true
      */
@@ -334,6 +334,24 @@ class Disciplina extends Model
         });
 
         return $discs;
+    }
+
+    /**
+     * Retorna os prefixos das disciplinas da Unidade
+     * 
+     * Corresponde aos 3 primeiros dígitos de coddis
+     */
+    public static function listarPrefixosDisciplinas()
+    {
+        $discs = self::listarDisciplinas();
+        $prefixos = [];
+        foreach ($discs as $disc) {
+            $p = substr($disc['coddis'], 0, 3);
+            $prefixos[$p] = 0;
+        }
+        $prefixos = array_keys($prefixos);
+        sort($prefixos);
+        return $prefixos;
     }
 
     /**

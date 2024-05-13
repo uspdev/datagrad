@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\RoleController;
 use App\Http\Controllers\ArquivoController;
 use App\Http\Controllers\GraduacaoController;
 use App\Http\Controllers\DisciplinaController;
@@ -47,3 +48,5 @@ Route::resource('disciplinas', DisciplinaController::class)->parameters(['discip
 Route::get('disciplinas/{coddis}/preview',[DisciplinaController::class, 'preview'])->name('disciplinas.preview');
 
 Route::get('arquivos/download',[ArquivoController::class, 'download'])->name('arquivos.download');
+
+Route::get('/roles', [RoleController::class,'index'])->name('roles.index');

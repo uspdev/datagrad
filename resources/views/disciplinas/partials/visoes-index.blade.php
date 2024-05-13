@@ -10,9 +10,9 @@
     Visão CG
   </a>
 @endcan
-@can('disciplina-chefe')
+@cannot('disciplina-chefe')
   <a href="{{ route('disciplinas.index') }}?visao=chefe"
     class="btn btn-sm {{ $visao == 'chefe' ? 'btn-primary' : 'btn-outline-primary' }} ml-2">
-    Visão Chefe
+    Visão Departamento
   </a>
 @endcan
