@@ -26,15 +26,19 @@
     <div class="form-inline">
       @include('disciplinas.partials.visoes-index')
       @include('disciplinas.partials.consultar-form')
+      <button class="btn btn-sm btn-info ml-2">Ajuda <i class="fas fa-question"></i></button>
     </div>
   </div>
 
-  <table class="table table-sm table-bordered datatable-simples dt-fixed-header">
+  <table class="table table-sm table-bordered datatable-simples dt-fixed-header dt-buttons">
     <thead>
       <tr>
         <th>Código</th>
         <th style="min-width: 70px;">Estado</th>
         <th style="min-width: 300px;">Nome</th>
+        <th>Cred. Aula</th>
+        <th>Cred. Trab.</th>
+        <th>Ativ. ext. (horas)</th>
         <th>Responsáveis</th>
       </tr>
     </thead>
@@ -60,6 +64,9 @@
           <td>
             <a href="{{ route('disciplinas.show', $disc->coddis) }}">{{ $disc->nomdis }}</a>
           </td>
+          <td>{{ $disc->creaul }}</td>
+          <td>{{ $disc->cretrb }}</td>
+          <td>{{ $disc->cgahoratvext }}</td>
           <td>
             {{ $disc->retornarListaResponsaveis() }}
           </td>
