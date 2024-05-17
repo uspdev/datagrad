@@ -80,20 +80,20 @@
         },
         {
             "name": "barryvdh/laravel-dompdf",
-            "version": "v2.1.1",
+            "version": "v2.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/barryvdh/laravel-dompdf.git",
-                "reference": "cb37868365f9b937039d316727a1fced1e87b31c"
+                "reference": "c96f90c97666cebec154ca1ffb67afed372114d8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/barryvdh/laravel-dompdf/zipball/cb37868365f9b937039d316727a1fced1e87b31c",
-                "reference": "cb37868365f9b937039d316727a1fced1e87b31c",
+                "url": "https://api.github.com/repos/barryvdh/laravel-dompdf/zipball/c96f90c97666cebec154ca1ffb67afed372114d8",
+                "reference": "c96f90c97666cebec154ca1ffb67afed372114d8",
                 "shasum": ""
             },
             "require": {
-                "dompdf/dompdf": "^2.0.3",
+                "dompdf/dompdf": "^2.0.7",
                 "illuminate/support": "^6|^7|^8|^9|^10|^11",
                 "php": "^7.2 || ^8.0"
             },
@@ -141,7 +141,7 @@
             ],
             "support": {
                 "issues": "https://github.com/barryvdh/laravel-dompdf/issues",
-                "source": "https://github.com/barryvdh/laravel-dompdf/tree/v2.1.1"
+                "source": "https://github.com/barryvdh/laravel-dompdf/tree/v2.2.0"
             },
             "funding": [
                 {
@@ -153,7 +153,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2024-03-15T12:48:39+00:00"
+            "time": "2024-04-25T13:16:04+00:00"
         },
         {
             "name": "brick/math",
@@ -7394,16 +7394,16 @@
         },
         {
             "name": "uspdev/senhaunica-socialite",
-            "version": "4.3.10",
+            "version": "4.3.11",
             "source": {
                 "type": "git",
                 "url": "https://github.com/uspdev/senhaunica-socialite.git",
-                "reference": "feed3c38228dbe165813bee33e158fa5593a6001"
+                "reference": "d96f582130d092a9998d026c3f0c4b73b2df91d4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/uspdev/senhaunica-socialite/zipball/feed3c38228dbe165813bee33e158fa5593a6001",
-                "reference": "feed3c38228dbe165813bee33e158fa5593a6001",
+                "url": "https://api.github.com/repos/uspdev/senhaunica-socialite/zipball/d96f582130d092a9998d026c3f0c4b73b2df91d4",
+                "reference": "d96f582130d092a9998d026c3f0c4b73b2df91d4",
                 "shasum": ""
             },
             "require": {
@@ -7445,9 +7445,9 @@
             "homepage": "https://github.com/uspdev/senhaunica-socialite",
             "support": {
                 "issues": "https://github.com/uspdev/senhaunica-socialite/issues",
-                "source": "https://github.com/uspdev/senhaunica-socialite/tree/4.3.10"
+                "source": "https://github.com/uspdev/senhaunica-socialite/tree/4.3.11"
             },
-            "time": "2024-02-09T11:12:31+00:00"
+            "time": "2024-05-15T10:40:49+00:00"
         },
         {
             "name": "uspdev/utils",
@@ -8253,16 +8253,16 @@
         },
         {
             "name": "mockery/mockery",
-            "version": "1.6.11",
+            "version": "1.6.12",
             "source": {
                 "type": "git",
                 "url": "https://github.com/mockery/mockery.git",
-                "reference": "81a161d0b135df89951abd52296adf97deb0723d"
+                "reference": "1f4efdd7d3beafe9807b08156dfcb176d18f1699"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/mockery/mockery/zipball/81a161d0b135df89951abd52296adf97deb0723d",
-                "reference": "81a161d0b135df89951abd52296adf97deb0723d",
+                "url": "https://api.github.com/repos/mockery/mockery/zipball/1f4efdd7d3beafe9807b08156dfcb176d18f1699",
+                "reference": "1f4efdd7d3beafe9807b08156dfcb176d18f1699",
                 "shasum": ""
             },
             "require": {
@@ -8332,7 +8332,7 @@
                 "security": "https://github.com/mockery/mockery/security/advisories",
                 "source": "https://github.com/mockery/mockery"
             },
-            "time": "2024-03-21T18:34:15+00:00"
+            "time": "2024-05-16T03:13:13+00:00"
         },
         {
             "name": "myclabs/deep-copy",
