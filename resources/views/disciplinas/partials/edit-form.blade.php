@@ -25,7 +25,7 @@
 @endsection
 
 <div class="row mt-3">
-  <div class="col-md-6">
+  <div class="col-md-5">
 
     @include('disciplinas.partials.form-ano-semestre')
 
@@ -36,17 +36,26 @@
     <x-disciplina-numero name="creaul" :model="$disc"></x-disciplina-numero>
     <x-disciplina-numero name="cretrb" :model="$disc"></x-disciplina-numero>
     <x-disciplina-numero name="numvagdis" :model="$disc"></x-disciplina-numero>
-    {{-- <x-disciplina-numero name="durdis" :model="$disc"></x-disciplina-numero> --}}
 
     @include('disciplinas.partials.form-ativ-extensionista')
 
   </div>
-  <div class="col-md-6">
+  <div class="col-md-5">
     {{-- @include('disciplinas.partials.form-ativ-animais') --}}
     @include('disciplinas.partials.form-responsaveis')
 
   </div>
+  <div class="col-md-2">
+    <div class="alert alert-info mt-3 small">
+      <div>Estado: {{ $disc->estado == 'editar' ? 'Em edição' : '-' }}</div>
+      <hr>
+      <div>
+        Ultima alteração realizada por {{ $disc->atualizadoPor->name }} em {{ $disc->updated_at->format('d/m/Y') }}.
+      </div>
+    </div>
+  </div>
 </div>
+
 <x-disciplina-text name="nomdis" :model="$disc"></x-disciplina-text>
 <x-disciplina-text name="nomdisigl" :model="$disc"></x-disciplina-text>
 
@@ -75,8 +84,6 @@
 <div class="card atividade-extensionista" id="card-extensao">
   <div class="card-header">Atividade extensionista</div>
   <div class="card-body">
-    {{-- <x-disciplina-text name="cgahoratvext" :model="$disc"></x-disciplina-text> --}}
-
     <x-disciplina-textarea name="grpavoatvext" :model="$disc"></x-disciplina-textarea>
     <x-disciplina-textarea name="grpavoatvextigl" :model="$disc"></x-disciplina-textarea>
 
