@@ -39,7 +39,7 @@
 
     <fieldset>
       @include('disciplinas.partials.edit-form')
-      {{-- @include('disciplinas.partials.card-curso') --}}
+      @include('disciplinas.partials.card-curso')
     </fieldset>
   </form>
 @endsection

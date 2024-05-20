@@ -14,7 +14,7 @@
     <div class="row">
       <div class="col-6">
         <b>Minha unidade</b><hr>
-        @foreach ($dr['cursos'] as $curso)
+        @foreach ($disc->dr['cursos'] as $curso)
           @if (stripos(config('replicado.codundclgs'), $curso['codclg']) !== false)
             <div class="mb-3">
               Curso: <b>{{ $curso['sglfusclgund'] }} / {{ $curso['nomcur'] }}</b>
@@ -30,7 +30,7 @@
       </div>
       <div class="col-6">
         <b>Outras unidades</b><hr>
-        @foreach ($dr['cursos'] as $curso)
+        @foreach ($disc->dr['cursos'] as $curso)
           @if (stripos(config('replicado.codundclgs'), $curso['codclg']) === false)
             <div class="mb-3">
               Curso: <b>{{ $curso['sglfusclgund'] }} / {{ $curso['nomcur'] }}</b> 
