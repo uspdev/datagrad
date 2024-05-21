@@ -632,4 +632,26 @@ class Graduacao extends GraduacaoReplicado
 
         return DB::fetchAll($query, $params);
     }
+
+    /**
+     * Ajustado do replicado para incluir o nome do minsitrante da disciplina
+     * @author Masakik, em 21/5/2024
+     */
+    public static function obterGradeHoraria($codpes)
+    {
+        $current = date("Y") . (date("m") > 6 ? 2 : 1);
+
+        $query = "SELECT h.coddis, h.codtur, o.diasmnocp, ph.horent, ph.horsai,
+                M.codpes codpesmin, P.nompesttd nompesmin
+            FROM HISTESCOLARGR h
+            INNER JOIN OCUPTURMA o ON (h.coddis = o.coddis AND h.codtur = o.codtur)
+            INNER JOIN PERIODOHORARIO ph ON (o.codperhor = ph.codperhor)
+            INNER JOIN MINISTRANTE M ON (h.coddis = M.coddis AND h.codtur = M.codtur)
+            INNER JOIN PESSOA P ON (P.codpes = M.codpes)
+            WHERE h.codpes = convert(int,:codpes) AND h.codtur LIKE '%{$current}%'";
+        $param = [
+            'codpes' => $codpes,
+        ];
+        return DB::fetchAll($query, $param);
+    }
 }

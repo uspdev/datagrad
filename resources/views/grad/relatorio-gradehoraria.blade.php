@@ -33,6 +33,7 @@
           <th>Nome</th>
           <th>Cod. Disciplina</th>
           <th>Cod. Turma</th>
+          <th>Ministrante</th>
           <th>Dia da Semana</th>
           <th>Hora de Início</th>
           <th>Hora de Término</th>
@@ -45,6 +46,7 @@
             <td>{{ $horario['nome'] }}</td>
             <td>{{ $horario['coddis'] }}</td>
             <td>{{ $horario['codtur'] }}</td>
+            <td>{{ $horario['nompesmin'] }}</td>
             <td>{{ $horario['diasmnocp'] }}</td>
             <td>{{ $horario['horent'] }}</td>
             <td>{{ $horario['horsai'] }}</td>
