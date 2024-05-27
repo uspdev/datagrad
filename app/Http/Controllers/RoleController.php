@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use Closure;
-use App\Models\User;
 use App\Models\Disciplina;
+use App\Models\User;
+use Closure;
 use Illuminate\Http\Request;
 use Spatie\Permission\Models\Role;
 use Uspdev\UspTheme\Facades\UspTheme;
@@ -27,10 +27,13 @@ class RoleController extends Controller
 
         $roleCG = Role::where('name', 'CG')->first();
         $departamentos = [];
+
+        // cria as permissions referentes aos departamentos no formato disciplinas_xxx,
+        // onde xxx é o prefixo da disciplina
         foreach (Disciplina::listarPrefixosDisciplinas() as $prefixo) {
-            $role = Role::firstOrCreate(['name' => 'disciplinas.' . $prefixo]);
-            $departamentos[] = Role::firstOrCreate(['name' => 'disciplinas.' . $prefixo]);
-            // $departamentos[] = 'disciplinas.' . $prefixo;
+            $role = Role::firstOrCreate(['name' => 'disciplinas_' . $prefixo]);
+            $role->givePermissionTo('disciplina-chefe');
+            $departamentos[] = Role::firstOrCreate(['name' => 'disciplinas_' . $prefixo]);
         }
 
         return view('roles.index', compact('roles', 'departamentos', 'roleCG'));
@@ -70,8 +73,8 @@ class RoleController extends Controller
 
     /**
      * Update the specified resource in storage.
-     * 
-     * Este update não segue o padrão do laravel.
+     *
+     * Este update não segue o padrão do laravel. Usa o $role_name ao invés do id
      */
     public function update(Request $request, string $role_name)
     {

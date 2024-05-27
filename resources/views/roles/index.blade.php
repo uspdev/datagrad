@@ -33,45 +33,61 @@
   </div>
 
   <div class="row">
-    <div class="col-md-6">
-      <form method="post" action="{{ route('roles.update', 'cg') }}">
-        @csrf
-        @method('put')
-        <div>
-          <div class="h5">
+    <div class="col-md-4">
+      <div class="h5">
+        Grupos de disciplinas / Chefes de departamentos
+      </div>
+      @foreach ($departamentos as $role)
+        <div class="card my-2">
+          <form method="post" id="{{ $role->name }}" action="{{ route('roles.update', $role->name) }}">
+            @csrf
+            @method('put')
+            <div class="card-header py-1">
+              Prefixo {{ substr($role->name, 12) }}
+              @include('disciplinas.partials.codpes-adicionar-btn')
+            </div>
+            <div class="card-body py-1">
+              @foreach ($role->users->sortBy('name') as $user)
+                <div class="hover">
+                  <span>{{ $user->name }}</span>
+                  <span class="hide">
+                    @include('disciplinas.partials.codpes-remover-btn', ['codpes' => $user->codpes])
+                  </span>
+                </div>
+              @endforeach
+            </div>
+          </form>
+        </div>
+      @endforeach
+    </div>
+    
+    <div class="col-md-4">
+      <div class="h5">Coordenadores de cursos</div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card">
+        <form method="post" id="cg" action="{{ route('roles.update', 'cg') }}">
+          @csrf
+          @method('put')
+          <div class="card-header py-1">
             Comissão de graduação (CG)
             @include('disciplinas.partials.codpes-adicionar-btn')
           </div>
-          <div class="ml-3">
+          <div class="card-body py-1">
             @foreach ($roleCG->users->sortBy('name') as $user)
-              <div class="hover"><span>{{ $user->name }}</span>
+              <div class="hover">
+                <span>{{ $user->name }}</span>
                 <span class="hide">
                   @include('disciplinas.partials.codpes-remover-btn', ['codpes' => $user->codpes])
                 </span>
               </div>
             @endforeach
           </div>
-        </div>
-      </form>
-
-      <br>
-      <div class="h5">Coordenadores de cursos</div>
-
+        </form>
+      </div>
     </div>
-    <div class="col-md-6">
 
-      <div class="h5">Grupos de disciplinas / Chefes de departamentos</div>
-      @foreach ($departamentos as $role)
-        <b>{{ $role->name }}</b><br>
-        <div class="ml-3">
-          @foreach ($role->users as $user)
-            {{ $user->name }}
-            {{-- - {{ $user->permissions->pluck('name') }} --}}
-            <br>
-          @endforeach
-        </div>
-      @endforeach
 
-    </div>
   </div>
 @endsection
