@@ -21,6 +21,7 @@
       {{ $visao == 'docente' ? 'Minhas' : '' }}
       Disciplinas
       {{ $visao == 'cg' ? 'CG' : '' }}
+      {{ $visao == 'departamento' ? 'com prefixo(s) ' . Auth::user()->prefixos()->implode(', ') : '' }}
     </div>
 
     <div class="form-inline">

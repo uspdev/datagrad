@@ -8,7 +8,6 @@ use Illuminate\Support\Facades\Gate;
 
 class DisciplinaPolicy
 {
-
     /**
      * Perform pre-authorization checks.
      */
@@ -26,10 +25,8 @@ class DisciplinaPolicy
      */
     public function viewAny(User $user): bool
     {
-        // return true;
-        return Gate::check('senhaunica.servidor')
-        || Gate::check('senhaunica.estagiario')
-        || Gate::check('senhaunica.docente');
+        // servidores, estagiários e docentes
+        return Gate::check('senhaunica.servidor') || Gate::check('senhaunica.estagiario') || Gate::check('senhaunica.docente');
     }
 
     /**
@@ -53,11 +50,17 @@ class DisciplinaPolicy
      */
     public function update(User $user, Disciplina $disciplina): bool
     {
-        if (strpos(json_encode($disciplina->responsaveis), $user->codpes) !== false
-            || strpos(json_encode($disciplina->dr['responsaveis']), $user->codpes) !== false
-        ) {
+        // docente está na lista de responsáveis pela disciplina
+        if (strpos(json_encode($disciplina->responsaveis), $user->codpes) !== false || strpos(json_encode($disciplina->dr['responsaveis']), $user->codpes) !== false) {
             return true;
         }
+
+        // docente é chefe
+        $prefixo = substr($disciplina->coddis, 0, 3);
+        if ($user->roles->where('name', 'disciplinas_' . $prefixo)->all()) {
+            return true;
+        }
+
         return false;
     }
 

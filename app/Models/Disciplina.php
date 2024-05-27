@@ -335,6 +335,26 @@ class Disciplina extends Model
 
         return $discs;
     }
+    
+    /**
+     * Lista disciplinas por prefixo, com os respectivos responsáveis.
+     * 
+     * O prefixo define o departamento de orígem da disciplina.
+     * Ex.: SET0199, o prefixo é SET
+     * 
+     * @param String $prefixo
+     * @return Illuminate\Support\Collection
+     */
+    public static function listarDisciplinasPorPrefixo($prefixo)
+    {
+        $drs = Graduacao::listarDisciplinasPorPrefixo($prefixo);
+        $discs = self::mergearResponsaveis(collect(), $drs);
+
+        $discsLocal = self::where('coddis', 'like', $prefixo . '%')->get();
+        $discs = self::limparDisciplinasReplicado($discs, $discsLocal);
+
+        return $discs;
+    }
 
     /**
      * Retorna os prefixos das disciplinas da Unidade
@@ -368,6 +388,17 @@ class Disciplina extends Model
         return $discs;
     }
 
+    // protected static function mergearPrefixos($discs, $drs)
+    // {
+    //     foreach ($drs as $k => $dr) {
+    //         $disc = new Disciplina();
+    //         $disc->fill($dr);
+    //         $disc->responsaveis = Graduacao::listarResponsaveisDisciplina($disc->coddis);
+    //         $discs[] = $disc;
+    //     }
+    //     return $discs;
+    // }
+    
     /**
      * Limpa de $discs as disciplinas repetidas em $discsLocal
      */

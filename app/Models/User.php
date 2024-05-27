@@ -44,4 +44,17 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+    
+    /**
+     * Retorna os prefixos associados ao docente, caso esteja cadastrado em algum
+     * 
+     * @return Array
+     */
+    public function prefixos() {
+        $prefixos = $this->roles()->where('name', 'like', 'disciplinas_%')->get()->pluck('name');
+        $prefixos->transform(function($item, $key) {
+           return substr($item, 12);
+        });
+        return $prefixos;
+    }
 }

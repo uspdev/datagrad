@@ -622,13 +622,41 @@ class Graduacao extends GraduacaoReplicado
     {
         $query = 'SELECT DR.codpes, DR.dtainirsp, D.*
             FROM DISCIPGRRESP DR
-            INNER JOIN DISCIPLINAGR D on D.coddis = DR.coddis
+            INNER JOIN DISCIPLINAGR D ON D.coddis = DR.coddis
                 AND D.verdis = (SELECT max(verdis) FROM DISCIPLINAGR where coddis = DR.coddis)
             WHERE DR.dtafimrsp is NULL
                 AND DR.codpes = CONVERT(INT,:codpes)
             ORDER BY D.coddis';
 
         $params['codpes'] = $codpes;
+
+        return DB::fetchAll($query, $params);
+    }
+
+    /**
+     * Lista disciplinas por prefixo.
+     *
+     * O prefixo define o departamento de origem da disciplina.
+     * Deve estar em miúscula ou da forma cadastrada no replicado.
+     * As disciplinas retornadas estão ativas mas podem não estar vigentes ainda,
+     *   ou seja, a entrar em vigência no futuro.
+     * Ex.: SET0199, o prefixo é SET
+     *
+     * @param String $prefixo
+     * @return Array
+     * @author Masakik, em 27/5/2024
+     */
+    public static function listarDisciplinasPorPrefixo($prefixo)
+    {
+        $query = "SELECT D1.*
+        FROM DISCIPLINAGR AS D1
+        WHERE (D1.verdis = (SELECT MAX(D2.verdis) FROM DISCIPLINAGR AS D2 WHERE (D2.coddis = D1.coddis)))
+            AND D1.dtadtvdis IS NULL -- nao foi desativado
+            AND D1.dtaatvdis IS NOT NULL -- foi ativado
+            AND D1.coddis LIKE :prefixo
+        ORDER BY D1.nomdis ASC";
+
+        $params['prefixo'] = $prefixo . '%';
 
         return DB::fetchAll($query, $params);
     }

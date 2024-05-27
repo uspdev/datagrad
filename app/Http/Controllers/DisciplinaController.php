@@ -47,14 +47,22 @@ class DisciplinaController extends Controller
                 if (!Gate::allows('disciplina-cg')) {
                     $request->session()->put('disciplinas.visao', 'docente');
                     return redirect()->action([self::class, 'index']);
-                } else {
-                    $discs = Disciplina::listarDisciplinas();
-                    $request->session()->put('disciplinas.visao', 'cg');
-                    $visao = 'cg';
                 }
+                $discs = Disciplina::listarDisciplinas();
+                $request->session()->put('disciplinas.visao', 'cg');
                 break;
 
-            case 'chefe':
+            case 'departamento':
+                if (!Gate::allows('disciplina-chefe')) {
+                    $request->session()->put('disciplinas.visao', 'docente');
+                    return redirect()->action([self::class, 'index']);
+                }
+                $discs = collect();
+                foreach ($user->prefixos() as $prefixo) {
+                    $discs = $discs->merge(Disciplina::listarDisciplinasPorPrefixo($prefixo));
+                }
+                $request->session()->put('disciplinas.visao', 'departamento');
+                break;
             default:
                 $discs = Disciplina::listarDisciplinasPorResponsavel($user->codpes);
         }
