@@ -676,7 +676,8 @@ class Graduacao extends GraduacaoReplicado
             INNER JOIN PERIODOHORARIO ph ON (o.codperhor = ph.codperhor)
             INNER JOIN MINISTRANTE M ON (h.coddis = M.coddis AND h.codtur = M.codtur)
             INNER JOIN PESSOA P ON (P.codpes = M.codpes)
-            WHERE h.codpes = convert(int,:codpes) AND h.codtur LIKE '%{$current}%'";
+            WHERE h.codpes = convert(int,:codpes) AND h.codtur LIKE '%{$current}%'
+                AND h.stamtr = 'M'";
         $param = [
             'codpes' => $codpes,
         ];

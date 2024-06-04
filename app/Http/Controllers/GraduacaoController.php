@@ -215,7 +215,7 @@ class GraduacaoController extends Controller
 
     public function cursos()
     {
-        $this->authorize('datagrad');
+        $this->authorize('disciplinas');
         \UspTheme::activeUrl('graduacao/cursos');
 
         $cursos = Graduacao::listarCursosHabilitacoes();
@@ -226,7 +226,7 @@ class GraduacaoController extends Controller
 
     public function gradeCurricular(Request $request, int $codcur, int $codhab)
     {
-        $this->authorize('datagrad');
+        $this->authorize('disciplinas');
         \UspTheme::activeUrl('graduacao/cursos');
 
         $curso = Graduacao::obterCurso($codcur, $codhab);
@@ -279,7 +279,7 @@ class GraduacaoController extends Controller
             ['nome', 'asc'],
             fn($a, $b) => $diaSemana[$a['diasmnocp']] <=> $diaSemana[$b['diasmnocp']],
             ['horent', 'asc'],
-        ])->toArray();
+        ])->unique()->toArray();
 
         session()->flashInput($request->input());
         return view('grad.relatorio-gradehoraria', compact('horarios', 'naoEncontrados'));
@@ -346,7 +346,7 @@ class GraduacaoController extends Controller
 
     protected function semestres()
     {
-        $semestres = ['20232', '20231', '20222', '20221', '20212', '20211', '20202', '20201', '20192', '20191', '20182', '20181'];
+        $semestres = ['20241', '20232', '20231', '20222', '20221', '20212', '20211', '20202', '20201', '20192', '20191', '20182', '20181'];
         return $semestres;
     }
 
