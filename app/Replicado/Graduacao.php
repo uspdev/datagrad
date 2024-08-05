@@ -86,6 +86,16 @@ class Graduacao extends GraduacaoReplicado
         'DT' => 'Desativada',
     ];
 
+    // Status-matrícula
+    // Remoção forçada: via tela Histórico de Matrícula que permite a remoção de matrícula em turma já consolidada
+    public static $stamtr = [
+        'E' => 'Excluído',
+        'I' => 'Inscrito',
+        'P' => 'Pré-matriculado',
+        'M' => 'Matriculado',
+        'R' => 'Remoção forçada',
+    ];
+
     /**
      * Lista os cursos e habilitações da unidade
      *
@@ -662,7 +672,11 @@ class Graduacao extends GraduacaoReplicado
     }
 
     /**
-     * Ajustado do replicado para incluir o nome do minsitrante da disciplina
+     * Ajustado do replicado para incluir o nome do ministrante da disciplina
+     * Porém se a disciplina tem mais de um ministrante ele retornará em linhas separadas.
+     * 
+     * 5/8/2024 Incluído o retorno de disciplinas com stamtr = I (inscrito), E (Excluído) e P (pre-matricula)
+     *
      * @author Masakik, em 21/5/2024
      */
     public static function obterGradeHoraria($codpes)
@@ -671,16 +685,32 @@ class Graduacao extends GraduacaoReplicado
 
         $query = "SELECT h.coddis, h.codtur, o.diasmnocp, ph.horent, ph.horsai,
                 M.codpes codpesmin, P.nompesttd nompesmin
+                , h.stamtr
             FROM HISTESCOLARGR h
             INNER JOIN OCUPTURMA o ON (h.coddis = o.coddis AND h.codtur = o.codtur)
             INNER JOIN PERIODOHORARIO ph ON (o.codperhor = ph.codperhor)
             INNER JOIN MINISTRANTE M ON (h.coddis = M.coddis AND h.codtur = M.codtur)
             INNER JOIN PESSOA P ON (P.codpes = M.codpes)
             WHERE h.codpes = convert(int,:codpes) AND h.codtur LIKE '%{$current}%'
-                AND h.stamtr = 'M'";
+                AND (h.stamtr = 'M' OR h.stamtr = 'I' OR h.stamtr = 'E' or h.stamtr = 'P')";
         $param = [
             'codpes' => $codpes,
         ];
-        return DB::fetchAll($query, $param);
+        $res = DB::fetchAll($query, $param);
+
+        $ret = [];
+        foreach ($res as $k => $d) {
+            $n = next($d);
+
+            if (is_array($n) && $n['coddis'] == $d['coddis'] && $n['codtur'] == $d['codtur'] && $n['diasmnocp'] == $d['diasmnocp'] && $n['horent'] == $d['horent'] && $n['horsai'] == $d['horsai']) {
+                $res[$k + 1]['nompesmin'] .= ', ' . $d['nompesmin'];
+                // dd($res[$k + 1]['nompesmin']);
+            } else {
+                $d['statusMatricula'] = SELF::$stamtr[$d['stamtr']]; // obtendo stamtr por extenso
+                $ret[] = $d;
+            }
+        }
+
+        return $ret;
     }
 }
