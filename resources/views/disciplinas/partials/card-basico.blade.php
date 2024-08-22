@@ -43,31 +43,31 @@
     <div class="row">
       <div class="col-6">
         <b>Objetivos</b>
-        <textarea class="form-control">{!! $dr['objdis'] !!}</textarea>
+        <textarea class="form-control autoexpand">{!! $dr['objdis'] !!}</textarea>
       </div>
       <div class="col-6">
         <b>Objectives</b>
-        <textarea class="form-control" lang="en">{{ $dr['objdisigl'] }}</textarea>
+        <textarea class="form-control autoexpand" lang="en">{{ $dr['objdisigl'] }}</textarea>
       </div>
     </div>
     <div class="row mt-3">
       <div class="col-6">
         <b>Programa resumido</b>
-        <textarea class="form-control">{{ $dr['pgmrsudis'] }}</textarea>
+        <textarea class="form-control autoexpand">{{ $dr['pgmrsudis'] }}</textarea>
       </div>
       <div class="col-6">
         <b>Short program</b>
-        <textarea class="form-control">{{ $dr['pgmrsudisigl'] }}</textarea>
+        <textarea class="form-control autoexpand">{{ $dr['pgmrsudisigl'] }}</textarea>
       </div>
     </div>
     <div class="row mt-3">
       <div class="col-6">
         <b>Programa completo</b>
-        <textarea class="form-control">{!! htmlspecialchars_decode($dr['pgmdis']) !!}</textarea>
+        <textarea class="form-control autoexpand">{!! htmlspecialchars_decode($dr['pgmdis']) !!}</textarea>
       </div>
       <div class="col-6">
         <b>Full program</b>
-        <textarea class="form-control">{{ $dr['pgmdisigl'] }}</textarea>
+        <textarea class="form-control autoexpand">{{ $dr['pgmdisigl'] }}</textarea>
       </div>
     </div>
 

@@ -120,13 +120,25 @@
   .row {
     margin-right: 15px;
   }
+
+  .pagenum:before {
+        content: counter(page);
+    }
+
 </style>
 
-@section('styles')
-@endsection
+{{-- @section('styles')
+@endsection --}}
 
+<span class="pagenum"></span>
 <h3 style="text-align: center;">Alteração de disciplina</h3>
-<div>Alteração para o ano/semestre: <b>{{ $disc->ano }} / {{ $disc->semestre }}</b></div>
+  <table style="border: 0px;"  cellspacing="0" cellpadding="0">
+    <tr>
+      <td style="font-size: 20px; vertical-align: middle; padding-left:20px;">Alteração para o ano/semestre: <b>{{ $disc->ano }} / {{ $disc->semestre }}</b></td>
+      <td style="width: 25%; text-align: right;">Data do documento: {{ $disc->pdf['date'] }}<br>
+        Hash: {{ $disc->pdf['hash'] }}</td>
+    </tr>
+  </table>
 <br>
 <div>Código/Code: <b>{{ $disc->coddis }}</b></div>
 <div>Nome/Title: <b>{{ $disc->nomdis }} / {{ $disc->nomdisigl }}</b></div>
@@ -191,7 +203,48 @@
     <x-pdf-textarea name="idcavlatvextigl" :model="$disc"></x-pdf-textarea>
   </div>
 @endif
+<br>
+<br>
+@foreach ($disc->cursos as $curso)
+  <b>Habilidades e competências para o curso {{ $curso['codcur'] }} - {{ $curso->dr['nomcur'] }}</b><br>
+  @if (empty($curso->habilidades))
+    Habilidades não cadastradas!
+  @else
+    <b>Habilidades</b><br>
+    @foreach (explode(PHP_EOL, $curso->habilidades) as $hab)
+      @if ($disc->checkHabilidades($curso->codcur, $hab))
+        H{{ $loop->index }}. {{ $hab }}<br>
+      @endif
+    @endforeach
+  @endif
+  <br>
+  @if (empty($curso->competencias))
+    Competências não cadastradas!
+  @else
+    <b>Competências</b> <br>
+    @foreach (explode(PHP_EOL, $curso->competencias) as $con)
+      @if ($disc->checkCompetencias($curso->codcur, $con))
+        C{{ $loop->index }}. {{ $con }}<br>
+      @endif
+    @endforeach
+  @endif
+@endforeach
 
+{{-- <br>
+<b>Habilidades (conforme PPC)</b>
+@foreach ($disc->habilidades as $cursos)
+  @foreach ($cursos as $codcur => $hab)
+  {{ $hab }}<br><br>
+  @endforeach
+@endforeach
+
+<br>
+<b>Competências</b><br>
+@foreach ($disc->competencias as $cursos)
+  @foreach ($cursos as $codcur => $con)
+  {{ $con }}<br><br>
+  @endforeach
+@endforeach --}}
 
 
 

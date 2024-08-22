@@ -2,15 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Disciplina;
-use App\Services\Diff;
-use App\Services\Pdf;
 use Closure;
+use UspTheme;
+use App\Models\Curso;
+use App\Services\Pdf;
+use App\Services\Diff;
+use App\Models\Disciplina;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
-use UspTheme;
 
 class DisciplinaController extends Controller
 {
@@ -123,10 +124,28 @@ class DisciplinaController extends Controller
      */
     public function edit(Request $request, $coddis)
     {
+        $this->authorize('user');
         $disc = Disciplina::primeiroOuNovo(strtoupper($coddis));
         $this->authorize('update', $disc);
 
         $disc->mesclarResponsaveisReplicado();
+
+        $cursos = [];
+        foreach ($disc->dr['cursos'] as $curso_dr) {
+            if (stripos(config('replicado.codundclgs'), $curso_dr['codclg']) !== false) {
+                // é curso da unidade
+                $curso = Curso::where('codcur', $curso_dr['codcur'])->first();
+                if (!$curso) {
+                    $curso = new Curso();
+                    $curso->codcur = $curso_dr['codcur'];
+                    $curso->dr = $curso_dr;
+                }
+                $cursos[] = $curso;
+            }
+        }
+        $disc->cursos = $cursos;
+
+        // dd($disc);
 
         return view('disciplinas.edit', compact('disc'));
     }
@@ -140,8 +159,17 @@ class DisciplinaController extends Controller
      */
     public function update(Request $request, $coddis)
     {
+        $request->validate([]);
         $disc = Disciplina::primeiroOuNovo($coddis);
         $this->authorize('update', $disc);
+
+        // para aprovação, finaliza a edição do pdf
+        if ($request->submit == 'Em aprovação') {
+            $disc->estado = 'Em aprovação';
+            $disc->save();
+            Disciplina::renovarCacheAfterResponse();
+            return redirect()->route('disciplinas.show', $disc->coddis);
+        }
 
         if ($add = $request->codpes_add) {
             $disc->adicionarResponsavel($add);
@@ -152,22 +180,23 @@ class DisciplinaController extends Controller
         }
 
         $disc->fill($request->all());
-        $disc->save();
-
-        // renova o cache depois de enviar o response para o navegador
-        // https://laravel.com/docs/10.x/queues#dispatching-after-the-response-is-sent-to-browser
-        dispatch(function () {
-            Disciplina::listarDisciplinas(true);
-        })->afterResponse();
-
+        if ($disc->isDirty()) {
+            $disc->save();
+            Disciplina::renovarCacheAfterResponse();
+        }
         if ($request->submit == 'preview') {
-            // $save = clone $disc;
             $disc->diffs = Diff::computar($disc);
             $disc = Pdf::quebrarTextoLongo($disc);
-            // dd('save', $save->pgmdis, $disc->pgmdis);
-            // dd($disc->objdis, explode('__quebrar__',$disc->objdis));
-            $pdf = Pdf::gerarRelatorioAlteracaoDisciplina($disc);
 
+            $pdf = Pdf::gerarPdfAlteracaoDisciplina($disc);
+            // dd($request->all());
+            $disc->fresh();
+            unset($disc->diffs);
+            $disc->pdf = $pdf;
+            // dd($disc);
+            $disc->save();
+
+            Disciplina::renovarCacheAfterResponse();
             return redirect()->route('disciplinas.preview', $disc->coddis);
         }
 
@@ -184,7 +213,7 @@ class DisciplinaController extends Controller
     {
         $disc = Disciplina::where('coddis', $coddis)->first();
 
-        $url = Storage::temporaryUrl('disciplina-' . $coddis . '.pdf', now()->addMinutes(10));
+        $url = Storage::temporaryUrl('disciplinas/disciplina-' . $coddis . '.pdf', now()->addMinutes(10));
 
         return view('disciplinas.preview', compact('disc', 'url'));
     }

@@ -25,6 +25,8 @@
               href="{{ route('graduacao.gradeCurricular', [$curso['codcur'], $curso['codhab']]) }}">Grade</a>
             <a class="btn btn-sm btn-outline-primary spinner"
               href="{{ route('graduacao.turmas', [$curso['codcur'], $curso['codhab']]) }}">Turmas</a>
+            <a class="btn btn-sm btn-outline-primary spinner"
+              href="{{ route('cursos.show', [$curso['codcur'], 'codhab' => $curso['codhab']]) }}">PPC</a>
           </td>
           <td>
             ({{ $curso['codcur'] }})

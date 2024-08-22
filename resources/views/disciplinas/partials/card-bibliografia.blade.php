@@ -19,6 +19,6 @@
     </span>
   </div>
   <div class="card-body">
-    <textarea class="form-control" disabled>{!! htmlspecialchars_decode($dr['dscbbgdis']) !!}</textarea>
+    <textarea class="form-control autoexpand" disabled>{!! htmlspecialchars_decode($dr['dscbbgdis']) !!}</textarea>
   </div>
 </div>

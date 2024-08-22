@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use Dompdf\Dompdf;
+use App\Models\Curso;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Storage;
 
@@ -11,31 +12,51 @@ use Illuminate\Support\Facades\Storage;
  */
 class Pdf
 {
-
     /**
      * Gera o arquivo pdf de uma disicplina em alteração/criação e salva no filesystem
      *
      * @param App\Models\Disciplina $disc
      * @return String Nome do arquivo PDF
      */
-    public static function gerarRelatorioAlteracaoDisciplina($disc)
+    public static function gerarPdfAlteracaoDisciplina($disc)
     {
+        $cursos = [];
+        foreach ($disc->dr['cursos'] as $curso_dr) {
+            if (stripos(config('replicado.codundclgs'), $curso_dr['codclg']) !== false) {
+                // é curso da unidade
+                $curso = Curso::where('codcur', $curso_dr['codcur'])->first();
+                if (!$curso) {
+                    $curso = new Curso();
+                    $curso->codcur = $curso_dr['codcur'];
+                    $curso->dr = $curso_dr;
+                }
+                $cursos[] = $curso;
+            }
+        }
+        $disc->cursos = $cursos;
+
+        $date = now()->format('Y-m-d H:i:s');
+        $hash = $disc->hash();
+        $filename = 'disciplina-' . $disc->coddis . '.pdf';
+
+        $disc->pdf = compact('filename', 'date', 'hash');
+
         $html = Blade::render('disciplinas.pdf.conteudo', compact('disc'));
 
         // echo $html; exit;
+        // https://github.com/barryvdh/laravel-dompdf/issues/37
         $dompdf = new Dompdf();
         $dompdf->loadHtml($html);
         $dompdf->setPaper('A4', 'landscape');
         $dompdf->render();
-        $filename = 'disciplina-' . $disc->coddis . '.pdf';
-        Storage::put($filename, $dompdf->output());
+        Storage::put('disciplinas/' . $filename, $dompdf->output());
 
-        return $filename;
+        return [$disc->pdf];
     }
 
     /**
      * Caso tenha algum texto que não caiba em uma folha vamos colocar indicação de quebra
-     *
+     * Para todos os campos de $disciplina->meta
      *
      */
     public static function quebrarTextoLongo($disc, $linhas = 33)
@@ -45,7 +66,6 @@ class Pdf
         $size = '14';
         $numlinhas = 31;
         foreach ($disc->meta as $campo => $valor) {
-            
             // vamos remover alguns desnecessarios. Tem de rever ******
             if (isset($valor['diff']) && $valor['diff'] == false) {
                 continue;
@@ -134,7 +154,7 @@ class Pdf
 
         # Check if imagettfbbox is expecting font-size to be declared in points or pixels.
         static $mult;
-        $mult = $mult ?: (version_compare(GD_VERSION, '2.0', '>=') ? .75 : 1);
+        $mult = $mult ?: (version_compare(GD_VERSION, '2.0', '>=') ? 0.75 : 1);
 
         # Text already fits the designated space without wrapping.
         $box = imagettfbbox($size * $mult, 0, $font, $text);
@@ -149,7 +169,6 @@ class Pdf
         $words = preg_split('/\b(?=\S)|(?=\s)/', $text);
         $word_count = count($words);
         for ($i = 0; $i < $word_count; ++$i) {
-
             # Newline
             if (PHP_EOL === $words[$i]) {
                 $length = 0;
@@ -171,7 +190,7 @@ class Pdf
                 if ($diff - $width <= 0) {
                     for ($s = strlen($words[$i]); $s; --$s) {
                         $box = imagettfbbox($size * $mult, 0, $font, substr($words[$i], 0, $s) . '-');
-                        if ($width > ($box[2] - $box[0] / $mult) + $size) {
+                        if ($width > $box[2] - $box[0] / $mult + $size) {
                             $breakpoint = $s;
                             break;
                         }
@@ -180,7 +199,7 @@ class Pdf
                     $word_length = strlen($words[$i]);
                     for ($s = 0; $s < $word_length; ++$s) {
                         $box = imagettfbbox($size * $mult, 0, $font, substr($words[$i], 0, $s + 1) . '-');
-                        if ($width < ($box[2] - $box[0] / $mult) + $size) {
+                        if ($width < $box[2] - $box[0] / $mult + $size) {
                             $breakpoint = $s;
                             break;
                         }

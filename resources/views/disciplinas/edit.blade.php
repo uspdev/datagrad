@@ -30,7 +30,7 @@
 @endsection
 
 @section('content')
-  <form method="post" action="{{ route('disciplinas.update', $disc->coddis) }}">
+  <form method="post" id="disciplinas-edit-form" action="{{ route('disciplinas.update', $disc->coddis) }}">
     @csrf
     @method('put')
     <input type="hidden" name="id" value={{ $disc->id }}>
@@ -39,12 +39,11 @@
 
     <fieldset>
       @include('disciplinas.partials.edit-form')
-      @include('disciplinas.partials.card-curso')
+      {{-- @include('disciplinas.partials.card-curso') --}}
     </fieldset>
   </form>
 @endsection
 
-@include('blocos.textarea-autoexpand')
 @section('javascripts_bottom')
   @parent
   <script src="{{ asset('js/diff-match-patch.js') }}"></script>
@@ -68,7 +67,6 @@
           $('ins').css('background-color', 'inherit')
           $('ins').css('text-decoration', 'inherit')
         }
-        $('textarea').height(0).height(this.scrollHeight).trigger('change')
       }
 
       // botão de mostrar/ocultar diffs

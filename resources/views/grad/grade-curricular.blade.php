@@ -57,7 +57,7 @@
         <th class="c4">Versão</th>
         <th class="c5">Tipo</th>
         <th class="c6">Créditos aula/trab</th>
-        <th class="c6 text-center" title="Possui atividade de extensão cadastrada">Atv. extensão</th>
+        <th class="c6 text-center" title="Possui atividade de extensão cadastrada">Atv. extensionista</th>
         <th>Objetivos</th>
         <th>Programa Resumido</th>
         <th>Programa</th>
@@ -72,7 +72,7 @@
           <td class="text-center">{{ $d['verdis'] }}</td>
           <td>{{ App\Replicado\Graduacao::$tipobg[$d['tipobg']] }}</td>
           <td class="text-center">{{ $d['creaul'] }}/{{ $d['cretrb'] }}</td>
-          <td class="text-center">{{ $d['cgahoratvext'] ? 'Sim' : 'Não' }}</td>
+          <td class="text-center">{{ $d['cgahoratvext'] ? $d['cgahoratvext'] : 'Não' }}</td>
           <td class="text-truncate">{!! $d['objdis'] !!} <div class="text-info">{!! $d['objdisigl'] !!}</div></td>
           <td class="text-truncate">{!! $d['pgmrsudis'] !!} <div class="text-info">{!! $d['pgmrsudisigl'] !!}</div></td>
           <td class="text-truncate">{!! $d['pgmdis'] !!} <div class="text-info">{!! $d['pgmdisigl'] !!}</div></td>

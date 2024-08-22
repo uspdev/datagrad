@@ -2,15 +2,16 @@
 
 namespace App\Models;
 
-use App\Replicado\Graduacao;
 use App\Replicado\Pessoa;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Replicado\Graduacao;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Disciplina extends Model
 {
@@ -22,15 +23,24 @@ class Disciplina extends Model
     /**
      * The attributes that should be cast.
      *
+     * $responsaveis = ['codpes'= > 'numnum', 'nompesttd' => 'nomnomnom'];
+     * $habilidades = ['hab 1', 'hab 2', 'hab x ...'];
+     * $competencias = similar a habilidades;
+     *
      * @var array
      */
     protected $casts = [
         'responsaveis' => 'array',
-        // 'responsaveis' => AsArrayObject::class,
+        'habilidades' => 'array',
+        'competencias' => 'array',
+        'pdf' => 'array',
     ];
 
     /** Dados que vem do replicado */
     public $dr;
+
+    /** Cursos da unidade para os quais a disciplina é ministrada */
+    public $cursos;
 
     /** Dados dos campos do formulário de alteração de disciplina */
     public $meta = [
@@ -158,6 +168,20 @@ class Disciplina extends Model
     ];
 
     /**
+     * Estado da disciplina
+     */
+    public static $estados = ['Em edição', 'Em aprovação', 'Aprovado', 'Finalizado'];
+
+    // protected function pdf(): Attribute
+    // {
+    //     return Attribute::make(
+    //         get: function(string $value = null) {
+    //         return json_decode($value, true) ?? ['filename' =>'', 'date'=> '', 'hash'=>''];
+    //         },
+    //     );
+    // }
+    
+    /**
      * Retorna dados replicados da diciplina, incluindo responsaveis, e cursos
      *
      * @param String $coddis
@@ -189,7 +213,7 @@ class Disciplina extends Model
             $disc = self::where('coddis', $coddis)->first();
             if (!$disc) {
                 $disc = self::novo($dr);
-                $disc->estado = 'editar';
+                $disc->estado = 'Em edição';
             }
             $disc->dr = $dr;
         } else {
@@ -335,13 +359,13 @@ class Disciplina extends Model
 
         return $discs;
     }
-    
+
     /**
      * Lista disciplinas por prefixo, com os respectivos responsáveis.
-     * 
+     *
      * O prefixo define o departamento de orígem da disciplina.
      * Ex.: SET0199, o prefixo é SET
-     * 
+     *
      * @param String $prefixo
      * @return Illuminate\Support\Collection
      */
@@ -356,9 +380,18 @@ class Disciplina extends Model
         return $discs;
     }
 
+    public static function renovarCacheAfterResponse()
+    {
+        // renova o cache depois de enviar o response para o navegador
+        // https://laravel.com/docs/10.x/queues#dispatching-after-the-response-is-sent-to-browser
+        dispatch(function () {
+            SELF::listarDisciplinas(true);
+        })->afterResponse();
+    }
+
     /**
      * Retorna os prefixos das disciplinas da Unidade
-     * 
+     *
      * Corresponde aos 3 primeiros dígitos de coddis
      */
     public static function listarPrefixosDisciplinas()
@@ -398,7 +431,7 @@ class Disciplina extends Model
     //     }
     //     return $discs;
     // }
-    
+
     /**
      * Limpa de $discs as disciplinas repetidas em $discsLocal
      */
@@ -451,6 +484,51 @@ class Disciplina extends Model
     public function tipdis($dr = false)
     {
         return $dr ? self::$tipdis[$this->dr['tipdis']] : self::$tipdis[$this->tipdis];
+    }
+
+    /**
+     * Calcula um hash dos dados que vão para o PDF
+     */
+    public function hash()
+    {
+        // colunas desconsideradas no hash
+        $removeKeys = ['pdf', 'estado', 'criado_por_id', 'atualizado_por', 'atualizado_por_id', 'created_at', 'updated_at', 'deleted_at', 'diffs'];
+
+        $data = $this->toArray();
+        $data = array_diff_key($data, array_flip($removeKeys));
+
+        // na visualização o resposável tem um campo a mais de status que deve ser removido
+        $resps = [];
+        foreach ($data['responsaveis'] as $resp) {
+            $resps[] = ['codpes' => $resp['codpes'], 'nompesttd' => $resp['nompesttd']];
+        }
+        $data['responsaveis'] = $resps;
+        $hash = md5(json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_NUMERIC_CHECK));
+        return $hash;
+    }
+
+    /**
+     * Retorna o estado checked ou não para input type radio das habilidades
+     */
+    public function checkHabilidades($codcur, $habilidade)
+    {
+        $habilidades = $this->habilidades;
+        if (!empty($habilidades) && in_array($habilidade, $habilidades[$codcur])) {
+            return 'checked';
+        }
+        return null;
+    }
+
+    /**
+     * Retorna o estado checked ou não para input type radio das competencias
+     */
+    public function checkCompetencias($codcur, $competencia)
+    {
+        $competencias = $this->competencias;
+        if (!empty($competencias) && in_array($competencia, $competencias[$codcur])) {
+            return 'checked';
+        }
+        return null;
     }
 
     /**

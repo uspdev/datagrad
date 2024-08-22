@@ -33,7 +33,7 @@
       {!! str_replace("\n", '&para;<br>', $model->dr[$name]) !!}
     </td>
     <td class="col-6">
-      <textarea name="{{ $name }}" class="form-control changed" data-original="{!! $model->dr[$name] !!}">{!! htmlspecialchars_decode($model[$name]) !!}</textarea>
+      <textarea name="{{ $name }}" class="form-control changed autoexpand" data-original="{!! $model->dr[$name] !!}">{!! htmlspecialchars_decode($model[$name]) !!}</textarea>
     </td>
   </tr>
 </table>

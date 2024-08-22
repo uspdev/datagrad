@@ -1,23 +1,34 @@
 {{--
 Bloco para autoexpandir textarea conforme necessidade.
-Aplica em todos os textarea
 
 Uso:
 - Incluir no layouts.app ou em outro lugar: @include('laravel-usp-theme::blocos.textarea-autoexpand')
-- Adiconar a classe 'datatable-simples'
+- Adiconar a classe 'autoexpand'
 
 @author Masakik, em 8/5/2024
 --}}
-@section('javascripts_bottom')
-  @parent
-  <script>
-    $(document).ready(function() {
+@once
+  @section('javascripts_bottom')
+    @parent
+    <script>
+      $(document).ready(function() {
 
-      //{{-- https://stackoverflow.com/questions/2948230/auto-expand-a-textarea-using-jquery --}}
-      $('body').on('change keyup keydown paste cut', 'textarea', function() {
-        $(this).height(0).height(this.scrollHeight)
-      }).find('textarea').trigger('change')
+        //{{-- https://stackoverflow.com/questions/2948230/auto-expand-a-textarea-using-jquery --}}
+        $(document).on('change keyup paste cut', '.autoexpand', function(e) {
+          $(this).height(0).height(this.scrollHeight)
+          // $(this).height(0).height(
+          //   this.scrollHeight +
+          //   parseFloat($(this).css('borderTopWidth')) +
+          //   parseFloat($(this).css('borderBottomWidth'))
+          // )
+        })
 
-    })
-  </script>
-@endsection
+        // aparentemente precisa dar um tempinho para poder disparar o autoexpand
+        setTimeout(() => {
+          $('.autoexpand').trigger('change')
+        }, 500)
+
+      })
+    </script>
+  @endsection
+@endonce

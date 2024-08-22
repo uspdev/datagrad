@@ -35,7 +35,7 @@
     <thead>
       <tr>
         <th>Código</th>
-        <th style="min-width: 70px;">Estado</th>
+        <th style="min-width: 100px;">Estado</th>
         <th style="min-width: 300px;">Nome</th>
         <th>Cred. Aula</th>
         <th>Cred. Trab.</th>
@@ -50,7 +50,7 @@
             {{ $disc->coddis }}
           </td>
           <td>
-            @if (isset($disc->estado) && $disc->estado == 'editar')
+            @if (isset($disc->estado) && $disc->estado == 'Em edição')
               <a href="{{ route('disciplinas.edit', $disc->coddis) }}" class="btn btn-sm btn-outline-warning py-0">
                 Em edição
               </a>
@@ -58,7 +58,13 @@
               <a href="{{ route('disciplinas.edit', $disc->coddis) }}" class="btn btn-sm btn-outline-success py-0">
                 Em criação
               </a>
-            @elseif(isset($disc->estado) && $disc->estado == 'finalizado')
+            @elseif(isset($disc->estado) && $disc->estado == 'Em aprovação')
+              <a href="{{ route('disciplinas.preview', $disc->coddis) }}" class="btn btn-sm btn-outline-danger py-0">
+                Em aprovação
+              </a>
+            @elseif(isset($disc->estado) && $disc->estado == 'Aprovado')
+              <span class="text-secondary">Aprovado</span>
+            @elseif(isset($disc->estado) && $disc->estado == 'Finalizado')
               <span class="text-secondary">Finalizado</span>
             @endif
           </td>

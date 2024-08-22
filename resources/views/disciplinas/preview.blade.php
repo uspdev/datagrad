@@ -17,13 +17,13 @@
 @endsection
 
 @section('content')
-  <form>
     @include('disciplinas.partials.navbar-edit')
-  </form>
 
   <div class="row">
     <div class="col-12">
-      <object class="pdf" data="{{ $url }}" height="800"></object>
+      <object class="pdf" type="application/pdf" data="{{ $url }}" height="800">
+      Alt: <a href="disciplina.pdf">disciplina.pdf</a>
+      </object>
     </div>
   </div>
 @endsection

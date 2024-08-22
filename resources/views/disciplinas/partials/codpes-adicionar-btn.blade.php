@@ -9,6 +9,7 @@
 
 @once
   @section('javascripts_bottom')
+    @parent
     <div class="modal fade" id="adicionar-codpes-modal" tabindex="-1">
       <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -30,7 +31,7 @@
               <div>
                 <div class="float-right">
                   <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Cancelar</button>
-                  <button type="submit" class="btn btn-sm btn-primary submit-btn">Salvar</button>
+                  <button type="button" class="btn btn-sm btn-primary submit-btn">Salvar</button>
                 </div>
               </div>
             </div>
@@ -39,7 +40,6 @@
         </div>
       </div>
     </div>
-    @parent
     <script>
       $(document).ready(function() {
 
@@ -54,12 +54,12 @@
         })
 
         senhaunicaUserModal.find('.submit-btn').on('click', function() {
-          let form = document.getElementById(formId)
           let codpes = senhaunicaUserModal.find(':input[name=codpes_add]').val()
-          let codpes_add = $('<input type="hidden" name="codpes_add" value="' + codpes + '">')
-          $('#' + formId).append(codpes_add).submit()
-          // console.log($('#' + formId))
-          // form.submit()
+          let codpes_input_add = $('<input type="hidden" name="codpes_add" value="' + codpes + '">')
+          $('#' + formId).append(codpes_input_add)
+          // o submit nao funcionou em disciplinas.edit então fizémos um click no botão de submit 
+          $('#' + formId).trigger('submit')
+          $('#' + formId).find('.default-submit-btn').trigger('click')
         })
 
         // abre o select2 automaticamente

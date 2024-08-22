@@ -4,7 +4,7 @@ $menu = [
     [
         'text' => 'Cursos',
         'url' => 'graduacao/cursos',
-        'can' => 'datagrad',
+        'can' => 'disciplinas',
     ],
     [
         'text' => 'Relatório síntese',

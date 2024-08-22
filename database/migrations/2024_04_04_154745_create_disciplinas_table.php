@@ -51,15 +51,20 @@ class CreateDisciplinasTable extends Migration
             $table->text('dscbbgdis')->nullable(); // bibliografia
 
             $table->string('stapsuatvani')->nullable(); // Atividades práticas com animais e/ou materiais biológicos
-            
+
             $table->string('ano')->nullable(); // alteração para o ano / semestre
             $table->string('semestre')->nullable();
             $table->text('justificativa')->nullable();
             $table->boolean('atividade_extensionista')->nullable();
-            $table->json('responsaveis')->nullable(); // codpes dos responsáveis pela disciplina, separados por vírgula
+
+            $table->text('habilidades')->nullable(); // habilidades e competencias separados por curso. (cast para array)
+            $table->text('competencias')->nullable(); // habilidades e competencias separados por curso. (cast para array)
+            $table->json('responsaveis')->nullable(); // responsáveis pela disciplina.  (cast para array)
+
             $table->string('pdf')->nullable();
-            $table->datetime('pdf_date')->nullable();
+            // $table->datetime('pdf_date')->nullable();
             $table->string('estado')->nullable(); // criar, editar, finalizado
+
             $table->foreignId('criado_por_id')->nullable()->constrained('users');
             $table->foreignId('atualizado_por_id')->nullable()->constrained('users');
             $table->timestamps();

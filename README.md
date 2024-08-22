@@ -1,6 +1,9 @@
 # Datagrad
 
 Sistema que auxilia na elaboração do relatório de revalidação de cursos de graduação, e outras informações relacionadas à graduação.
+
+[Apresentação na EESC](https://www.youtube.com/watch?v=18A8jRwIWIA) em 9/8/2024.
+
 ## Funcionalidades
 
 * Gera lista de disciplinas por curso (grade curricular)

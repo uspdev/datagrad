@@ -40,17 +40,24 @@
     @include('disciplinas.partials.form-ativ-extensionista')
 
   </div>
-  <div class="col-md-5">
+  <div class="col-md-4">
     {{-- @include('disciplinas.partials.form-ativ-animais') --}}
     @include('disciplinas.partials.form-responsaveis')
 
   </div>
-  <div class="col-md-2">
+  <div class="col-md-3">
     <div class="alert alert-info mt-3 small">
-      <div>Estado: {{ $disc->estado == 'editar' ? 'Em edição' : '-' }}</div>
+      <div>Estado atual:
+        <b>{{ $disc->estado }}</b> - {{ $disc->updated_at->format('d/m/Y H:i') }}<br>
+        Por {{ $disc->atualizadoPor->name }}<br>
+        Chave: {{ $disc->hash() }}
+      </div>
       <hr>
+
+      <div><b>Histórico</b></div>
       <div>
-        Ultima alteração realizada por {{ $disc->atualizadoPor->name }} em {{ $disc->updated_at->format('d/m/Y') }}.
+        <b>Em edição</b> - {{ $disc->updated_at->format('d/m/Y H:i') }}<br>
+        Por {{ $disc->atualizadoPor->name }}
       </div>
     </div>
   </div>
@@ -98,11 +105,19 @@
   </div>
 </div>
 
+@include('disciplinas.partials.form-habilidades-competencias')
+
 <div class="card">
   <div class="card-header text-center">
     Justificativa da alteração
   </div>
   <div class="card-body p-1">
-    <textarea class="form-control changed" name="justificativa">{{ $disc->justificativa }}</textarea>
+    <textarea class="form-control changed autoexpand" name="justificativa">{{ $disc->justificativa }}</textarea>
   </div>
+</div>
+<br>
+<div class="text-center">
+  <button class="btn btn-sm btn-primary ml-2 default-submit-btn" type="submit" name="submit" value="save">
+    Salvar e continuar
+  </button>
 </div>

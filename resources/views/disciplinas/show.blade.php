@@ -41,7 +41,6 @@
   @endif
 @endsection
 
-@include('blocos.textarea-autoexpand')
 @section('javascripts_bottom')
   @parent
   <script>

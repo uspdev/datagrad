@@ -3,10 +3,8 @@
 namespace App\Providers;
 
 use App\Models\User;
-use Spatie\Permission\Models\Role;
-use Illuminate\Support\Facades\Gate;
-use Spatie\Permission\Models\Permission;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
+use Illuminate\Support\Facades\Gate;
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -34,16 +32,5 @@ class AuthServiceProvider extends ServiceProvider
             || Gate::check('senhaunica.estagiario')
             || Gate::check('senhaunica.docente');
         });
-
-        $permission = Permission::firstOrCreate(['name' => 'disciplina-cg']);
-        $permission = Permission::firstOrCreate(['name' => 'disciplina-cc']); // coordenador de curso
-        $permission = Permission::firstOrCreate(['name' => 'disciplina-chefe']);
-        $permission = Permission::firstOrCreate(['name' => 'disciplina']); //professor, comum
-
-        // deve ir para migration
-        // comissão de graduação. tem todas as permissões
-        $role = Role::firstOrCreate(['name' => 'CG']);
-        $role->givePermissionTo(['datagrad', 'evasao', 'disciplina', 'disciplina-cg']);
-
     }
 }

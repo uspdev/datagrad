@@ -285,6 +285,9 @@ class GraduacaoController extends Controller
         return view('grad.relatorio-gradehoraria', compact('horarios', 'naoEncontrados'));
     }
 
+    /**
+     * Lista de turmas de um curso/habilitação
+     */
     public function turmas(Request $request, int $codcur, int $codhab)
     {
         $this->authorize('datagrad');
@@ -346,7 +349,7 @@ class GraduacaoController extends Controller
 
     protected function semestres()
     {
-        $semestres = ['20241', '20232', '20231', '20222', '20221', '20212', '20211', '20202', '20201', '20192', '20191', '20182', '20181'];
+        $semestres = ['20251','20242','20241', '20232', '20231', '20222', '20221', '20212', '20211', '20202', '20201', '20192', '20191', '20182', '20181'];
         return $semestres;
     }
 

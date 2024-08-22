@@ -14,6 +14,9 @@
 
 {{-- Fim de blocos do laravel-usp-theme --}}
 
+{{-- a ser transferido para o usptheme --}}
+@include('blocos.textarea-autoexpand')
+
 @section('flash')
   <div class="flash-message fixed-top w-50 ml-auto mr-auto" style="margin-top: 60px">
     @foreach (['danger', 'warning', 'success', 'info'] as $msg)

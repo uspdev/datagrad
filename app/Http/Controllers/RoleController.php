@@ -26,6 +26,7 @@ class RoleController extends Controller
         $roles = Role::where('name', 'not like', 'disciplinas%')->get();
 
         $roleCG = Role::where('name', 'CG')->first();
+        $roleCC = Role::where('name', 'CC')->first();
         $departamentos = [];
 
         // cria as permissions referentes aos departamentos no formato disciplinas_xxx,
@@ -36,7 +37,7 @@ class RoleController extends Controller
             $departamentos[] = Role::firstOrCreate(['name' => 'disciplinas_' . $prefixo]);
         }
 
-        return view('roles.index', compact('roles', 'departamentos', 'roleCG'));
+        return view('roles.index', compact('roles', 'departamentos', 'roleCG', 'roleCC'));
     }
 
     /**

@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\RoleController;
+use App\Http\Controllers\CursoController;
 use App\Http\Controllers\ArquivoController;
 use App\Http\Controllers\GraduacaoController;
 use App\Http\Controllers\DisciplinaController;
@@ -50,3 +51,4 @@ Route::get('disciplinas/{coddis}/preview',[DisciplinaController::class, 'preview
 Route::get('arquivos/download',[ArquivoController::class, 'download'])->name('arquivos.download');
 
 Route::resource('/roles', RoleController::class);
+Route::resource('/cursos', CursoController::class);
