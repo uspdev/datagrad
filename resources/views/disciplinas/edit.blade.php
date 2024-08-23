@@ -37,7 +37,7 @@
     <input type="hidden" name="coddis" value={{ $disc->coddis }}>
     @include('disciplinas.partials.navbar-edit')
 
-    <fieldset>
+    <fieldset {{ ($disc->estado == 'Em edição') ? '' : 'disabled' }}>
       @include('disciplinas.partials.edit-form')
       {{-- @include('disciplinas.partials.card-curso') --}}
     </fieldset>
