@@ -213,7 +213,7 @@ class DisciplinaController extends Controller
     {
         $disc = Disciplina::where('coddis', $coddis)->first();
 
-        $url = Storage::temporaryUrl('disciplinas/disciplina-' . $coddis . '.pdf', now()->addMinutes(10));
+        $url = Storage::temporaryUrl('disciplinas/disciplina-' . $coddis . '.pdf', now()->addMinutes(10), ['ResponseContentDisposition' => 'attachment; filename=file2.pdf',]);
 
         return view('disciplinas.preview', compact('disc', 'url'));
     }

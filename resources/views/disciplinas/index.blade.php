@@ -59,7 +59,7 @@
                 Em criação
               </a>
             @elseif(isset($disc->estado) && $disc->estado == 'Em aprovação')
-              <a href="{{ route('disciplinas.preview', $disc->coddis) }}" class="btn btn-sm btn-outline-danger py-0">
+              <a href="{{ route('disciplinas.edit', $disc->coddis) }}" class="btn btn-sm btn-outline-danger py-0">
                 Em aprovação
               </a>
             @elseif(isset($disc->estado) && $disc->estado == 'Aprovado')

@@ -34,9 +34,9 @@
         </button>
       @else
         {{-- em aprovação, aprovado, finalizado --}}
-        <button class="btn btn-sm btn-success ml-2" type="submit" name="submit" value="download">
+        <a href="{{ route('disciplinas.preview', $disc['coddis']) }}" class="btn btn-sm btn-success ml-2" type="submit">
           Visualizar documento <i class="fas fa-download"></i>
-        </button>
+        </a>
       @endif
     @endif
     @if (Request::is('*/preview'))

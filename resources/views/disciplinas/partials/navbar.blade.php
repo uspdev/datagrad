@@ -30,19 +30,23 @@
         class="badge badge-secondary ml-2" target="_BLANK">Jupiter Web <i class="fas fa-link"></i></a>
 
       @can('update', $disc)
-        @if ($disc->estado != 'Em aprovação')
-          <a href="{{ route('disciplinas.edit', $dr['coddis']) }}" class="btn btn-sm btn-warning ml-2" type="submit">
-            @if ($disc->id)
+        @if ($disc->estado == 'Em aprovação')
+          <button role="button" class="btn btn-sm btn-danger py-0">
+            Em aprovação
+          </button>
+        @endif
+        <a href="{{ route('disciplinas.edit', $dr['coddis']) }}" class="btn btn-sm btn-warning ml-2" type="submit">
+          @if ($disc->id)
+            @if ($disc->estado != 'Em aprovação')
               Editar alteração em andamento
             @else
-              Propor alteração da disciplina
+              Ver dados de edição
             @endif
-          </a>
           @else
-          <a href="{{ route('disciplinas.preview', $disc->coddis) }}" class="btn btn-sm btn-danger py-0" title="Visualizar documento">
-            Em aprovação
-          </a>
-        @endif
+            Propor alteração da disciplina
+          @endif
+        </a>
+
       @endcan
     @endif
   </div>
