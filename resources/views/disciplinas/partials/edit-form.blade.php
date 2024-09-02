@@ -48,16 +48,22 @@
   <div class="col-md-3">
     <div class="alert alert-info mt-3 small">
       <div>Estado atual:
-        <b>{{ $disc->estado }}</b> - {{ $disc->updated_at->format('d/m/Y H:i') }}<br>
-        Por {{ $disc->atualizadoPor->name }}<br>
+        <b>{{ $disc->estado }}</b>, por {{ $disc->atualizadoPor->name }}<br>
         Chave: {{ $disc->hash() }}
       </div>
       <hr>
 
       <div><b>Histórico</b></div>
       <div>
-        <b>Em edição</b> - {{ $disc->updated_at->format('d/m/Y H:i') }}<br>
-        Por {{ $disc->atualizadoPor->name }}
+        @forelse($disc->historico->reverse() as $h)
+          {{ $h['estado'] }}, {{ $h['data'] }}, {{ $h['user'] }}<br>
+          <div class="ml-3">
+            @if ($h['comentario'])
+              {{ $h['comentario'] }}
+            @endif
+          </div>
+        @empty
+        @endforelse
       </div>
     </div>
   </div>

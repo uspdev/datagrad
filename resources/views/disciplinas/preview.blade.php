@@ -17,7 +17,7 @@
 @endsection
 
 @section('content')
-    @include('disciplinas.partials.navbar-edit')
+    @include('disciplinas.partials.navbar-preview')
 
   <div class="row">
     <div class="col-12">

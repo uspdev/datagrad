@@ -69,7 +69,7 @@ class DisciplinaController extends Controller
         }
 
         $discs = $discs->sortBy('coddis');
-
+        
         return view('disciplinas.index', compact('discs', 'visao'));
     }
 
@@ -144,8 +144,7 @@ class DisciplinaController extends Controller
             }
         }
         $disc->cursos = $cursos;
-
-        // dd($disc);
+        // dd($disc->dr['cursos']);
 
         return view('disciplinas.edit', compact('disc'));
     }
@@ -161,14 +160,15 @@ class DisciplinaController extends Controller
     {
         $request->validate([]);
         $disc = Disciplina::primeiroOuNovo($coddis);
+        $disc->atualizarEstado('Em edição');
         $this->authorize('update', $disc);
 
         // para aprovação, finaliza a edição do pdf
         if ($request->submit == 'Em aprovação') {
-            $disc->estado = 'Em aprovação';
+            $disc->atualizarEstado('Em aprovação');
             $disc->save();
             Disciplina::renovarCacheAfterResponse();
-            return redirect()->route('disciplinas.show', $disc->coddis);
+            return redirect()->route('disciplinas.edit', $disc->coddis);
         }
 
         if ($add = $request->codpes_add) {
@@ -189,11 +189,10 @@ class DisciplinaController extends Controller
             $disc = Pdf::quebrarTextoLongo($disc);
 
             $pdf = Pdf::gerarPdfAlteracaoDisciplina($disc);
-            // dd($request->all());
-            $disc->fresh();
+
+            $disc->refresh();
             unset($disc->diffs);
             $disc->pdf = $pdf;
-            // dd($disc);
             $disc->save();
 
             Disciplina::renovarCacheAfterResponse();
@@ -227,5 +226,12 @@ class DisciplinaController extends Controller
     public function destroy($id)
     {
         //
+    }
+    
+    public function ajuda() {
+        
+        $md = file_get_contents(base_path('docs/disciplinas.md'));
+        
+        return view('disciplinas.ajuda', compact('md'));
     }
 }

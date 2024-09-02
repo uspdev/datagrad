@@ -37,7 +37,7 @@
     <input type="hidden" name="coddis" value={{ $disc->coddis }}>
     @include('disciplinas.partials.navbar-edit')
 
-    <fieldset {{ ($disc->estado == 'Em edição') ? '' : 'disabled' }}>
+    <fieldset {{ $disc->isEditavel() ? '' : 'disabled' }}>
       @include('disciplinas.partials.edit-form')
       {{-- @include('disciplinas.partials.card-curso') --}}
     </fieldset>
@@ -74,6 +74,7 @@
         e.preventDefault();
         mostrarDiff = !mostrarDiff
         mostrarOcultarDiff()
+        console.log('clicou')
       })
 
       // ao submeter form vamos salvar estado do diff

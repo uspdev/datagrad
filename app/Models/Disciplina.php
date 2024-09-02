@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Casts\AsCollection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Disciplina extends Model
@@ -34,7 +35,36 @@ class Disciplina extends Model
         'habilidades' => 'array',
         'competencias' => 'array',
         'pdf' => 'array',
+        'historico' => AsCollection::class,
     ];
+
+    /**
+     * The model's default values for attributes.
+     *
+     * @var array
+     */
+    protected $attributes = [
+        'historico' => '[]', // se for null retorna array para facilitar no froeach
+    ];
+    
+    /**
+     * O histórico é no formato [estado, data, user (nome), comentario (opcional)]
+     */
+
+    // tipdis: acho que deve ir para o replicado ***
+    public static $tipdis = [
+        'S' => 'Semestral',
+        'A' => 'Anual',
+        'Q' => 'Quadrimestral',
+    ];
+
+    /**
+     * Estado da disciplina
+     * 
+     * propor alteração - quando o objeto é criado mas não foi salvo: ainda não foi proposto a alteração
+     */
+    public static $estados = ['Propor alteração', 'Em edição', 'Em aprovação', 'Aprovado', 'Finalizado'];
+
 
     /** Dados que vem do replicado */
     public $dr;
@@ -160,18 +190,6 @@ class Disciplina extends Model
         ],
     ];
 
-    // tipdis
-    public static $tipdis = [
-        'S' => 'Semestral',
-        'A' => 'Anual',
-        'Q' => 'Quadrimestral',
-    ];
-
-    /**
-     * Estado da disciplina
-     */
-    public static $estados = ['Em edição', 'Em aprovação', 'Aprovado', 'Finalizado'];
-
     // protected function pdf(): Attribute
     // {
     //     return Attribute::make(
@@ -180,7 +198,7 @@ class Disciplina extends Model
     //         },
     //     );
     // }
-    
+
     /**
      * Retorna dados replicados da diciplina, incluindo responsaveis, e cursos
      *
@@ -213,7 +231,7 @@ class Disciplina extends Model
             $disc = self::where('coddis', $coddis)->first();
             if (!$disc) {
                 $disc = self::novo($dr);
-                $disc->estado = 'Em edição';
+                $disc->estado = 'Propor alteração';
             }
             $disc->dr = $dr;
         } else {
@@ -374,9 +392,15 @@ class Disciplina extends Model
         $drs = Graduacao::listarDisciplinasPorPrefixo($prefixo);
         $discs = self::mergearResponsaveis(collect(), $drs);
 
+        // vamos pegar as disciplinas locais do prefixo
         $discsLocal = self::where('coddis', 'like', $prefixo . '%')->get();
+        
+        // vamos juntar as disciplinas em aprovação
+        // $discs = $discs->merge(self::where('coddis', 'like', $prefixo . '%')->where('estado', 'Em aprovação')->get());
+        
+        // vamos limpar repetidos
         $discs = self::limparDisciplinasReplicado($discs, $discsLocal);
-
+        
         return $discs;
     }
 
@@ -385,7 +409,7 @@ class Disciplina extends Model
         // renova o cache depois de enviar o response para o navegador
         // https://laravel.com/docs/10.x/queues#dispatching-after-the-response-is-sent-to-browser
         dispatch(function () {
-            SELF::listarDisciplinas(true);
+            self::listarDisciplinas(true);
         })->afterResponse();
     }
 
@@ -492,10 +516,13 @@ class Disciplina extends Model
     public function hash()
     {
         // colunas desconsideradas no hash
-        $removeKeys = ['pdf', 'estado', 'criado_por_id', 'atualizado_por', 'atualizado_por_id', 'created_at', 'updated_at', 'deleted_at', 'diffs'];
+        $removeKeys = ['pdf', 'estado', 'criado_por_id', 'atualizado_por', 'atualizado_por_id', 'created_at', 'updated_at', 'deleted_at', 'diffs', 'historico'];
 
         $data = $this->toArray();
         $data = array_diff_key($data, array_flip($removeKeys));
+
+        // mostra as colunas sendo consideradas
+        // dd(implode('","',array_keys($data)));
 
         // na visualização o resposável tem um campo a mais de status que deve ser removido
         $resps = [];
@@ -505,6 +532,32 @@ class Disciplina extends Model
         $data['responsaveis'] = $resps;
         $hash = md5(json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_NUMERIC_CHECK));
         return $hash;
+    }
+
+    public function atualizarEstado($estado, $comentario = '')
+    {
+        if (empty($this->estado) || $this->estado != $estado) {
+            $novo = [
+                'estado' => $estado,
+                'data' => now()->format('d/m/Y H:i'),
+                'user' => Auth::user()->name,
+                'comentario' => $comentario,
+            ];
+            $historico = $this->historico;
+            $historico[] = $novo;
+            $this->historico = $historico;
+            $this->estado = $estado;
+        }
+    }
+
+    /**
+     * Retorna se a disciplina está em um estado editável ou não
+     * 
+     * @return boolean
+     */
+    public function isEditavel()
+    {
+        return $this->estado == 'Em edição' || $this->estado == 'Propor alteração';
     }
 
     /**

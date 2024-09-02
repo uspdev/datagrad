@@ -50,5 +50,9 @@
       @endcan
     @endif
   </div>
-  <div>@include('disciplinas.partials.consultar-form')</div>
+  <div class="form-inline">
+    @include('disciplinas.partials.consultar-form')
+    @include('disciplinas.partials.ajuda-modal')
+  </div>
+
 </div>

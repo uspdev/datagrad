@@ -1,17 +1,19 @@
 <div class="navbar navbar-light bg-warning card-header-sticky justify-content-between">
   <div>
     <span class="h5">
-      Alteração da disciplina: {{ $disc['coddis'] }} - {{ $disc['nomdis'] }}
+      <a href="{{ route('disciplinas.index') }}">Disciplinas</a>
+      <i class="fas fa-chevron-right"></i>  Alteração da disciplina: {{ $disc['coddis'] }} - {{ $disc['nomdis'] }}
     </span>
 
     @if (Request::is('*/edit'))
-      <button id="mostrar-ocultar-diff" class="btn btn-sm btn-outline-danger ml-2" style="background-color: lightsalmon;">
+      <button id="mostrar-ocultar-diff" type="button" class="btn btn-sm btn-outline-danger ml-2"
+        style="background-color: lightsalmon;">
         Mostrar/ocultar diferenças
       </button>
       @if ($disc->estado != 'Em edição')
-      <button type="button" class="btn btn-sm btn-danger py-0 ml-3" title="Visualizar documento">
-        {{ $disc->estado }}
-      </button>
+        <button type="button" class="btn btn-sm btn-danger py-0 ml-3" title="Visualizar documento">
+          {{ $disc->estado }}
+        </button>
       @endif
     @endif
     @if (Request::is('*/preview'))
@@ -24,7 +26,7 @@
       <a href="{{ route('disciplinas.show', $disc->coddis) }}" class="btn btn-sm btn-secondary ml-2">
         Cancelar
       </a>
-      @if ($disc->estado == 'Em edição')
+      @if ($disc->estado == 'Em edição' || $disc->estado == 'Propor alteração')
         {{-- em edição --}}
         <button class="btn btn-sm btn-primary ml-2 default-submit-btn" type="submit" name="submit" value="save">
           Salvar e continuar
@@ -34,7 +36,8 @@
         </button>
       @else
         {{-- em aprovação, aprovado, finalizado --}}
-        <a href="{{ route('disciplinas.preview', $disc['coddis']) }}" class="btn btn-sm btn-success ml-2" type="submit">
+        <a href="{{ route('disciplinas.preview', $disc['coddis']) }}" class="btn btn-sm btn-success ml-2"
+          type="submit">
           Visualizar documento <i class="fas fa-download"></i>
         </a>
       @endif
@@ -47,16 +50,36 @@
           <a href="{{ route('disciplinas.edit', $disc['coddis']) }}" class="btn btn-sm btn-primary ml-2" type="submit">
             Voltar para edição
           </a>
-          <button class="btn btn-sm btn-success ml-2" type="submit" name="submit" value="Em aprovação">
+          <button class="btn btn-sm btn-success ml-2 aprovacao-confirm" type="submit" name="submit"
+            value="Em aprovação">
             Enviar para aprovação
           </button>
         @else
-          <a href="{{ route('disciplinas.show', $disc['coddis']) }}" class="btn btn-sm btn-primary ml-2" type="submit">
+          <a href="{{ route('disciplinas.edit', $disc['coddis']) }}" class="btn btn-sm btn-primary ml-2" type="submit">
             Voltar para disciplina
           </a>
         @endif
       </form>
     @endif
+    @include('disciplinas.partials.ajuda-modal')
+    
   </div>
 
 </div>
+
+@section('javascripts_bottom')
+  @parent
+  <script>
+    $(document).ready(function() {
+
+      $('.aprovacao-confirm').on('click', function() {
+        if (confirm('Ao enviar para aprovação, não será possivel mais alterar. Confirma?')) {
+          return true
+        } else {
+          return false
+        }
+      })
+
+    })
+  </script>
+@endsection

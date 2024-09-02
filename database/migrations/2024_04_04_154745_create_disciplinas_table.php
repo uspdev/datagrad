@@ -62,8 +62,8 @@ class CreateDisciplinasTable extends Migration
             $table->json('responsaveis')->nullable(); // responsáveis pela disciplina.  (cast para array)
 
             $table->string('pdf')->nullable();
-            // $table->datetime('pdf_date')->nullable();
             $table->string('estado')->nullable(); // criar, editar, finalizado
+            $table->json('historico')->nullable(); // historico dos estados com comentários
 
             $table->foreignId('criado_por_id')->nullable()->constrained('users');
             $table->foreignId('atualizado_por_id')->nullable()->constrained('users');

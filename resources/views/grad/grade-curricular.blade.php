@@ -47,7 +47,6 @@
     {!! $curso['obscrl'] !!}
   </div>
   <hr />
-  {{-- @dd($curso) --}}
   <table class="table table-sm table-striped table-hover datatable-simples dt-fixed-header dt-buttons">
     <thead class="thead-light">
       <tr>

@@ -27,7 +27,7 @@
     <div class="form-inline">
       @include('disciplinas.partials.visoes-index')
       @include('disciplinas.partials.consultar-form')
-      <button class="btn btn-sm btn-info ml-2">Ajuda <i class="fas fa-question"></i></button>
+      @include('disciplinas.partials.ajuda-modal')
     </div>
   </div>
 

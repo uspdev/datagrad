@@ -123,6 +123,7 @@ class Graduacao extends GraduacaoReplicado
         WHERE C.codclg IN (__codundclgs__)
             AND ( (C.dtaatvcur IS NOT NULL) AND (C.dtadtvcur IS NULL) ) -- curso ativo
             AND ( (H.dtaatvhab IS NOT NULL) AND (H.dtadtvhab IS NULL) ) -- habilitação ativa
+            AND H.codhab = '0' -- colocado aqui para remover os cursos de dupla formação com IAU. Precisa melhorar. *******
         ORDER BY C.nomcur, H.nomhab ASC";
 
         return DB::fetchAll($query);
@@ -413,7 +414,6 @@ class Graduacao extends GraduacaoReplicado
         ) ORDER BY T.codtur, T.coddis
         ";
 
-        // dd($query);
         $res = DB::fetchAll($query, ['codpes' => $codpes]);
         return $res;
 
@@ -599,27 +599,48 @@ class Graduacao extends GraduacaoReplicado
     {
         $query = "SELECT F.sglfusclgund, F.codfusclgund,
                 CG.nomcur, CG.codclg,
-                H.nomhab,  G.*, C.* FROM GRADECURRICULAR  G
+                H.nomhab,  G.* --, C.* 
+            FROM GRADECURRICULAR  G
             INNER JOIN CURRICULOGR C ON G.codcrl = C.codcrl
             --   AND C.dtainicrl < GETDATE() -- exclui futuros
               AND (C.dtafimcrl > GETDATE() OR C.dtafimcrl IS NULL) -- pega os curriculos ativos
             INNER JOIN CURSOGR CG ON CG.codcur = C.codcur --AND CG.codclg IN (__codundclgs__)
-            INNER JOIN HABILITACAOGR H ON H.codcur = C.codcur AND H.codhab = C.codhab -- dados da habilitação
+            INNER JOIN HABILITACAOGR H ON H.codcur = C.codcur AND H.codhab = C.codhab AND H.dtadtvhab is NULL -- dados da habilitação
             INNER JOIN FUSAOCOLEGIADOUNIDADE F ON F.codoriclgund = CG.codclg -- pega dados de o colegiado de cursos interunidades
               AND F.codfusclgund < 3000 -- somente graduação (grad +2000, pos +3000, etc)
             WHERE G.coddis = :coddis
+              AND H.codhab = 0 -- exclui os cursos/hab de dupla formacao com IAU. Precisa melhorar *******
             ORDER BY CG.codclg, CG.nomcur -- ordena por colegiado e depois por curso
         ";
 
+        $query = "SELECT C.codcur, CR.nomcur, G.numsemidl, CR.codclg, C.dtainicrl, G.*, C.* FROM GRADECURRICULAR G
+            INNER JOIN CURRICULOGR C ON C.codcrl = G.codcrl
+	            AND C.dtafimcrl IS NULL
+            INNER JOIN CURSOGR CR ON C.codcur = CR.codcur
+            WHERE G.coddis = :coddis
+                AND G.verdis = (
+  	                SELECT MAX(verdis) FROM GRADECURRICULAR WHERE coddis=:coddis
+                )
+            ORDER BY C.codcur";
+
         $ret = DB::fetchAll($query, ['coddis' => $coddis]);
 
-        foreach ($ret as &$r) {
+
+        $res = [];
+        foreach ($ret as $k => $r) {
             // adicionando texto correspondente às siglas de alguns campos, conforme definição nesta classe
             $r['cicdisgdecrltxt'] = self::$cicdisgdecrl[$r['cicdisgdecrl']] ?? '';
             $r['tipobgtxt'] = self::$tipobg[$r['tipobg']] ?? '';
-        }
+            $r['sglfusclgund'] = 'EESC';
+            $r['nomhab'] = '';
 
-        return $ret;
+            // eliminando codcur repetidos
+            if (end($res) && end($res)['codcur'] == $r['codcur']) {
+            } else {
+                $res[] = $r;
+            }
+        }
+        return $res;
     }
 
     /**
@@ -704,7 +725,6 @@ class Graduacao extends GraduacaoReplicado
 
             if (is_array($n) && $n['coddis'] == $d['coddis'] && $n['codtur'] == $d['codtur'] && $n['diasmnocp'] == $d['diasmnocp'] && $n['horent'] == $d['horent'] && $n['horsai'] == $d['horsai']) {
                 $res[$k + 1]['nompesmin'] .= ', ' . $d['nompesmin'];
-                // dd($res[$k + 1]['nompesmin']);
             } else {
                 $d['statusMatricula'] = SELF::$stamtr[$d['stamtr']]; // obtendo stamtr por extenso
                 $ret[] = $d;

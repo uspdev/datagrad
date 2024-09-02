@@ -15,8 +15,10 @@ use Spatie\CommonMarkHighlighter\IndentedCodeRenderer;
 if (!function_exists('md2html')) {
     /**
      * Converte markdown para html (github flavored)
+     * 
+     * Caso seja passado o nome do arquivo, ele irá procurar na pasta docs e carregar
      *
-     * @param String $markdown
+     * @param String $markdown String contendo markdown ou nome do arquivo em docs/
      * @param String $style Estido do CSS (default=default.css)
      * @return String
      * @author Masakik, em 16/11/2022
@@ -32,6 +34,11 @@ if (!function_exists('md2html')) {
         $markdownConverter = new MarkdownConverter($environment);
 
         $html = '<style>' . file_get_contents(base_path('vendor/scrivo/highlight.php/styles/' . $style)) . '</style>';
+        
+        if (is_file(base_path('docs/'.$markdown))) {
+            $markdown = file_get_contents(base_path('docs/'.$markdown));
+        }
+        
         $html .= $markdownConverter->convertToHtml($markdown);
         return $html;
     }
