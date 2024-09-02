@@ -39,7 +39,7 @@
       <div class="card">
 
         <div class="card-header h5">
-          Grupos de disciplinas / Chefes de departamentos
+          Departamentos (Grupos de disciplinas)
         </div>
         <div class="card-body">
           @foreach ($departamentos as $role)

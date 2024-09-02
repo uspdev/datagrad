@@ -5,7 +5,7 @@
 
 Ao entrar no sistema, o docente tem acesso às disciplinas que é responsável.
 Nessas disciplinas ele pode propor alterações.\
-Todas as informações da disicplina podem ser alterados, menos a sigla e o nome.
+Todas as informações da disicplina podem ser alteradas, exceto a sigla e o nome.
 
 Pontos importantes:
 
@@ -17,9 +17,9 @@ Pontos importantes:
 
 <!-- * Será possível acompanhar no sistema o andamento da tramitação. -->
 
-### Para o chefe de departamento
+### Para o departamento
 
-O chefe de departamento tem acesso às disciplinas pertencentes ao departamento, ou seja, as disciplinas cujo prefixo são do departamento.\
+O departamento tem acesso às disciplinas cuja sigla seja correspondente.\
 Para acessar essas disciplinas, o docente de clicar em "disciplinas" e depois escolher a "Visão Departamento".\
 No caso das disciplinas com prefixo da unidade, a CG irá cadastrar um ou mais responsáveis (equivalente a chefe).
 
@@ -29,6 +29,6 @@ No caso das disciplinas com prefixo da unidade, a CG irá cadastrar um ou mais r
 
 As pessoas cadastradas como CG tem acesso a todas as disciplinas da Unidade. Para isso deve clicar em "Disciplinas" e depois escolher a "Visão CG".
 
-A CG também tem acesso ao menu de Funções onde é possível atribuir Funções às pessoas.
+A CG também tem acesso ao menu de Funções onde é possível atribuir funções às pessoas.
 
-Na função Chefe de departamento, em geral, além do chefe própriamente, coloca-se a secretária e outras pessoas que auxiliarão o chefe.
+Na função **Departamento**, em geral, além do chefe, coloca-se a secretária e outras pessoas que auxiliarão o chefe.
