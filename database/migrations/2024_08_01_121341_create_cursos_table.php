@@ -17,6 +17,8 @@ return new class extends Migration
             $table->integer('codhab')->nullable(); // codigo habilitacao
             $table->text('habilidades')->nullable();
             $table->text('competencias')->nullable();
+            $table->text('habilidades_igl')->nullable();
+            $table->text('competencias_igl')->nullable();
             $table->text('dr')->nullable(); // dados replicados
             $table->timestamps();
         });
