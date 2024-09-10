@@ -208,7 +208,7 @@
 @foreach ($disc->cursos as $curso)
   <b>Habilidades e competências para o curso {{ $curso['codcur'] }} - {{ $curso->dr['nomcur'] }}</b><br>
   @if (empty($curso->habilidades))
-    Habilidades não cadastradas!
+    Habilidades não cadastradas!<br>
   @else
     <b>Habilidades</b><br>
     @foreach (explode(PHP_EOL, $curso->habilidades) as $hab)
@@ -219,7 +219,7 @@
   @endif
   <br>
   @if (empty($curso->competencias))
-    Competências não cadastradas!
+    Competências não cadastradas!<br>
   @else
     <b>Competências</b> <br>
     @foreach (explode(PHP_EOL, $curso->competencias) as $con)
@@ -228,6 +228,7 @@
       @endif
     @endforeach
   @endif
+  <br>
 @endforeach
 
 {{-- <br>
