@@ -46,7 +46,7 @@ class Disciplina extends Model
     protected $attributes = [
         'historico' => '[]', // se for null retorna array para facilitar no froeach
     ];
-    
+
     /**
      * O histórico é no formato [estado, data, user (nome), comentario (opcional)]
      */
@@ -394,13 +394,13 @@ class Disciplina extends Model
 
         // vamos pegar as disciplinas locais do prefixo
         $discsLocal = self::where('coddis', 'like', $prefixo . '%')->get();
-        
+
         // vamos juntar as disciplinas em aprovação
         // $discs = $discs->merge(self::where('coddis', 'like', $prefixo . '%')->where('estado', 'Em aprovação')->get());
-        
+
         // vamos limpar repetidos
         $discs = self::limparDisciplinasReplicado($discs, $discsLocal);
-        
+
         return $discs;
     }
 
@@ -566,7 +566,7 @@ class Disciplina extends Model
     public function checkHabilidades($codcur, $habilidade)
     {
         $habilidades = $this->habilidades;
-        if (!empty($habilidades) && in_array($habilidade, $habilidades[$codcur])) {
+        if (!empty($habilidades) && !empty($habilidades[$codcur]) && in_array($habilidade, $habilidades[$codcur])) {
             return 'checked';
         }
         return null;
@@ -578,7 +578,7 @@ class Disciplina extends Model
     public function checkCompetencias($codcur, $competencia)
     {
         $competencias = $this->competencias;
-        if (!empty($competencias) && in_array($competencia, $competencias[$codcur])) {
+        if (!empty($competencias) && !empty($competencias[$codcur]) && in_array($competencia, $competencias[$codcur])) {
             return 'checked';
         }
         return null;
