@@ -39,6 +39,9 @@
 
     <fieldset {{ $disc->isEditavel() ? '' : 'disabled' }}>
       @include('disciplinas.partials.edit-form')
+      @include('disciplinas.partials.form-habilidades-competencias')
+      @include('disciplinas.partials.form-justificativa')
+
       {{-- @include('disciplinas.partials.card-curso') --}}
     </fieldset>
   </form>
