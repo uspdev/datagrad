@@ -733,4 +733,27 @@ class Graduacao extends GraduacaoReplicado
 
         return $ret;
     }
+
+    /**
+     * Método para listar as disciplinas de graduação ativas
+     *
+     * Alterado o nome do método e aplicado filtro de disciplinas desativadas (4/2022)
+     * 
+     * 11/9/2024 - Alterado do replicado para pegar disciplinas que ainda não estão ativadas
+     *
+     * @return Array lista com com disciplinas
+     * @author André Canale Garcia <acgarcia@sc.sp.br> (antes de 4/2022)
+     * @author Masakik, em 7/5/2024, fix #565 - aplicado filtro de disciplinas não ativadas
+     */
+    public static function listarDisciplinas()
+    {
+        $query = "SELECT D1.*
+            FROM DISCIPLINAGR AS D1
+            WHERE (D1.verdis = (SELECT MAX(D2.verdis) FROM DISCIPLINAGR AS D2 WHERE (D2.coddis = D1.coddis)))
+                AND D1.coddis IN (SELECT coddis FROM DISCIPGRCODIGO WHERE DISCIPGRCODIGO.codclg IN (__codundclgs__))
+                AND D1.dtadtvdis IS NULL -- nao foi desativado
+                -- AND D1.dtaatvdis IS NOT NULL -- foi ativado --11/9/2024
+            ORDER BY D1.nomdis ASC";
+        return DB::fetchAll($query);
+    }
 }

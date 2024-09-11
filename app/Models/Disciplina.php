@@ -356,7 +356,7 @@ class Disciplina extends Model
     /**
      * Lista todas as disciplinas da unidade - visão CG
      *
-     * Guarda em cache do Laravel por 24h pois é uma consulta demorada.
+     * Guarda em cache do Laravel por 12h pois é uma consulta demorada.
      * O cache é renovado quando há alteração da diciplina no sistema passando $refresh = true
      */
     public static function listarDisciplinas($refresh = false)
@@ -365,7 +365,7 @@ class Disciplina extends Model
             Cache::forget('listarDisciplinas');
         }
 
-        $discs = Cache::remember('listarDisciplinas', 60 * 60 * 24, function () {
+        $discs = Cache::remember('listarDisciplinas', 60 * 60 * 12, function () {
             $drs = Graduacao::listarDisciplinas();
             $discs = self::mergearResponsaveis(collect(), $drs);
 
