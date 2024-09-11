@@ -676,6 +676,7 @@ class Graduacao extends GraduacaoReplicado
      * @param String $prefixo
      * @return Array
      * @author Masakik, em 27/5/2024
+     * @author MasakiK, em 11/9/2024, comentado dtaatvdis para listar disciplinas ainda não ativadas
      */
     public static function listarDisciplinasPorPrefixo($prefixo)
     {
@@ -683,7 +684,7 @@ class Graduacao extends GraduacaoReplicado
         FROM DISCIPLINAGR AS D1
         WHERE (D1.verdis = (SELECT MAX(D2.verdis) FROM DISCIPLINAGR AS D2 WHERE (D2.coddis = D1.coddis)))
             AND D1.dtadtvdis IS NULL -- nao foi desativado
-            AND D1.dtaatvdis IS NOT NULL -- foi ativado
+            -- AND D1.dtaatvdis IS NOT NULL -- foi ativado
             AND D1.coddis LIKE :prefixo
         ORDER BY D1.nomdis ASC";
 
