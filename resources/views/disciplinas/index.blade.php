@@ -40,6 +40,7 @@
         <th>Cred. Aula</th>
         <th>Cred. Trab.</th>
         <th>Ativ. ext. (horas)</th>
+        <th>Data últ. alteração</th>
         <th>Responsáveis</th>
       </tr>
     </thead>
@@ -74,6 +75,7 @@
           <td>{{ $disc->creaul }}</td>
           <td>{{ $disc->cretrb }}</td>
           <td>{{ $disc->cgahoratvext }}</td>
+          <td><span class="d-none">{{ $disc->dr['dtaultalt'] ?? '' }}</span>{{ formatarData($disc->dr['dtaultalt'] ?? '') }}</td>
           <td>
             {{ $disc->retornarListaResponsaveis() }}
           </td>

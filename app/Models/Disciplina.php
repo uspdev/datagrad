@@ -439,6 +439,7 @@ class Disciplina extends Model
         foreach ($drs as $k => $dr) {
             $disc = new Disciplina();
             $disc->fill($dr);
+            $disc->dr = $dr;
             $disc->responsaveis = Graduacao::listarResponsaveisDisciplina($disc->coddis);
             $discs[] = $disc;
         }
