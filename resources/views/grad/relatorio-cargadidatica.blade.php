@@ -36,7 +36,6 @@
     <div class="my-2"></div>
   </form>
 
-
   @if ($naoEncontrados)
     <hr>
     <div class="h4">Não encontrados</div>
@@ -45,15 +44,51 @@
     @endforeach
   @endif
 
+  <div class="card">
+    <div class="card-header h4">
+      Resultados
+    </div>
+    <div class="card-body">
+      <div class="row">
+
+        <div class="col-md-4">
+          <div class="h5">Sem carga didática</div>
+          @forelse ($semCargaDidatica as $nome)
+            {{ $nome }}<br>
+          @empty
+          @endforelse
+        </div>
+
+        <div class="col-md-4">
+          <div class="h5">Totais</div>
+          <div>Total de horas teóricas/15 semanas: {{ $totalHorasTeoricas / 15 }}</div>
+          <div>Total de horas práticas/15 semanas: {{ $totalHorasPraticas / 15 }}</div>
+          <div>Total de horas: {{ $totalHorasTeoricas / 15 + $totalHorasPraticas / 15 }}</div>
+        </div>
+
+        <div class="col-md-4">
+          <div class="h5">Disciplinas não computadas nos totais</div>
+          @forelse ($disciplinasExcluidas as $d)
+          {{-- @dd($d) --}}
+          <div>{{ $d['coddis'] }} - {{ $d['nomdis'] }}</div>
+          @empty
+          @endforelse
+        </div>
+        
+      </div>
+    </div>
+  </div>
+
   @if ($pessoas)
-    <div class="h4">Resultados</div>
     <div class="alert alert-info">
       <b>Observações</b><br>
       A média semestral de horas/créditos leva em conta a carga horária da turma. <br>
     </div>
-    <table class="table table-sm table-bordered table-hover datatable-simples">
+
+    <table class="table table-sm table-bordered table-hover datatable-simples dt-fixed-header">
       <thead>
         <tr>
+          <th>Número USP</th>
           <th>Nome</th>
           <th>Média semestral turmas</th>
           <th>Média semestral horas teo/pra</th>
@@ -64,7 +99,8 @@
       <tbody>
         @foreach ($pessoas as $pessoa)
           <tr>
-            <td>{{ $pessoa['codpes'] }} {{ $pessoa['nome'] }}</td>
+            <td>{{ $pessoa['codpes'] }}</td>
+            <td>{{ $pessoa['nome'] }}</td>
             <td class="text-center">{{ $pessoa['mediaTurmas'] }}</td>
             <td class="text-center" data-order="{{ $pessoa['mediaHorasTeorica'] + $pessoa['mediaHorasPratica'] }}">
               {{ $pessoa['mediaHorasTeorica'] }}/{{ $pessoa['mediaHorasPratica'] }}
