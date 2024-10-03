@@ -54,6 +54,7 @@
         <th class="c2">Código</th>
         <th>Nome</th>
         <th class="c4">Versão</th>
+        <th class="c4">Data Ativação</th>
         <th class="c5">Tipo</th>
         <th class="c6">Créditos aula/trab</th>
         <th class="c6 text-center" title="Possui atividade de extensão cadastrada">Atv. extensionista</th>
@@ -69,6 +70,7 @@
           <td><a href="{{ route('disciplinas.show', $d['coddis']) }}">{{ $d['coddis'] }}</a></td>
           <td>{{ $d['nomdis'] }} <div class="text-info">{{ $d['nomdisigl'] }}</div></td>
           <td class="text-center">{{ $d['verdis'] }}</td>
+          <td class="text-center">{{ formatarData($d['dtaatvdis']) }}</td>
           <td>{{ App\Replicado\Graduacao::$tipobg[$d['tipobg']] }}</td>
           <td class="text-center">{{ $d['creaul'] }}/{{ $d['cretrb'] }}</td>
           <td class="text-center">{{ $d['cgahoratvext'] ? $d['cgahoratvext'] : 'Não' }}</td>
