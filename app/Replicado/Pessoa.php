@@ -118,7 +118,30 @@ class Pessoa extends PessoaReplicado
         return [];
     }
 
-    public static function procurar() {
+    /**
+     * Método para retornar *array* com a lista de servidores docentes por setor(es)
+     *
+     * Pode passar codigos dos setores em array ou inteiro
+     * Se aposentados = true (default), lista também os docentes aposentados
+     *
+     * @param Array|Integer $codset
+     * @param Bool $aposentados (opt) Default true
+     * @return Array
+     * @author Masakik, em 30/09/2024
+     */
+    public static function listarDocentesSetor($codsets, bool $aposentados = true)
+    {
+        if (is_array($codsets)) {
+            $codsets = implode(',', $codsets);
+        }
 
+        $aposentados = $aposentados ? "OR L.tipvinext='Docente Aposentado'" : '';
+        
+        $query = "SELECT DISTINCT P.* 
+            FROM PESSOA P 
+            INNER JOIN LOCALIZAPESSOA L ON (P.codpes = L.codpes) 
+            WHERE L.codset IN ($codsets) AND L.codfncetr = 0 AND (L.tipvinext='Docente' $aposentados)
+            ORDER BY P.nompes";
+        return DB::fetchAll($query);
     }
 }

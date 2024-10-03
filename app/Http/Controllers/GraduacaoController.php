@@ -9,8 +9,8 @@ use App\Services\Evasao;
 use App\Services\Grafico;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Session;
 use Uspdev\Replicado\Uteis;
+use Uspdev\UspTheme\Facades\UspTheme;
 
 class GraduacaoController extends Controller
 {
@@ -26,7 +26,7 @@ class GraduacaoController extends Controller
         }
 
         $this->authorize('datagrad');
-        \UspTheme::activeUrl('graduacao/relatorio/sintese');
+        UspTheme::activeUrl('graduacao/relatorio/sintese');
 
         $nomes = SELF::limparNomes($request->nomes);
         $pessoas = [];
@@ -75,7 +75,7 @@ class GraduacaoController extends Controller
         }
 
         $this->authorize('datagrad');
-        \UspTheme::activeUrl('graduacao/relatorio/complementar');
+        UspTheme::activeUrl('graduacao/relatorio/complementar');
 
         $anoIni = $request->anoIni;
         $anoFim = $request->anoFim;
@@ -127,7 +127,6 @@ class GraduacaoController extends Controller
             $pessoa['monografiasConcluidasAperfeicoamentoEspecializacao'] = Lattes::listarMonografiasConcluidasAperfeicoamentoEspecializacao(...$params) ?: [];
 
             $pessoas[] = $pessoa;
-
         }
 
         return view('grad.relatorio-complementar', [
@@ -139,24 +138,49 @@ class GraduacaoController extends Controller
     public function cargaDidatica(Request $request)
     {
         $this->authorize('datagrad');
-        \UspTheme::activeUrl('graduacao/relatorio/cargadidatica');
+        UspTheme::activeUrl('graduacao/relatorio/cargadidatica');
 
         $semestreIni = $request->semestreIni;
         $semestreFim = $request->semestreFim;
 
         $semestres = $this->iniFim($request->semestreIni, $request->semestreFim);
 
-        $nomes = SELF::limparNomes($request->nomes);
+        if ($request->codsets && $request->nomes) {
+            $request->session()->flash('alert-warning', 'Forneça somente nomes ou somente setores!');
+        }
+
+        $ocultarTurmas = ($request->ocultarTurmas == 1) ? true : false;
+        $excluirTcc = $request->excluirTcc == 1 ? true : false;
+
+        $codsets = [];
+        if ($request->codsets) {
+            // se foi passado codsets
+            $codsets = $request->codsets;
+            $pessoas = Pessoa::listarDocentesSetor($codsets);
+            $nomes = collect($pessoas)->pluck('nompes')->toArray();
+            $ocultarTurmas = 1;
+            $docentesSetor = Pessoa::listarDocentesSetor($codsets, false);
+        } else {
+            // se foi passado nomes
+            $nomes = SELF::limparNomes($request->nomes);
+            $docentesSetor = 0;
+        }
         sort($nomes);
 
-        // estagio
+        // estagio: vamos excluir disciplinas que não contam para carga didática
         $exclusao = ['1800078', '1800090', '1800096', '1800097', '1800122', '1800200', '1807100', 'SAA0170', 'SEL0425', 'SEL0625', 'SEM0398', 'SEP0622', 'SMM0324'];
 
         // TCC
         $exclusao = array_merge($exclusao, ['1800080', '1800081']);
 
         // projeto de final de curso
-        // $exclusao = array_merge($exclusao, ['1800083', '1800093', '1800094', 'SAA0346', 'SEL0442', 'SEL0444', 'SEM0399', 'SEM0404', 'SMM0325']);
+        $exclusao = array_merge($exclusao, ['1800083', '1800093', '1800094', 'SAA0346', 'SEL0442', 'SEL0444', 'SEM0399', 'SEM0404', 'SMM0325']);
+
+        // projeto de formatura
+        $exclusao = array_merge($exclusao, ['SEL0624']);
+
+        // tutoria academica
+        // $exclusao = array_merge($exclusao, ['1800120', '1800121']);
 
         $pessoas = [];
         $naoEncontrados = [];
@@ -164,7 +188,9 @@ class GraduacaoController extends Controller
         $disciplinasExcluidas = [];
         $totalHorasTeoricas = 0;
         $totalHorasPraticas = 0;
+        $totalTurmas = 0;
         foreach ($nomes as $nome) {
+            
             $pessoaReplicado = Pessoa::procurarServidorPorNome($nome, $fonetico = false) ?? Pessoa::procurarServidorPorNome($nome, $fonetico = true);
             if (!$pessoaReplicado) {
                 $naoEncontrados[] = $nome;
@@ -175,41 +201,64 @@ class GraduacaoController extends Controller
             $pessoa['departamento'] = Pessoa::retornarSetor($pessoaReplicado['codpes']);
             $pessoa['codpes'] = $pessoaReplicado['codpes'];
             $pessoa['nome'] = $pessoaReplicado['nompesttd'];
-            $pessoa['turmas'] = Graduacao::listarTurmasPorCodpes($pessoa['codpes'], $semestres);
 
-            // vamos calcular as cargas horárias médias
+            // ordenando por collect pois o retorno do DB não vem ordenado pois junta varias queries
+            $turmas = collect(Graduacao::listarTurmasPorCodpes($pessoa['codpes'], $semestres))->sortBy(['coddis', 'codtur'])->toArray();
+
+            if (empty($turmas)) {
+                $semCargaDidatica[] = $nome;
+                continue;
+            }
+
+            $count = 0; // contagem do nro de turmas/disciplinas consideradas por pessoa
+            $prev = null;
             $somaHorasTeorica = 0;
             $somaHorasPratica = 0;
-            $count = 0; // contagem do nro de turmas/disciplinas consideradas
-            if (!empty($pessoa['turmas'])) {
-                $k = 0;
-                $prev = $pessoa['turmas'][$k]; // o prev aqui é a 1a. disciplina
-                $divisorQuinzenal = ($prev['stamis'] == 'N') ? 1 : 2; // 'N' -> semanal
+            for ($k = 0; $k < count($turmas); $k++) {
+                $adicionar = true; // permite ignorar adicao na lista pois é repetido dos dias da asemana
 
-                // vamos somar as horas se não estiver nas disciplinas de exclusão
-                if (!in_array($prev['coddis'], $exclusao)) {
-                    $somaHorasTeorica += (int) $prev['cgahorteo'] / $divisorQuinzenal;
-                    $somaHorasPratica += (int) $prev['cgahorpra'] / $divisorQuinzenal;
-                    $count++;
-                } else {
-                    $disciplinasExcluidas[] = $prev;
-                }
-                for ($k = 1; $k < count($pessoa['turmas']); $k++) {
-                    $turma = $pessoa['turmas'][$k];
+                $turma = $turmas[$k];
+                $turma['ministrantes'] = collect(Graduacao::listarMinistrantes($turma))->pluck('nompes');
+                $turma['horafmt'] = '(' . $turma['diasmnocp'] . ') ' . $turma['horent'] . ' - ' . $turma['horsai'];
+
+                if (!$excluirTcc || !in_array($turma['coddis'], $exclusao)) {
                     $divisorQuinzenal = ($turma['stamis'] == 'N') ? 1 : 2; // 'N' -> semanal
+                    $divisorMinistrantes = count($turma['ministrantes']);
 
-                    // acho que aqui exclui quando a disciplina/turma está repetido, ou seja tem mais de um horario ministrado
-                    if (!($prev['codtur'] == $turma['codtur'] && $prev['coddis'] == $turma['coddis'])) {
+                    if ($divisorMinistrantes == 0) {
+                        $divisorMinistrantes = 1;
+                    }
 
-                        if (!in_array($turma['coddis'], $exclusao)) {
-                            $somaHorasTeorica += (int) $turma['cgahorteo'] / $divisorQuinzenal;
-                            $somaHorasPratica += (int) $turma['cgahorpra'] / $divisorQuinzenal;
+                    if (is_null($prev)) {
+                        // primeira turma da lista
+                        $somaHorasTeorica += (int) $turma['cgahorteo'] / $divisorQuinzenal / $divisorMinistrantes;
+                        $somaHorasPratica += (int) $turma['cgahorpra'] / $divisorQuinzenal / $divisorMinistrantes;
+                        $turma['frateo'] = round((int) $turma['cgahorteo'] / $divisorQuinzenal / $divisorMinistrantes, 3);
+                        $turma['frapra'] = round((int) $turma['cgahorpra'] / $divisorQuinzenal / $divisorMinistrantes, 3);
+                        $count++;
+                    } else {
+                        // demais turmas
+                        // aqui exclui quando a disciplina/turma está repetido, ou seja tem mais de um horário ministrado
+                        if (!($prev['codtur'] == $turma['codtur'] && $prev['coddis'] == $turma['coddis'])) {
+                            $somaHorasTeorica += (int) $turma['cgahorteo'] / $divisorQuinzenal / $divisorMinistrantes;
+                            $somaHorasPratica += (int) $turma['cgahorpra'] / $divisorQuinzenal / $divisorMinistrantes;
+                            $turma['frateo'] = round((int) $turma['cgahorteo'] / $divisorQuinzenal / $divisorMinistrantes, 3);
+                            $turma['frapra'] = round((int) $turma['cgahorpra'] / $divisorQuinzenal / $divisorMinistrantes, 3);
                             $count++;
                         } else {
-                            $disciplinasExcluidas[] = $turma;
+                            $pessoa['turmas'][$k - 1]['horafmt'] = $turma['horafmt'] . '; ' . $pessoa['turmas'][$k - 1]['horafmt'];
+                            $adicionar = false;
                         }
                     }
-                    $prev = $turma;
+                } else {
+                    $disciplinasExcluidas[] = $turma;
+                }
+
+                $turma['ministrantes'] = $turma['ministrantes']->implode(', ');
+                $prev = $turma;
+
+                if ($adicionar == true) {
+                    $pessoa['turmas'][$k] = $turma;
                 }
             }
 
@@ -219,8 +268,7 @@ class GraduacaoController extends Controller
 
             $totalHorasTeoricas += $somaHorasTeorica;
             $totalHorasPraticas += $somaHorasPratica;
-            
-            $disciplinasExcluidas = array_map("unserialize", array_unique(array_map("serialize", $disciplinasExcluidas)));
+            $totalTurmas += $count;
 
             // só vamos incluir se tiver ministrado alguma coisa
             if ($pessoa['mediaTurmas'] != 0) {
@@ -230,20 +278,59 @@ class GraduacaoController extends Controller
             }
         }
 
+        $disciplinasExcluidas = collect($disciplinasExcluidas)->sort()->unique('coddis');
+        $turmaSelect = $this->semestres();
+
         session()->flashInput($request->input());
 
-        // dd($pessoas);
-        return view('grad.relatorio-cargadidatica', [
-            'pessoas' => $pessoas,
-            'naoEncontrados' => $naoEncontrados,
-            'semCargaDidatica' => $semCargaDidatica,
-            'totalHorasTeoricas' => $totalHorasTeoricas,
-            'totalHorasPraticas' => $totalHorasPraticas,
-            'disciplinasExcluidas' => $disciplinasExcluidas,
-            'semestreIni' => $semestreIni,
-            'semestreFim' => $semestreFim,
-            'turmaSelect' => $this->semestres(),
-        ]);
+        return view('grad.relatorio-cargadidatica', compact(
+            'pessoas',
+            'naoEncontrados',
+            'semCargaDidatica',
+            'totalHorasTeoricas',
+            'totalHorasPraticas',
+            'totalTurmas',
+            'disciplinasExcluidas',
+            'semestreIni',
+            'semestreFim',
+            'turmaSelect',
+            'ocultarTurmas',
+            'excluirTcc',
+            'codsets',
+            'docentesSetor'
+        ));
+    }
+
+    /**
+     * Realiza os calculos da smedias por turma
+     */
+    protected static function computarTurma($turma, $prev = null)
+    {
+        $count = 0;
+        $somaHorasTeorica = 0;
+        $somaHorasPratica = 0;
+
+        $turma['ministrantes'] = collect(Graduacao::listarMinistrantes($turma))->pluck('nompes');
+
+        $divisorQuinzenal = ($turma['stamis'] == 'N') ? 1 : 2; // 'N' -> semanal
+        $divisorMinistrantes = count($turma['ministrantes']);
+
+        // acho que aqui exclui quando a disciplina/turma está repetido, ou seja tem mais de um horario ministrado
+        if (is_null($prev)) {
+            $somaHorasTeorica += (int) $prev['cgahorteo'] / $divisorQuinzenal;
+            $somaHorasPratica += (int) $prev['cgahorpra'] / $divisorQuinzenal;
+            $count++;
+        } else {
+            if (!($prev['codtur'] == $turma['codtur'] && $prev['coddis'] == $turma['coddis'])) {
+                $somaHorasTeorica += (int) $turma['cgahorteo'] / $divisorQuinzenal / $divisorMinistrantes;
+                $somaHorasPratica += (int) $turma['cgahorpra'] / $divisorQuinzenal / $divisorMinistrantes;
+                $count++;
+            }
+        }
+
+        $turma['ministrantes'] = $turma['ministrantes']->implode(', ');
+
+        return $turma;
     }
 
     protected static function limparNomes($nomes)
@@ -489,5 +576,4 @@ class GraduacaoController extends Controller
 
         return view('grad.relatorio-evasao', ['taxaEvasao' => $taxaEvasao, 'formRequest' => $formRequest, 'cursoOpcao' => $CodcurNomecur, 'imagemEvasao' => $imagemEvasao]);
     }
-
 }

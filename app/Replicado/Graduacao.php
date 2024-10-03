@@ -297,7 +297,7 @@ class Graduacao extends GraduacaoReplicado
      * @return Array
      * @author Masaki K Neto, em 28/3/3023
      */
-    public static function listarMinistrante($turma)
+    public static function listarMinistrantes($turma)
     {
         $params['coddis'] = $turma['coddis'];
         $params['verdis'] = $turma['verdis'];
@@ -310,6 +310,7 @@ class Graduacao extends GraduacaoReplicado
                 AND verdis = CONVERT(INT, :verdis)
                 AND codtur = :codtur";
         $res = DB::fetchAll($query, $params);
+
         return empty($res) ? $res : array_unique($res, SORT_REGULAR);
     }
 
@@ -337,6 +338,7 @@ class Graduacao extends GraduacaoReplicado
             , CONVERT(VARCHAR, T.dtainitur, 103) as dtainitur -- inicio e
             , CONVERT(VARCHAR, T.dtafimtur, 103) as dtafimtur -- fim das aulas
             , D.nomdis -- nome da disciplina
+            , D.verdis
             , (T.numvagtur + T.numvagturcpl + T.numvagopt + T.numvagecr + T.numvagoptlre) as numvagtot -- total de vagas
             , (T.nummtr + T.nummtrturcpl + T.nummtropt + T.nummtrecr + T.nummtroptlre) as nummtrtot -- total de matriculados
             , T.codtur, T.coddis, T.cgahorteo, T.cgahorpra -- dados da turma
@@ -387,6 +389,7 @@ class Graduacao extends GraduacaoReplicado
                     , CONVERT(VARCHAR, T.dtainitur, 103) as dtainitur -- inicio e
                     , CONVERT(VARCHAR, T.dtafimtur, 103) as dtafimtur -- fim das aulas
                     , D.nomdis -- nome da disciplina
+                    , D.verdis
                     , (T.numvagtur + T.numvagturcpl + T.numvagopt + T.numvagecr + T.numvagoptlre) as numvagtot -- total de vagas
                     , (T.nummtr + T.nummtrturcpl + T.nummtropt + T.nummtrecr + T.nummtroptlre) as nummtrtot -- total de matriculados
                     , T.codtur, T.coddis
@@ -468,7 +471,7 @@ class Graduacao extends GraduacaoReplicado
     {
         $turmas = Graduacao::listarTurmas($codcur, $codhab, $semestre);
         foreach ($turmas as &$turma) {
-            $turma['ministrantes'] = Graduacao::listarMinistrante($turma);
+            $turma['ministrantes'] = Graduacao::listarMinistrantes($turma);
             $turma['ativDidaticas'] = Graduacao::listarAtivDidaticas($turma);
         }
         return $turmas;
