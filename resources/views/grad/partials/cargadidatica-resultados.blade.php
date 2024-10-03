@@ -1,5 +1,5 @@
 <div class="card">
-  <div class="card-header h4 card-header-sticky">
+  <div class="card-header h4">
     Resultados
     {{-- @include('grad.partials.ocultar-col-5-btn') --}}
   </div>
@@ -10,8 +10,8 @@
       <thead>
         <tr>
           <th>Nome</th>
-          <th>fração teo</th>
-          <th>fração pra</th>
+          <th>fração TEO</th>
+          <th>fração PRA</th>
 
           <th>codtur</th>
           <th>disciplina</th>
@@ -93,14 +93,17 @@
 
     <div class="alert alert-info d-print-none">
       <b>Observações</b><br>
-      MS = média semestral<br>
-      A média semestral de horas/créditos leva em conta a carga horária nominal da turma. <br>
-      Os créditos são divididos pelo número de ministrantes.<br>
+      Fração TEO e Fração PRA correspondem à fração de horas da disciplina que contribui para a carga didática do docente.
+      A fração corresponde à carga horária da disciplina dividido pelo número de MINISTRANTES e dividido por 2 se for QUINZENAL.
+      {{-- MS = média semestral<br>
+      A média semestral de horas/créditos leva em conta a carga horária nominal da turma. <br> --}}
+      {{-- Os créditos são divididos pelo número de ministrantes.<br>
       Os créditos são divididos por 2 (dois) se a disciplina for quinzenal.<br>
       A fração teórica/prática mostra a fração das horas que são contabilizadas para a média de horas do docente.
-      Ela é obtida dividindo-se as horas da turma pelo número de ministrantes e divindindo por 2 se for qunzenal.
+      Ela é obtida dividindo-se as horas da turma pelo número de ministrantes e divindindo por 2 se for qunzenal. --}}
       Supõe-se que os docentes não permanecam simultaneamente em sala de aula o que pode não ser verdade.<br>
-      Docentes ativos não incluem sêniores mas incluem temporários e afastados.
+      Docentes ativos não incluem sêniores mas incluem temporários e afastados.<br>
+      Nos docentes sem carga didática podem aparecer aposentados antigos.
     </div>
 
   </div>
