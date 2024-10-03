@@ -91,7 +91,7 @@
       </div>
     </div>
 
-    <div class="alert alert-info d-print-none">
+    <div class="alert alert-info">
       <b>Observações</b><br>
       Fração TEO e Fração PRA correspondem à fração de horas da disciplina que contribui para a carga didática do docente.
       A fração corresponde à carga horária da disciplina dividido pelo número de MINISTRANTES e dividido por 2 se for QUINZENAL.
