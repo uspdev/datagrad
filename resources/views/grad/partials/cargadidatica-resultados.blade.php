@@ -102,7 +102,7 @@
       A fração teórica/prática mostra a fração das horas que são contabilizadas para a média de horas do docente.
       Ela é obtida dividindo-se as horas da turma pelo número de ministrantes e divindindo por 2 se for qunzenal. --}}
       Supõe-se que os docentes não permanecam simultaneamente em sala de aula o que pode não ser verdade.<br>
-      Docentes ativos não incluem sêniores mas incluem temporários e afastados.<br>
+      Docentes ativos não incluem sêniores mas incluem temporários e afastados. Os ativos são um retrato atual e pode não refletir o período considerado.<br>
       Nos docentes sem carga didática podem aparecer aposentados antigos.
     </div>
 
