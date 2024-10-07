@@ -2,14 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use App\Replicado\Graduacao;
+use App\Services\Evasao;
 use App\Replicado\Lattes;
 use App\Replicado\Pessoa;
-use App\Services\Evasao;
 use App\Services\Grafico;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
 use Uspdev\Replicado\Uteis;
+use App\Replicado\Graduacao;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Cache;
 use Uspdev\UspTheme\Facades\UspTheme;
 
 class GraduacaoController extends Controller
@@ -137,7 +138,12 @@ class GraduacaoController extends Controller
 
     public function cargaDidatica(Request $request)
     {
-        $this->authorize('datagrad');
+        // $this->authorize('datagrad');
+        
+        if (!Gate::any(['datagrad','disciplina-chefe'])) {
+            abort(403);
+        }
+        
         UspTheme::activeUrl('graduacao/relatorio/cargadidatica');
 
         $semestreIni = $request->semestreIni;

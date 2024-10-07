@@ -19,7 +19,7 @@ $menu = [
     [
         'text' => 'Relatório carga didática',
         'url' => 'graduacao/relatorio/cargadidatica',
-        'can' => 'datagrad',
+        'can' => 'datagrad,disciplina-chefe',
     ],
     [
         'text' => 'Relatório grade horária',
