@@ -138,8 +138,6 @@ class GraduacaoController extends Controller
 
     public function cargaDidatica(Request $request)
     {
-        // $this->authorize('datagrad');
-        
         if (!Gate::any(['datagrad','disciplina-chefe'])) {
             abort(403);
         }
@@ -197,7 +195,8 @@ class GraduacaoController extends Controller
         $totalTurmas = 0;
         foreach ($nomes as $nome) {
             
-            $pessoaReplicado = Pessoa::procurarServidorPorNome($nome, $fonetico = false) ?? Pessoa::procurarServidorPorNome($nome, $fonetico = true);
+            $pessoaReplicado = Pessoa::procurarPorCodpesOuNome($nome, $ativos = true) ?? Pessoa::procurarServidorPorNome($nome, $fonetico = true);
+
             if (!$pessoaReplicado) {
                 $naoEncontrados[] = $nome;
                 continue;

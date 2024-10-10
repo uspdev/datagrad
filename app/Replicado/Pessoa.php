@@ -4,6 +4,7 @@ namespace App\Replicado;
 
 use Uspdev\Replicado\DB;
 use Uspdev\Replicado\Pessoa as PessoaReplicado;
+use Uspdev\Replicado\Uteis;
 
 class Pessoa extends PessoaReplicado
 {
@@ -119,6 +120,53 @@ class Pessoa extends PessoaReplicado
     }
 
     /**
+     * Método para buscar pessoas por codpes ou parte do nome
+     *
+     * A busca é fonética, somente ativos ou todos
+     * O método foi ajustado para compatibilizar com procuraPorNome() e dump()
+     *
+     * 9/3/2022 Revertido em parte para o método original, mas mantendo fonético
+     *
+     * @param String $busca Código ou Nome a ser buscado
+     * @param Bool $ativos Se true faz busca somente entre os ativos, se false busca em toda a base
+     * @return array
+     * @author André Canale Garcia <acgarcia@sc.sp.br> // Adaptação do método procurarPorNome
+     * @author Masaki K Neto, modificado em 1/2/2022
+     */
+    public static function procurarPorCodpesOuNome(string $busca, bool $ativos = true)
+    {
+        if ($ativos) {
+            # se ativos vamos fazer join com LOCALIZAPESSOA
+            if (is_numeric($busca)) { // é codpes
+                $query = "SELECT DISTINCT P.*, L.* FROM PESSOA P
+                INNER JOIN LOCALIZAPESSOA L on L.codpes = P.codpes
+                WHERE P.codpes = convert(int,:codpes)
+                AND L.codpes = P.codpes
+                AND L.tipdsg = NULL --exclui designações
+                
+                ORDER BY P.nompes ASC";
+                $param['codpes'] = $busca;
+            } else { // é string (nome)
+                $query = "SELECT DISTINCT P.*, L.* FROM PESSOA P
+                INNER JOIN LOCALIZAPESSOA L on L.codpes = P.codpes
+                WHERE P.nompesfon LIKE :nome
+                AND L.codpes = P.codpes
+                AND L.tipdsg = NULL --exclui designações
+                ORDER BY P.nompes ASC";
+                $param['nome'] =  '%' . Uteis::fonetico($busca) . '%';
+                
+            }
+
+        } 
+
+        $res = DB::fetch($query, $param);
+        if (isset($res[0]) && is_array($res[0])) {
+            dd($res);
+        }
+        return $res;
+    }
+
+    /**
      * Método para retornar *array* com a lista de servidores docentes por setor(es)
      *
      * Pode passar codigos dos setores em array ou inteiro
@@ -137,9 +185,9 @@ class Pessoa extends PessoaReplicado
 
         $aposentados = $aposentados ? "OR L.tipvinext='Docente Aposentado'" : '';
         
-        $query = "SELECT DISTINCT P.* 
-            FROM PESSOA P 
-            INNER JOIN LOCALIZAPESSOA L ON (P.codpes = L.codpes) 
+        $query = "SELECT DISTINCT P.*
+            FROM PESSOA P
+            INNER JOIN LOCALIZAPESSOA L ON (P.codpes = L.codpes)
             WHERE L.codset IN ($codsets) AND L.codfncetr = 0 AND (L.tipvinext='Docente' $aposentados)
             ORDER BY P.nompes";
         return DB::fetchAll($query);

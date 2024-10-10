@@ -2,16 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use Closure;
-use UspTheme;
 use App\Models\Curso;
-use App\Services\Pdf;
-use App\Services\Diff;
 use App\Models\Disciplina;
+use App\Services\Diff;
+use App\Services\Pdf;
+use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
+use Uspdev\UspTheme\Facades\UspTheme;
 
 class DisciplinaController extends Controller
 {
@@ -69,7 +69,7 @@ class DisciplinaController extends Controller
         }
 
         $discs = $discs->sortBy('coddis');
-        
+
         return view('disciplinas.index', compact('discs', 'visao'));
     }
 
@@ -212,7 +212,7 @@ class DisciplinaController extends Controller
     {
         $disc = Disciplina::where('coddis', $coddis)->first();
 
-        $url = Storage::temporaryUrl('disciplinas/disciplina-' . $coddis . '.pdf', now()->addMinutes(10), ['ResponseContentDisposition' => 'attachment; filename=file2.pdf',]);
+        $url = Storage::temporaryUrl('disciplinas/disciplina-' . $coddis . '.pdf', now()->addMinutes(10), ['ResponseContentDisposition' => 'attachment; filename=file2.pdf']);
 
         return view('disciplinas.preview', compact('disc', 'url'));
     }
@@ -227,11 +227,12 @@ class DisciplinaController extends Controller
     {
         //
     }
-    
-    public function ajuda() {
-        
+
+    public function ajuda()
+    {
+
         $md = file_get_contents(base_path('docs/disciplinas.md'));
-        
+
         return view('disciplinas.ajuda', compact('md'));
     }
 }
