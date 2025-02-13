@@ -15,6 +15,13 @@ Sistema que auxilia na elaboração do relatório de revalidação de cursos de 
 * Gera relatório de evasão por curso e ano de ingresso dos alunos
 * Facilita a alteração de disciplinas, principalmente no processo de tradução para inglês e cadastro de atividade extensionista (em andamento)
 
+## Autorizações
+
+* A variável SENHAUNICA_ADMINS do .env não é utilizada, ou seja, os admins não têm acesso aos itens do menu. Para darmos acesso, fazemos o seguinte (em run-time):
+- clicar no ícone do Senhaunica-socialite > Usuários;
+- na relação que for apresentada, no usuário em questão, clicar em qualquer permissão dele (por exemplo, "admin (env)" ou "Servidor");
+- no pop-up que se abre, marcar os itens a serem autorizados e então clicar no botão "Salvar".
+
 ## Changelog
 
 03/2024
