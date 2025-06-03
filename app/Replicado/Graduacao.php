@@ -25,22 +25,37 @@ class Graduacao extends GraduacaoReplicado
     /**
      * tipoHabilitacao da tabela HABILITACAOGR
      *
-     * Os tipos foram obtidos consultando o BD da EESC e
-     * os que tem ?? não são descirtos na documentação
+     * Inspecionando o código HTML de um campo "Tipo de Habilitação" no JúpiterWeb
+     * aparecem os tipos e suas descrições
+     * 
+     * 'B' => 'Grau Principal exclusivo',
+     * 'E' => 'Licenciatura exclusiva( ECA,IF,IME)',
+     * 'G' => 'Grau Principal c/ sequência opcional',
+     * 'H' => 'Habilitação , modalidade, ênfase, área',
+     * 'I' => 'Grau Principal após Núcleo  Geral',
+     * 'J' => 'Habilitação Exclusiva',
+     * 'L' => 'Licenciatura sequêncial a Bacharelado Obrigatório',
+     * 'M' => 'Licenciatura de Primeiro Grau',
+     * 'N' => 'Licenciatura sem Bacharelado anterior( ex: IB, IQ)',
+     * 'O' => 'Núcleo específico seqüencial',
+     * 'P' => 'Letras - Português',
+     * 'S' => 'Núcleo específico (ex: grandes áreas da Poli)',
+     * 'U' => 'Núcleo Básico ou Geral',
      */
     public static $tiphab = [
-        'B' => 'Grau principal exclusivo',
-        'G' => 'Grau principal com sequência opcional',
-        'H' => 'H ??',
-        'I' => 'I ??',
-        'J' => 'J ??',
-        'L' => 'L ??',
-        'M' => 'M ??',
-        'N' => 'N ??',
-        'O' => 'O ??',
-        'P' => 'P ??',
-        'S' => 'S ??',
-        'U' => 'Núcleo básico ou geral',
+        'B' => 'Grau Principal exclusivo',
+        'E' => 'Licenciatura exclusiva (ECA,IF,IME)',
+        'G' => 'Grau Principal c/ sequência opcional',
+        'H' => 'Habilitação, modalidade, ênfase, área',
+        'I' => 'Grau principal após Núcleo Geral',
+        'J' => 'Habilitação exclusiva',
+        'L' => 'Licenciatura sequencial a Bacharelado obrigatório',
+        'M' => 'Licenciatura de Primeiro Grau',
+        'N' => 'Licenciatura sem Bacharelado anterior (ex: IB,IQ)',
+        'O' => 'Núcleo específico sequencial',
+        'P' => 'Letras - Português',
+        'S' => 'Núcleo específico (ex: grandes áreas da Poli)',
+        'U' => 'Núcleo Básico ou Geral',
     ];
 
     /**
