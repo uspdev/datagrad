@@ -27,9 +27,12 @@ class Graduacao extends GraduacaoReplicado
      *
      * Os tipos foram obtidos consultando o BD da EESC e
      * os que tem ?? não são descirtos na documentação
+     * 
+     * O tipo 'E' ocorre na ECA
      */
     public static $tiphab = [
         'B' => 'Grau principal exclusivo',
+        'E' => 'E ??',        
         'G' => 'Grau principal com sequência opcional',
         'H' => 'H ??',
         'I' => 'I ??',
