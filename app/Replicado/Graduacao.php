@@ -5,6 +5,7 @@ namespace App\Replicado;
 use Uspdev\Replicado\DB;
 use Uspdev\Replicado\Graduacao as GraduacaoReplicado;
 use Uspdev\Replicado\Replicado;
+use Uspdev\Replicado\Estrutura;
 
 class Graduacao extends GraduacaoReplicado
 {
@@ -649,7 +650,7 @@ class Graduacao extends GraduacaoReplicado
             // adicionando texto correspondente às siglas de alguns campos, conforme definição nesta classe
             $r['cicdisgdecrltxt'] = self::$cicdisgdecrl[$r['cicdisgdecrl']] ?? '';
             $r['tipobgtxt'] = self::$tipobg[$r['tipobg']] ?? '';
-            $r['sglfusclgund'] = 'EESC';
+            $r['sglfusclgund'] = Estrutura::obterUnidade(config('datagrad.codundclgs')[0])['sglund']; # obterUnidade só pode receber um codundclg por vez
             $r['nomhab'] = '';
 
             // eliminando codcur repetidos
