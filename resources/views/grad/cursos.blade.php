@@ -4,6 +4,10 @@
   <h4>
     Cursos
   </h4>
+  <span>
+    Exibindo as habilitações 
+    {{ (count(config('datagrad.codhabs')) == 1) ? 'com Código de Habilitação igual a ' . config('datagrad.codhabs')[0] : 'com Código de Habilitação terminando em ' . implode(', ', config('datagrad.codhabs')) }}.
+  </span>
 
   <table class="table table-sm table-hover datatable-simples dt-fixed-header">
     <thead class="thead-light">

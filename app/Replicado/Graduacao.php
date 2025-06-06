@@ -133,12 +133,24 @@ class Graduacao extends GraduacaoReplicado
         //     ORDER BY C.nomcur, H.nomhab ASC";
 
         // aqui está sem o coordenador que estava dando problema na dupla formacao iau
+        
+        $codhabs = config('datagrad.codhabs');
+        $condicaoCodhab = '';
+        if (count($codhabs) == 1) {
+            $condicaoCodhab = 'H.codhab = ' . $codhabs[0]; # EESC: Colocado aqui para remover os cursos de dupla formação com IAU. 
+        } else {
+            for ($i = 0; $i < count($codhabs); $i++) {
+                $condicaoCodhab .= "H.codhab LIKE '%" . $codhabs[$i] . "' OR "; # ECA: Colocado aqui para considerar outras habilitações.
+            }
+            $condicaoCodhab = substr($condicaoCodhab, 0, strlen($condicaoCodhab) - 3);
+        }
+
         $query = " SELECT C.*, H.* FROM CURSOGR C
         INNER JOIN HABILITACAOGR H ON C.codcur = H.codcur
         WHERE C.codclg IN (__codundclgs__)
             AND ( (C.dtaatvcur IS NOT NULL) AND (C.dtadtvcur IS NULL) ) -- curso ativo
             AND ( (H.dtaatvhab IS NOT NULL) AND (H.dtadtvhab IS NULL) ) -- habilitação ativa
-            AND H.codhab = '0' -- colocado aqui para remover os cursos de dupla formação com IAU. Precisa melhorar. *******
+            AND (" . $condicaoCodhab . ") 
         ORDER BY C.nomcur, H.nomhab ASC";
 
         return DB::fetchAll($query);
