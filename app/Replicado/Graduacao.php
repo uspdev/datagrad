@@ -141,7 +141,7 @@ class Graduacao extends GraduacaoReplicado
             $condicaoCodhab = 'H.codhab = ' . $codhabs[0]; # EESC: Colocado aqui para remover os cursos de dupla formação com IAU. 
         } else {
             for ($i = 0; $i < count($codhabs); $i++) {
-                $condicaoCodhab .= "H.codhab LIKE '%" . $codhabs[$i] . "' OR "; # ECA: Colocado aqui para considerar outras habilitações.
+                $condicaoCodhab .= "RIGHT(H.codhab, 1) = " . $codhabs[$i] . " OR "; # ECA: Colocado aqui para considerar outras habilitações.
             }
             $condicaoCodhab = substr($condicaoCodhab, 0, strlen($condicaoCodhab) - 3);
         }
