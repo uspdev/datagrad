@@ -53,14 +53,18 @@
         <th class="c1">Sem. ideal</th>
         <th class="c2">Código</th>
         <th>Nome</th>
+        <th>Nome (en)</th>
         <th class="c4">Versão</th>
         <th class="c4">Data Ativação</th>
         <th class="c5">Tipo</th>
         <th class="c6">Créditos aula/trab</th>
         <th class="c6 text-center" title="Possui atividade de extensão cadastrada">Atv. extensionista</th>
         <th>Objetivos</th>
+        <th>Objetivos (en)</th>
         <th>Programa Resumido</th>
+        <th>Programa Resumido (en)</th>
         <th>Programa</th>
+        <th>Programa (en)</th>
       </tr>
     </thead>
     <tbody>
@@ -68,15 +72,19 @@
         <tr>
           <td>{{ $d['numsemidl'] }}</td>
           <td><a href="{{ route('disciplinas.show', $d['coddis']) }}">{{ $d['coddis'] }}</a></td>
-          <td>{{ $d['nomdis'] }} <div class="text-info">{{ $d['nomdisigl'] }}</div></td>
+          <td>{{ $d['nomdis'] }}</td>
+          <td><div class="text-info">{{ $d['nomdisigl'] }}</div></td>
           <td class="text-center">{{ $d['verdis'] }}</td>
           <td class="text-center">{{ formatarData($d['dtaatvdis']) }}</td>
           <td>{{ App\Replicado\Graduacao::$tipobg[$d['tipobg']] }}</td>
           <td class="text-center">{{ $d['creaul'] }}/{{ $d['cretrb'] }}</td>
           <td class="text-center">{{ $d['cgahoratvext'] ? $d['cgahoratvext'] : 'Não' }}</td>
-          <td class="text-truncate">{!! $d['objdis'] !!} <div class="text-info">{!! $d['objdisigl'] !!}</div></td>
-          <td class="text-truncate">{!! $d['pgmrsudis'] !!} <div class="text-info">{!! $d['pgmrsudisigl'] !!}</div></td>
-          <td class="text-truncate">{!! $d['pgmdis'] !!} <div class="text-info">{!! $d['pgmdisigl'] !!}</div></td>
+          <td class="text-truncate">{!! $d['objdis'] !!}</div></td>
+          <td class="text-truncate"><div class="text-info">{!! $d['objdisigl'] !!}</div></td>
+          <td class="text-truncate">{!! $d['pgmrsudis'] !!}</td>
+          <td class="text-truncate"><div class="text-info">{!! $d['pgmrsudisigl'] !!}</div></td>
+          <td class="text-truncate">{!! $d['pgmdis'] !!}</td>
+          <td class="text-truncate"><div class="text-info">{!! $d['pgmdisigl'] !!}</div></td>
         </tr>
       @endforeach
     </tbody>
