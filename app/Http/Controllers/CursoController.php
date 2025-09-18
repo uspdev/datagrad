@@ -84,10 +84,14 @@ class CursoController extends Controller
         $this->authorize('viewAny', Disciplina::class);
 
         $habilidades = Tools::limparLinhas($request->habilidades);
+        $habilidades_igl = Tools::limparLinhas($request->habilidades_igl);
         $competencias = Tools::limparLinhas($request->competencias);
+        $competencias_igl = Tools::limparLinhas($request->competencias_igl);
         $curso = Curso::find($id);
         $curso->habilidades = $habilidades;
+        $curso->habilidades_igl = $habilidades_igl;
         $curso->competencias = $competencias;
+        $curso->competencias_igl = $competencias_igl;
         $curso->save();
 
         // $habs = explode(PHP_EOL, $habilidades);

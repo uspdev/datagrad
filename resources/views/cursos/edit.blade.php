@@ -24,18 +24,34 @@
 
     <table class="table table-bordered table-sm hab_con">
       <tr style="background-color: aliceBlue">
-        <th class="pl-3">Habilidades</th>
         <th class="pl-3">Competências</th>
+        <th class="pl-3">Competences</th>
+      </tr>
+      <tr>
+        <td class="col-6 p-">
+          <textarea name="competencias" class="form-control autoexpand" rows="10">{{ $curso->competencias }}</textarea>
+        </td>
+        <td class="col-6 p-2">
+          <textarea name="competencias_igl" class="form-control autoexpand" rows="10">{{ $curso->competencias_igl }}</textarea>
+        </td>
+      </tr>
+    </table>
+
+    <table class="table table-bordered table-sm hab_con">
+      <tr style="background-color: aliceBlue">
+        <th class="pl-3">Habilidades</th>
+        <th class="pl-3">Skills</th>
       </tr>
       <tr>
         <td class="col-6 p-">
           <textarea name="habilidades" class="form-control autoexpand" rows="10">{{ $curso->habilidades }}</textarea>
         </td>
         <td class="col-6 p-2">
-          <textarea name="competencias" class="form-control autoexpand" rows="10">{{ $curso->competencias }}</textarea>
+          <textarea name="habilidades_igl" class="form-control autoexpand" rows="10">{{ $curso->habilidades_igl }}</textarea>
         </td>
       </tr>
     </table>
+
     <br>
     <br>
     <br>
