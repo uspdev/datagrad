@@ -32,6 +32,11 @@ $menu = [
         'can' => 'evasao',
     ],
     [
+        'text' => 'Relatório de turmas',
+        'url' => 'graduacao/relatorio/turma',
+        'can' => 'disciplinas',
+    ],
+    [
         'text' => 'Disciplinas',
         'url' => 'disciplinas',
         'can' => 'disciplinas',
