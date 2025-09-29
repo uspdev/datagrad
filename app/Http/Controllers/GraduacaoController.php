@@ -138,10 +138,10 @@ class GraduacaoController extends Controller
 
     public function cargaDidatica(Request $request)
     {
-        if (!Gate::any(['datagrad','disciplina-chefe'])) {
+        if (!Gate::any(['datagrad', 'disciplina-chefe'])) {
             abort(403);
         }
-        
+
         UspTheme::activeUrl('graduacao/relatorio/cargadidatica');
 
         $semestreIni = $request->semestreIni;
@@ -194,7 +194,7 @@ class GraduacaoController extends Controller
         $totalHorasPraticas = 0;
         $totalTurmas = 0;
         foreach ($nomes as $nome) {
-            
+
             $pessoaReplicado = Pessoa::procurarPorCodpesOuNome($nome, $ativos = true) ?? Pessoa::procurarServidorPorNome($nome, $fonetico = true);
 
             if (!$pessoaReplicado) {
@@ -580,5 +580,23 @@ class GraduacaoController extends Controller
         $imagemEvasao = Grafico::criarGraficoEvasao($taxaEvasao, $formRequest);
 
         return view('grad.relatorio-evasao', ['taxaEvasao' => $taxaEvasao, 'formRequest' => $formRequest, 'cursoOpcao' => $CodcurNomecur, 'imagemEvasao' => $imagemEvasao]);
+    }
+
+    public function relatorioTurma(Request $request)
+    {
+        $this->authorize('disciplinas');
+        \UspTheme::activeUrl('graduacao/relatorio/turma');
+
+        if ($request->isMethod('get')) {
+            return view('grad.relatorio-turma', ['disciplinaOpcao' => $CoddisNomedis]);
+        }
+
+        $request->validate([
+            'disciplina' => 'required',
+            'anoInicio' => 'required|integer',
+            'anoFim' => 'required|integer|lt:' . (date('Y')),
+        ]);
+
+        return view('grad.relatorio-turma', ['formRequest' => $formRequest, 'disciplinaOpcao' => $CoddisNomedis]);
     }
 }
