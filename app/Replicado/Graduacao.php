@@ -28,7 +28,7 @@ class Graduacao extends GraduacaoReplicado
      *
      * Inspecionando o código HTML de um campo "Tipo de Habilitação" no JúpiterWeb
      * aparecem os tipos e suas descrições
-     * 
+     *
      * 'B' => 'Grau Principal exclusivo',
      * 'E' => 'Licenciatura exclusiva( ECA,IF,IME)',
      * 'G' => 'Grau Principal c/ sequência opcional',
@@ -134,11 +134,11 @@ class Graduacao extends GraduacaoReplicado
         //     ORDER BY C.nomcur, H.nomhab ASC";
 
         // aqui está sem o coordenador que estava dando problema na dupla formacao iau
-        
+
         $codhabs = config('datagrad.codhabs');
         $condicaoCodhab = '';
         if (count($codhabs) == 1) {
-            $condicaoCodhab = 'H.codhab = ' . $codhabs[0]; # EESC: Colocado aqui para remover os cursos de dupla formação com IAU. 
+            $condicaoCodhab = 'H.codhab = ' . $codhabs[0]; # EESC: Colocado aqui para remover os cursos de dupla formação com IAU.
         } else {
             for ($i = 0; $i < count($codhabs); $i++) {
                 $condicaoCodhab .= "RIGHT(H.codhab, 1) = " . $codhabs[$i] . " OR "; # ECA: Colocado aqui para considerar outras habilitações.
@@ -151,7 +151,7 @@ class Graduacao extends GraduacaoReplicado
         WHERE C.codclg IN (__codundclgs__)
             AND ( (C.dtaatvcur IS NOT NULL) AND (C.dtadtvcur IS NULL) ) -- curso ativo
             AND ( (H.dtaatvhab IS NOT NULL) AND (H.dtadtvhab IS NULL) ) -- habilitação ativa
-            AND (" . $condicaoCodhab . ") 
+            AND (" . $condicaoCodhab . ")
         ORDER BY C.nomcur, H.nomhab ASC";
 
         return DB::fetchAll($query);
@@ -630,7 +630,7 @@ class Graduacao extends GraduacaoReplicado
     {
         $query = "SELECT F.sglfusclgund, F.codfusclgund,
                 CG.nomcur, CG.codclg,
-                H.nomhab,  G.* --, C.* 
+                H.nomhab,  G.* --, C.*
             FROM GRADECURRICULAR  G
             INNER JOIN CURRICULOGR C ON G.codcrl = C.codcrl
             --   AND C.dtainicrl < GETDATE() -- exclui futuros
@@ -727,7 +727,7 @@ class Graduacao extends GraduacaoReplicado
     /**
      * Ajustado do replicado para incluir o nome do ministrante da disciplina
      * Porém se a disciplina tem mais de um ministrante ele retornará em linhas separadas.
-     * 
+     *
      * 5/8/2024 Incluído o retorno de disciplinas com stamtr = I (inscrito), E (Excluído) e P (pre-matricula)
      *
      * @author Masakik, em 21/5/2024
@@ -770,7 +770,7 @@ class Graduacao extends GraduacaoReplicado
      * Método para listar as disciplinas de graduação ativas
      *
      * Alterado o nome do método e aplicado filtro de disciplinas desativadas (4/2022)
-     * 
+     *
      * 11/9/2024 - Alterado do replicado para pegar disciplinas que ainda não estão ativadas
      *
      * @return Array lista com com disciplinas
@@ -788,4 +788,86 @@ class Graduacao extends GraduacaoReplicado
             ORDER BY D1.nomdis ASC";
         return DB::fetchAll($query);
     }
+
+    /**
+     * Método para listar as turmas de uma disciplina,
+     * bem como os ministrantes e os resultados dos alunos:
+     * (Aprovados, reprovados, em recuperação, etc.
+     *
+     * @param Int $coddis
+     * @return Array lista com resultados de cada turma da disciplina
+     * @author Leandro Ramos <leandroramos@usp.br>
+     */
+    public function listarTurmasResultados($coddis)
+    {
+        $query = "
+            SELECT
+	            t.codtur AS 'Código Turma',
+	            p.nompes AS 'Ministrante',
+	            -- Total de matriculados
+                (t.nummtr + t.nummtropt + t.nummtrturcpl + t.nummtrecr) AS 'Total de Matriculados',
+	            -- Aprovados
+	            COUNT(DISTINCT CASE WHEN h.rstfim IN ('A', 'AR') THEN h.codpes END) AS 'Aprovados',
+	            -- Reprovados
+	            COUNT(DISTINCT CASE WHEN h.rstfim IN ('RA', 'RF', 'RN') THEN h.codpes END) AS 'Reprovados',
+	            -- Recuperação
+	            COUNT(DISTINCT CASE WHEN (h.rstfim = 'R' OR h.notfim2 IS NOT NULL) THEN h.codpes END) AS 'De Recuperação',
+	            -- Recuperação Aprovado
+	            COUNT(DISTINCT CASE WHEN (h.rstfim = 'R' OR h.notfim2 IS NOT NULL)
+                                   AND h.rstfim IN ('A', 'AR') THEN h.codpes END) AS 'Recuperação Aprovado',
+	            -- Recuperação Reprovado
+	            COUNT(DISTINCT CASE WHEN (h.rstfim = 'R' OR h.notfim2 IS NOT NULL)
+                                   AND h.rstfim IN ('RA', 'RF', 'RN') THEN h.codpes END) AS 'Recuperação Reprovado',
+                -- Média da Turma
+                AVG(
+                    CASE
+                      WHEN h.notfim IS NULL AND h.notfim2 IS NULL THEN NULL
+                      WHEN h.notfim2 IS NULL THEN h.notfim
+                      WHEN h.notfim > h.notfim2 THEN h.notfim
+                      ELSE h.notfim2
+                    END
+                ) AS 'Média da Turma'
+            FROM
+            	dbo.TURMAGR t
+            JOIN dbo.OCUPTURMA o
+              ON
+            	t.codtur = o.codtur
+            	AND t.coddis = o.coddis
+            	AND t.verdis = o.verdis
+            JOIN dbo.MINISTRANTE m
+              ON
+            	m.codtur = o.codtur
+            	AND m.coddis = o.coddis
+            	AND m.verdis = o.verdis
+            	AND m.codperhor = o.codperhor
+            	AND m.diasmnocp = o.diasmnocp
+            	AND m.dtainiocp = o.dtainiocp
+            JOIN dbo.PESSOA p
+              ON
+            	m.codpes = p.codpes
+            LEFT JOIN dbo.HISTESCOLARGR h
+              ON
+            	h.codtur = t.codtur
+            	AND h.coddis = t.coddis
+            	AND h.verdis = t.verdis
+            WHERE
+            	h.coddis = '4302111'
+            GROUP BY
+            	t.codtur,
+            	p.nompes,
+            	t.nummtr,
+            	t.nummtropt,
+            	t.nummtrturcpl,
+            	t.nummtrecr
+            ORDER BY
+            	t.codtur"
+
+        $param = [
+            'coddis' => $coddis,
+        ];
+
+        $ret = DB::fetchall($query, $param);
+        return $ret;
+    }
+
 }
