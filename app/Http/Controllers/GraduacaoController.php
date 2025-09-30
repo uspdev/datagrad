@@ -587,16 +587,25 @@ class GraduacaoController extends Controller
         $this->authorize('disciplinas');
         \UspTheme::activeUrl('graduacao/relatorio/turma');
 
+        $disciplinas = Graduacao::listarDisciplinas();
+        $resultadosTurmas = Graduacao::listarTurmasResultados($request->disciplina, $request->anoInicio, $request->anoFim);
+
         if ($request->isMethod('get')) {
-            return view('grad.relatorio-turma', ['disciplinaOpcao' => $CoddisNomedis]);
+            return view('grad.relatorio-turma', ['disciplinas' => $disciplinas]);
         }
 
         $request->validate([
             'disciplina' => 'required',
             'anoInicio' => 'required|integer',
-            'anoFim' => 'required|integer|lt:' . (date('Y')),
+            'anoFim' => 'required|integer|lte:' . (date('Y')),
         ]);
 
-        return view('grad.relatorio-turma', ['formRequest' => $formRequest, 'disciplinaOpcao' => $CoddisNomedis]);
+        $formRequest = [
+            'disciplina' => $request->disciplina,
+            'anoInicio'  => $request->anoInicio,
+            'anoFim'     => $request->anoFim,
+        ];
+
+        return view('grad.relatorio-turma', ['formRequest' => $formRequest, 'disciplinas' => $disciplinas, 'resultadosTurmas' => $resultadosTurmas]);
     }
 }

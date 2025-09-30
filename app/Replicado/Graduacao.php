@@ -795,79 +795,76 @@ class Graduacao extends GraduacaoReplicado
      * (Aprovados, reprovados, em recuperação, etc.
      *
      * @param Int $coddis
+     * @param Int $anoInicio
+     * @param Int $anoFim
      * @return Array lista com resultados de cada turma da disciplina
      * @author Leandro Ramos <leandroramos@usp.br>
      */
-    public function listarTurmasResultados($coddis)
+    public static function listarTurmasResultados($coddis, $anoInicio, $anoFim)
     {
         $query = "
             SELECT
-	            t.codtur AS 'Código Turma',
-	            p.nompes AS 'Ministrante',
-	            -- Total de matriculados
-                (t.nummtr + t.nummtropt + t.nummtrturcpl + t.nummtrecr) AS 'Total de Matriculados',
-	            -- Aprovados
-	            COUNT(DISTINCT CASE WHEN h.rstfim IN ('A', 'AR') THEN h.codpes END) AS 'Aprovados',
-	            -- Reprovados
-	            COUNT(DISTINCT CASE WHEN h.rstfim IN ('RA', 'RF', 'RN') THEN h.codpes END) AS 'Reprovados',
-	            -- Recuperação
-	            COUNT(DISTINCT CASE WHEN (h.rstfim = 'R' OR h.notfim2 IS NOT NULL) THEN h.codpes END) AS 'De Recuperação',
-	            -- Recuperação Aprovado
-	            COUNT(DISTINCT CASE WHEN (h.rstfim = 'R' OR h.notfim2 IS NOT NULL)
-                                   AND h.rstfim IN ('A', 'AR') THEN h.codpes END) AS 'Recuperação Aprovado',
-	            -- Recuperação Reprovado
-	            COUNT(DISTINCT CASE WHEN (h.rstfim = 'R' OR h.notfim2 IS NOT NULL)
-                                   AND h.rstfim IN ('RA', 'RF', 'RN') THEN h.codpes END) AS 'Recuperação Reprovado',
+                t.codtur AS 'codigoTurma',
+                p.nompes AS 'ministrante',
+                -- Total de matriculados
+                (t.nummtr + t.nummtropt + t.nummtrturcpl + t.nummtrecr) AS 'matriculados',
+                -- Aprovados
+                COUNT(DISTINCT CASE WHEN h.rstfim IN ('A', 'AR') THEN h.codpes END) AS 'aprovados',
+                -- Reprovados
+                COUNT(DISTINCT CASE WHEN h.rstfim IN ('RA', 'RF', 'RN') THEN h.codpes END) AS 'reprovados',
+                -- De Recuperação
+                COUNT(DISTINCT CASE WHEN (h.rstfim = 'R' OR h.notfim2 IS NOT NULL) THEN h.codpes END) AS 'recuperacao',
+                -- Recuperação Aprovado
+                COUNT(DISTINCT CASE WHEN (h.rstfim = 'R' OR h.notfim2 IS NOT NULL)
+                                   AND h.rstfim IN ('A', 'AR') THEN h.codpes END) AS 'recuperacaoAprovados',
+                -- Recuperação Reprovado
+                COUNT(DISTINCT CASE WHEN (h.rstfim = 'R' OR h.notfim2 IS NOT NULL)
+                                   AND h.rstfim IN ('RA', 'RF', 'RN') THEN h.codpes END) AS 'recuperacaoReprovados',
                 -- Média da Turma
                 AVG(
                     CASE
-                      WHEN h.notfim IS NULL AND h.notfim2 IS NULL THEN NULL
-                      WHEN h.notfim2 IS NULL THEN h.notfim
-                      WHEN h.notfim > h.notfim2 THEN h.notfim
-                      ELSE h.notfim2
+                        WHEN h.notfim IS NULL AND h.notfim2 IS NULL THEN NULL
+                        WHEN h.notfim2 IS NULL THEN h.notfim
+                        WHEN h.notfim > h.notfim2 THEN h.notfim
+                        ELSE h.notfim2
                     END
-                ) AS 'Média da Turma'
-            FROM
-            	dbo.TURMAGR t
-            JOIN dbo.OCUPTURMA o
-              ON
-            	t.codtur = o.codtur
-            	AND t.coddis = o.coddis
-            	AND t.verdis = o.verdis
-            JOIN dbo.MINISTRANTE m
-              ON
-            	m.codtur = o.codtur
-            	AND m.coddis = o.coddis
-            	AND m.verdis = o.verdis
-            	AND m.codperhor = o.codperhor
-            	AND m.diasmnocp = o.diasmnocp
-            	AND m.dtainiocp = o.dtainiocp
-            JOIN dbo.PESSOA p
-              ON
-            	m.codpes = p.codpes
-            LEFT JOIN dbo.HISTESCOLARGR h
-              ON
-            	h.codtur = t.codtur
-            	AND h.coddis = t.coddis
-            	AND h.verdis = t.verdis
-            WHERE
-            	h.coddis = '4302111'
+                ) AS 'mediaTurma'
+            FROM dbo.TURMAGR t
+            INNER JOIN dbo.HISTESCOLARGR h
+                ON h.codtur = t.codtur
+                AND h.coddis = t.coddis
+                AND h.verdis = t.verdis
+                AND h.coddis = :coddis
+                AND SUBSTRING(h.codtur, 1, 4) BETWEEN :anoInicio AND :anoFim
+            INNER JOIN dbo.OCUPTURMA o
+                ON t.codtur = o.codtur
+                AND t.coddis = o.coddis
+                AND t.verdis = o.verdis
+            INNER JOIN dbo.MINISTRANTE m
+                ON m.codtur = o.codtur
+                AND m.coddis = o.coddis
+                AND m.verdis = o.verdis
+                AND m.codperhor = o.codperhor
+                AND m.diasmnocp = o.diasmnocp
+                AND m.dtainiocp = o.dtainiocp
+            INNER JOIN dbo.PESSOA p
+                ON m.codpes = p.codpes
             GROUP BY
-            	t.codtur,
-            	p.nompes,
-            	t.nummtr,
-            	t.nummtropt,
-            	t.nummtrturcpl,
-            	t.nummtrecr
-            ORDER BY
-            	t.codtur"
+                t.codtur,
+                p.nompes,
+                t.nummtr,
+                t.nummtropt,
+                t.nummtrturcpl,
+                t.nummtrecr
+            ORDER BY t.codtur";
 
         $param = [
             'coddis' => $coddis,
+            'anoInicio' => $anoInicio,
+            'anoFim' => $anoFim,
         ];
 
-        $ret = DB::fetchall($query, $param);
+        $ret = DB::fetchAll($query, $param);
         return $ret;
     }
-
 }

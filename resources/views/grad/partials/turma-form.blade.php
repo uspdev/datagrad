@@ -4,9 +4,9 @@
     <label for="disciplina">Disciplina:</label>
     <select id="disciplina" name="disciplina">
       <option value=''>Selecione</option>
-      @foreach ($disciplinaOpcao as $disciplina)
+      @foreach ($disciplinas as $disciplina)
         @if (isset($formRequest))
-          <option value={{ $disciplina['coddis'] }} {{ $formRequest['coddis'] == $disciplina['coddis'] ? 'selected' : '' }}>
+          <option value={{ $disciplina['coddis'] }} {{ $formRequest['disciplina'] == $disciplina['coddis'] ? 'selected' : '' }}>
             {{ $disciplina['coddis'] }} - {{ $disciplina['nomdis'] }} </option>
         @else
           <option value={{ $disciplina['coddis'] }} {{ old('disciplina') == $disciplina['coddis'] ? 'selected' : '' }}>
@@ -30,7 +30,7 @@
   </select>
   <select id="anoFim" name="anoFim">
     <option value=''></option>
-    @foreach (range(2015, date('Y')) as $anoFim)
+    @foreach (range(2015, (date('Y') + 1)) as $anoFim)
       @if (isset($formRequest))
         <option value={{ $anoFim }} {{ $formRequest['anoFim'] == $anoFim ? 'selected' : '' }}>
           {{ $anoFim }}
