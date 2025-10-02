@@ -15,7 +15,8 @@
       @endforeach
     </select>
   </div>
-  <label for="anoInicio">Ano de início do intervalo:</label>
+  <br>
+  <label for="anoInicio">De </label>
   <select id="anoInicio" name="anoInicio">
     <option value=''></option>
     @foreach (range(2015, date('Y')) as $anoInicio)
@@ -28,6 +29,7 @@
       @endif
     @endforeach
   </select>
+  <label for="anoFim"> a </label>
   <select id="anoFim" name="anoFim">
     <option value=''></option>
     @foreach (range(2015, (date('Y'))) as $anoFim)
