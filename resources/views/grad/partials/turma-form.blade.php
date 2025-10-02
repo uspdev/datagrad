@@ -2,7 +2,7 @@
   @csrf
   <div id=opcaoDisciplina>
     <label for="disciplina">Disciplina:</label>
-    <select id="disciplina" name="disciplina">
+    <select class="select2" id="disciplina" name="disciplina">
       <option value=''>Selecione</option>
       @foreach ($disciplinas as $disciplina)
         @if (isset($formRequest))
@@ -30,7 +30,7 @@
   </select>
   <select id="anoFim" name="anoFim">
     <option value=''></option>
-    @foreach (range(2015, (date('Y') + 1)) as $anoFim)
+    @foreach (range(2015, (date('Y'))) as $anoFim)
       @if (isset($formRequest))
         <option value={{ $anoFim }} {{ $formRequest['anoFim'] == $anoFim ? 'selected' : '' }}>
           {{ $anoFim }}
