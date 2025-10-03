@@ -112,6 +112,23 @@ class Graduacao extends GraduacaoReplicado
         'R' => 'Remoção forçada',
     ];
 
+    // codigo-lingua-estrangeira seguindo ISO639-3
+    public static $codlinegr = [
+        'POR' => 'Português',
+        'ENG' => 'Inglês',
+        'SPA' => 'Espanhol',
+        'FRE' => 'Francês',
+        'ITA' => 'Italiano',
+        'GER' => 'Alemão',
+        'JPN' => 'Japonês',
+        'RUS' => 'Russo',
+        'ARA' => 'Árabe',
+        'LAT' => 'Latim',
+        'GRC' => 'Grego antigo',
+        // outros códigos podem ser adicionados conforme necessário
+    ];
+
+
     /**
      * Lista os cursos e habilitações da unidade
      *
@@ -786,7 +803,14 @@ class Graduacao extends GraduacaoReplicado
                 AND D1.dtadtvdis IS NULL -- nao foi desativado
                 -- AND D1.dtaatvdis IS NOT NULL -- foi ativado --11/9/2024
             ORDER BY D1.nomdis ASC";
-        return DB::fetchAll($query);
+        $ret = DB::fetchAll($query);
+
+        $ret = array_map(function ($r) {
+            $r['sitdistxt'] = self::$sitdis[$r['sitdis']] ?? '';
+            return $r;
+        }, $ret);
+        
+        return $ret;
     }
 
     /**

@@ -107,7 +107,7 @@
               @include('disciplinas.partials.codpes-adicionar-btn')
             </span><br>
             <span class="text-secondary">
-              Os nomes na função CG tem acesso a todos os relatórios do sistema e acesso atodas as disciplinas da Unidade.
+              Os nomes na função CG tem acesso a todos os relatórios do sistema e acesso a todas as disciplinas da Unidade.
             </span>
           </div>
           <div class="card-body py-1">

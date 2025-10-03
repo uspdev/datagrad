@@ -20,20 +20,24 @@
 @endsection
 
 @section('content')
-  @include('disciplinas.partials.navbar')
+  @include('disciplinas.partials.show-navbar')
 
-  {{-- <span class="d-block alert alert-info">Exemplos com extensão: SHS0360, MAE0413, ERM0208, MAT0120<br />
+  {{-- <span class="d-block alert alert-info">
+    Exemplos com extensão: SHS0360, MAE0413, ERM0208, MAT0120<br />
     Prática com animais: VCI4104, ZMV1405
+    Viagem didática: GAA0252
   </span> --}}
 
   @if ($dr)
     <form>
       <fieldset disabled>
-        @include('disciplinas.partials.card-basico')
-        @include('disciplinas.partials.card-avaliacao')
-        @include('disciplinas.partials.card-bibliografia')
-        @includeWhen($dr['cgahoratvext'], 'disciplinas.partials.card-extensao')
-        @include('disciplinas.partials.card-curso')
+        @include('disciplinas.partials.show-basico')
+        @include('disciplinas.partials.show-avaliacao')
+        @include('disciplinas.partials.show-bibliografia')
+        @includeWhen($dr['cgahoratvext'], 'disciplinas.partials.show-extensao')
+        @includeWhen($dr['stavgmdid'] ==  'S', 'disciplinas.partials.show-viagem')
+        @includeWhen($dr['stapsuatvani'] ==  'S', 'disciplinas.partials.show-animais')
+        @include('disciplinas.partials.show-curso')
       </fieldset>
     </form>
   @else

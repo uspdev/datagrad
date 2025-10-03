@@ -16,11 +16,11 @@ $menu = [
         'url' => 'graduacao/relatorio/complementar',
         'can' => 'datagrad',
     ],
-    [
-        'text' => 'Relatório carga didática',
-        'url' => 'graduacao/relatorio/cargadidatica',
-        'can' => 'datagrad,disciplina-chefe',
-    ],
+    // [
+    //     'text' => 'Relatório carga didática',
+    //     'url' => 'graduacao/relatorio/cargadidatica',
+    //     'can' => 'datagrad',
+    // ],
     [
         'text' => 'Relatório grade horária',
         'url' => 'graduacao/relatorio/gradehoraria',

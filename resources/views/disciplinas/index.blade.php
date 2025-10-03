@@ -40,6 +40,10 @@
         <th>Cred. Aula</th>
         <th>Cred. Trab.</th>
         <th>Ativ. ext. (horas)</th>
+        <th>Viagem didática (VD)</th>
+        <th>Habilidades e competências</th>
+        <th>Situação</th>
+        <th>Últ. versão</th>
         <th>Data últ. alteração</th>
         <th>Responsáveis</th>
       </tr>
@@ -50,35 +54,25 @@
           <td>
             {{ $disc->coddis }}
           </td>
-          <td>
-            @if (isset($disc->estado) && $disc->estado == 'Em edição')
-              <a href="{{ route('disciplinas.edit', $disc->coddis) }}" class="btn btn-sm btn-outline-warning py-0">
-                Em edição
-              </a>
-            @elseif(isset($disc->estado) && $disc->estado == 'criar')
-              <a href="{{ route('disciplinas.edit', $disc->coddis) }}" class="btn btn-sm btn-outline-success py-0">
-                Em criação
-              </a>
-            @elseif(isset($disc->estado) && $disc->estado == 'Em aprovação')
-              <a href="{{ route('disciplinas.edit', $disc->coddis) }}" class="btn btn-sm btn-outline-danger py-0">
-                Em aprovação
-              </a>
-            @elseif(isset($disc->estado) && $disc->estado == 'Aprovado')
-              <span class="text-secondary">Aprovado</span>
-            @elseif(isset($disc->estado) && $disc->estado == 'Finalizado')
-              <span class="text-secondary">Finalizado</span>
-            @endif
+          <td>@include('disciplinas.partials.index-estado')
           </td>
           <td>
             <a href="{{ route('disciplinas.show', $disc->coddis) }}">{{ $disc->nomdis }}</a>
           </td>
           <td>{{ $disc->creaul }}</td>
           <td>{{ $disc->cretrb }}</td>
-          <td>{{ $disc->cgahoratvext }}</td>
-          <td><span class="d-none">{{ $disc->dr['dtaultalt'] ?? '' }}</span>{{ formatarData($disc->dr['dtaultalt'] ?? '') }}</td>
+          <td>{{ $disc->atividade_extensionista ? $disc->cgahoratvext : '' }}</td>
+          <td>{{ $disc->stavgmdid == '1' ? 'Sim' : '' }}</td>
+          <td>{{ $disc->habilidades ? 'Sim' : '' }}</td>
+          <td>{{ $disc->dr['sitdistxt'] ?? '-' }}</td>
+          <td>{{ $disc->dr['verdis'] ?? '' }}</td>
+          <td data-order={{ $disc->dr['dtaultalt'] ?? '' }}>
+            {{ formatarData($disc->dr['dtaultalt'] ?? '') }}
+          </td>
           <td>
             {{ $disc->retornarListaResponsaveis() }}
           </td>
+          {{-- @if (isset($disc->dr['sitdis']) && $disc->dr['sitdis'] == 'AP') @dd($disc)@endif --}}
         </tr>
       @endforeach
     </tbody>

@@ -27,7 +27,7 @@
       @endif
     @endforeach
   </div>
-
+@endsection
 @section('javascripts_bottom')
   @parent
   <script>
@@ -39,23 +39,41 @@
   </script>
 @endsection
 
-@endsection
-
-
 @section('title')
-@parent
+  @parent
 @endsection
 
 @section('styles')
-@parent
-<style>
-  /*seus estilos*/
-</style>
+  @parent
+  <style>
+    .gap-2 {
+      display: flex;
+      /* precisa ser flex container */
+    }
+
+    .gap-2>*+* {
+      margin-left: 0.5rem;
+      /* 0.5rem = gap-2 do BS5 */
+    }
+
+    .gap-2>*:not(:last-child) {
+      margin-right: 0.5rem;
+    }
+
+    /*seus estilos*/
+  </style>
 @endsection
 
 @section('javascripts_bottom')
-@parent
-<script>
-  // Seu código .js
-</script>
+  @parent
+  <script>
+    // habilita/desabilita mensagens de log no console
+    // alguns scripts usam essa variável
+    function dlog(...args) {
+      if ({{ config('app.debug') ? 'true' : 'false' }}) {
+        console.log("app.debug -", ...args);
+      }
+    }
+    // Seu código .js
+  </script>
 @endsection

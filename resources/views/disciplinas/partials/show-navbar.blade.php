@@ -5,7 +5,7 @@
     </span>
     @if ($dr)
       <span class="h5">
-        <i class="fas fa-chevron-right"></i> Disciplina {{ $dr['coddis'] }} - {{ $dr['nomdis'] }}
+        <i class="fas fa-chevron-right"></i> {{ $dr['coddis'] }} - {{ $dr['nomdis'] }}
       </span>
       {{-- @include('disciplinas.partials.badge-vigencia') --}}
 
@@ -27,26 +27,27 @@
 
       {{-- link jupiter --}}
       <a href="https://uspdigital.usp.br/jupiterweb/obterDisciplina?nomdis=&sgldis={{ $dr['coddis'] }}"
-        class="badge badge-secondary ml-2" target="_BLANK">Jupiter Web <i class="fas fa-link"></i></a>
+        class="btn btn-sm btn-secondary ml-2" target="_BLANK">Jupiter Web <i class="fas fa-link"></i></a>
 
       @can('update', $disc)
         @if ($disc->estado == 'Em aprovação')
-          <button role="button" class="btn btn-sm btn-danger py-0">
-            Em aprovação
-          </button>
+          <a href="{{ route('disciplinas.preview-html', $dr['coddis']) }}" class="btn btn-sm btn-danger ml-2"
+            type="submit">
+            Em aprovação <i class="fas fa-sm fa-chevron-right"></i> Visualizar HTML
+          </a>
         @endif
-        <a href="{{ route('disciplinas.edit', $dr['coddis']) }}" class="btn btn-sm btn-warning ml-2" type="submit">
-          @if ($disc->id)
-            @if ($disc->estado != 'Em aprovação')
-              Editar alteração em andamento
-            @else
-              Ver dados de edição
-            @endif
-          @else
-            Propor alteração da disciplina
-          @endif
-        </a>
 
+        @if ($disc->estado == 'Propor alteração')
+          <a href="{{ route('disciplinas.edit', $dr['coddis']) }}" class="btn btn-sm btn-warning ml-2" type="submit">
+            Propor alteração da disciplina
+          </a>
+        @endif
+
+        @if ($disc->estado == 'Em edição')
+          <a href="{{ route('disciplinas.edit', $dr['coddis']) }}" class="btn btn-sm btn-warning ml-2" type="submit">
+            Editar alteração em andamento
+          </a>
+        @endif
       @endcan
     @endif
   </div>
