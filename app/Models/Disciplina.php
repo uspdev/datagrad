@@ -3,14 +3,14 @@
 namespace App\Models;
 
 use App\Replicado\Pessoa;
+use App\Casts\AlwaysArray;
+use App\Casts\BrazilianDate;
 use App\Replicado\Graduacao;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Casts\AsCollection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
@@ -31,11 +31,16 @@ class Disciplina extends Model
      * @var array
      */
     protected $casts = [
-        'responsaveis' => 'array',
-        'habilidades' => 'array',
-        'competencias' => 'array',
-        'pdf' => 'array',
+        'responsaveis' => AlwaysArray::class,
+        'habilidades' => AlwaysArray::class,
+        'competencias' => AlwaysArray::class,
+        'mtdens' => AlwaysArray::class,
+        'mtdensigl' => AlwaysArray::class,
+        'objdslsut' => AlwaysArray::class,
+        'pdf' => AlwaysArray::class,
         'historico' => AsCollection::class,
+        'dtainivalprp' => BrazilianDate::class,
+        'dtafimvalprp' => BrazilianDate::class,
     ];
 
     /**
@@ -63,8 +68,14 @@ class Disciplina extends Model
      * 
      * propor alteração - quando o objeto é criado mas não foi salvo: ainda não foi proposto a alteração
      */
-    public static $estados = ['Propor alteração', 'Em edição', 'Em aprovação', 'Aprovado', 'Finalizado'];
-
+    public static $estados = [
+        'Criar',
+        'Propor alteração',
+        'Em edição',
+        'Em aprovação',
+        'Aprovado',
+        'Finalizado'
+    ];
 
     /** Dados que vem do replicado */
     public $dr;
@@ -77,6 +88,11 @@ class Disciplina extends Model
         'tipdis' => [
             'titulo' => 'Tipo/Type',
             'diff' => false,
+            'options' => [
+                'S' => 'Semestral',
+                'A' => 'Anual',
+                'Q' => 'Quadrimestral',
+            ],
         ],
         'creaul' => [
             'titulo' => 'Créditos-aula/Semester hour credits',
@@ -94,6 +110,13 @@ class Disciplina extends Model
             'titulo' => 'Duração (semanas)',
             'diff' => false,
         ],
+        'codlinegr' => [
+            'titulo' => 'Idioma/Language',
+            'options' => [
+                'POR' => 'Português',
+                'ENG' => 'Inglês',
+            ],
+        ],
         'nomdis' => [
             'titulo' => 'Nome',
         ],
@@ -101,53 +124,218 @@ class Disciplina extends Model
             'titulo' => 'Name',
             'class' => 'ingles',
         ],
+        'pgmrsudis' => [
+            'titulo' => 'Ementa (sinopse da disciplina)',
+            'ajuda' => 'Trata da apresentação da disciplina, em linhas gerais; da descrição de sua proposta.
+            (Associar o conteúdo resumido aos objetivos de aprendizagem com a bibliografia de referência.)',
+        ],
+        'pgmrsudisigl' => [
+            'titulo' => 'Course Description',
+            'class' => 'ingles',
+        ],
         'objdis' => [
             'titulo' => 'Objetivos',
+            'ajuda' => 'O que se quer alcançar com a disciplina, em termos de aprendizagem dos estudantes;
+             ou seja, expressa o que se espera que os estudantes aprendam ao final da disciplina, 
+             em determinadas condições de ensino, tendo em vista que a ocorrência dessa aprendizagem possa ser verificada.',
         ],
         'objdisigl' => [
             'titulo' => 'Objectives',
             'class' => 'ingles',
         ],
-        'pgmrsudis' => [
-            'titulo' => 'Programa resumido',
-            'ajuda' => 'Resumo do programa da disciplina, para impressão do catálogo de Cursos da Graduação',
-        ],
-        'pgmrsudisigl' => [
-            'titulo' => 'Short program',
-            'class' => 'ingles',
-        ],
         'pgmdis' => [
-            'titulo' => 'Programa completo',
+            'titulo' => 'Conteúdo Programático',
+            'ajuda' => 'Indica os conteúdos que permitirão o alcance dos objetivos definidos.
+             Nesse sentido, os conteúdos de ensino são meios para a realização dos objetivos, 
+             e não os objetivos em si. Conteúdos são conhecimentos que se considera essencial 
+             que sejam apreendidos e reelaborados pelos estudantes para que os objetivos sejam alcançados. 
+             Conteúdo é o conjunto de conhecimentos, habilidades, atitudes e valores que serão 
+             desenvolvidos ao longo da disciplina.',
         ],
         'pgmdisigl' => [
-            'titulo' => 'Full program',
+            'titulo' => 'Full Program',
             'class' => 'ingles',
         ],
+        'mtdens' => [
+            // otitulo combina com inglês pois será apenas um checkbox em pt-br
+            'titulo' => 'Métodos de Ensino',
+            'ajuda' => 'Descreve como os conteúdos serão desenvolvidos para que os objetivos possam ser alcançados: 
+            considerar tempos, espaços e recursos que possam contribuir para a aprendizagem. 
+            São os procedimentos de ensino, as ações e atividades que serão propostas ao longo da disciplina, 
+            em função dos objetivos previstos. Apresenta as estratégias de ensino que orientarão a prática educativa',
+            'options' => [
+                'Aula expositiva',
+                'Aula dialogada',
+                'Atividades em laboratório',
+                'Simulações',
+                'Seminários',
+                'Estudo coletivo com ou sem apresentação dos resultados',
+                'Construção de Portfólio',
+                'Roda de conversa',
+                'Tempestade cerebral',
+                'Mapa conceitual',
+                'Estudo dirigido',
+                'Aulas orientadas',
+                'Lista de discussão por meios informatizados',
+                'Estudo de caso: situação-problema, filmes, imagens, frases, expressões, notícias, entrevistas, depoimentos, documentos.',
+                'Atividade para discussão e solução de problemas',
+                'Resolução de exercícios',
+                'Ensino em pequenos grupos',
+                'Trabalho em grupo / grupos de trabalho',
+                'Dramatização de situação',
+                'Seminário, Simpósio, Palestras - com a turma ou sua organização conjunta',
+                'Painel',
+                'Entrevistas',
+                'Aula com Convidados',
+                'Fórum de Discussão e debates',
+                'Oficina ou Laboratório de construção e testagem',
+                'Estudo do meio',
+                'Ensino com pesquisa',
+                'Exposições e visitas com produção de relatório',
+                'Ensino individualizado',
+                'Diários de aprendizagem',
+                'Ensino baseado em projetos, em problemas',
+            ],
+        ],
+        'mtdensigl' => [
+            'titulo' => 'Teaching Methods',
+            'class' => 'ingles',
+            'options' => [
+                'Lecture',
+                'Dialogued class',
+                'Laboratory activities',
+                'Simulations',
+                'Seminars',
+                'Collective study with or without presentation of results',
+                'Portfolio development',
+                'Roundtable discussion',
+                'Brainstorming',
+                'Concept map',
+                'Guided study',
+                'Tutored classes',
+                'Discussion list via digital media',
+                'Case study: problem-situation, films, images, sentences, expressions, news, interviews, testimonials, documents.',
+                'Activity for discussion and problem solving',
+                'Exercise solving',
+                'Small group teaching',
+                'Group work / working groups',
+                'Role play',
+                'Seminar, Symposium, Lectures - with the class or jointly organized',
+                'Panel',
+                'Interviews',
+                'Guest lecture',
+                'Discussion forum and debates',
+                'Workshop or construction and testing lab',
+                'Field study',
+                'Research-based teaching',
+                'Exhibitions and visits with report production',
+                'Individualized teaching',
+                'Learning journals',
+                'Project-based and problem-based learning',
+            ],
+
+        ],
         'dscmtdavl' => [
-            'titulo' => 'Métodos de avaliação',
+            'titulo' => 'Método de Avaliação',
+            'ajuda' => 'Descrever com clareza o processo de avaliação de aprendizagem para que o aluno compreenda 
+            como todos os elementos do plano de ensino se articulam e para que o professor possa realizar a gestão 
+            da aprendizagem na sua disciplina, com base em evidências do que o aluno aprendeu, 
+            as lacunas na aprendizagem e o que precisa ser redimensionado em termos de ensino. 
+            O estudante precisa também ter clareza do que o professor espera dele em relação à aprendizagem e, 
+            portanto, o que será avaliado, a partir do que foi ensinado. A avaliação, portanto, deve gerar informações 
+            sobre o processo de ensino e de aprendizagem para que o próprio processo possa ser replanejado, 
+            se necessário. O feedback da aprendizagem para o estudante, durante o processo, é fundamental 
+            para que ele esteja seguro de onde precisa avançar e como, por isso, ele deve ser disponibilizado a tempo.',
         ],
         'dscmtdavligl' => [
-            'titulo' => 'Evaluation methods',
+            'titulo' => 'Evaluation Method',
             'class' => 'ingles',
         ],
         'crtavl' => [
-            'titulo' => 'Critérios de avaliação',
+            'titulo' => 'Critérios de Aprovação',
+            'ajuda' => 'A escolha do instrumento de avaliação deve levar em conta aquele que poderá fornecer 
+            o maior conjunto de informações sobre a aprendizagem dos estudantes, para que o professor possa 
+            tomar decisões seguras e precisas sobre como intervir para potencializar a aprendizagem e intervir 
+            onde haja necessidade, para tornar a aprendizagem mais efetiva para todos.',
         ],
         'crtavligl' => [
-            'titulo' => 'Evaluation criterion',
+            'titulo' => 'Evaluation Criterion',
             'class' => 'ingles',
         ],
         'dscnorrcp' => [
-            'titulo' => 'Norma de recuperação',
+            'titulo' => 'Norma de recuperação (da aprendizagem)',
+            'ajuda' => 'Nesse caso, o foco é a recuperação da aprendizagem. Para isso, o estudante deve saber onde 
+            precisa melhorar, em termos de aprendizagem, e como, quais recursos adicionais ele poderá buscar 
+            para aprender o que não conseguiu ainda.'
         ],
         'dscnorrcpigl' => [
             'titulo' => 'Recovery standard',
             'class' => 'ingles',
         ],
         'dscbbgdis' => [
-            'titulo' => 'Bibliografia / References',
+            'titulo' => 'Bibliografia Básica / Bibliography',
+        ],
+        'dscbbgdiscpl' => [
+            'titulo' => 'Bibliografia Complementar',
+        ],
+        'objdslsut' => [ // 17 ODS da ONU
+            'titulo' => 'Objetivos de Desenvolvimento Sustentável',
+            'options' => [
+                'Erradicação da pobreza',
+                'Fome zero e agricultura sustentável',
+                'Saúde e bem-estar',
+                'Educação de qualidade',
+                'Igualdade de gênero',
+                'Água potável e saneamento',
+                'Energia limpa e acessível',
+                'Trabalho decente e crescimento econômico',
+                'Indústria, inovação e infraestrutura',
+                'Redução das desigualdades',
+                'Cidades e comunidades sustentáveis',
+                'Consumo e produção responsáveis',
+                'Ação contra a mudança global do clima',
+                'Vida na água',
+                'Vida terrestre',
+                'Paz, justiça e instituições eficazes',
+                'Parcerias e meios de implantação',
+            ],
+        ],
+        'stavgmdid' => [
+            'titulo' => 'Viagem didática?',
+        ],
+        'staetr' => [
+            'titulo' => 'É estruturante?',
+        ],
+        'dscatvpvs' => [
+            'titulo' => 'Descrição das atividades previstas',
         ],
 
+        // atividades animais
+        'stapsuatvani' => [
+            'titulo' => 'Atividades práticas com animais e/ou materiais biológicos?',
+        ],
+        'ptccmseiaani' => [
+            'titulo' => 'Protocolo CEUA',
+            'ajuda' => 'Número do protocolo emitido pela CEUA - Comissão de Ética de Uso de Animais',
+        ],
+        'dtainivalprp' => [
+            'titulo' => 'Data início da validade da proposta',
+            'ajuda' => 'Data início da validade da proposta de manuseio de animais/matérias biológicos encaminhada para comissão CEUA',
+        ],
+        'dtafimvalprp' => [
+            'titulo' => 'Data fim da validade da proposta',
+            'ajuda' => 'Data fim da validade da proposta de manuseio de animais/matérias biológicos encaminhada para comissão CEUA',
+        ],
+
+        // atividades extensionistas
+        'atividade_extensionista' => [
+            'titulo' => 'Atividade extensionista',
+            'diff' => false,
+            'options' => [
+                true => 'Sim',
+                false => 'Não',
+            ],
+        ],
         'cgahoratvext' => [
             'titulo' => 'Carga horária (horas)',
             'ajuda' => 'Carga horária em atividade extensionista, definida em resolução 07/2018 do Conselho Nacional de Educação (CNE), que estabelece as diretrizes para a extensão na educação superior brasileira (instituições públicas e privadas) e que avaliações do Ministério da Educação (MEC) passam a considerar o currículo dos cursos com a extensão obrigatória.',
@@ -204,9 +392,9 @@ class Disciplina extends Model
      *
      * @param String $coddis
      */
-    public static function obterDisciplinaReplicado($coddis)
+    public static function obterDisciplinaReplicado($coddis, $verdis = 'max')
     {
-        $dr = Graduacao::obterDisciplina($coddis, 'max');
+        $dr = Graduacao::obterDisciplina($coddis, $verdis);
         if ($dr) {
             $dr['responsaveis'] = Graduacao::listarResponsaveisDisciplina($coddis);
 
@@ -222,22 +410,38 @@ class Disciplina extends Model
     }
 
     /**
-     * Similar a createOrNew, mas usando $coddis como chave
+     * Retorna a disciplina existente pelo código, ou cria uma nova se não existir.
+     *
+     * - Se a disciplina existir e tiver versão (`verdis`), usa essa versão.
+     * - Se existir mas não tiver versão, usa 'max'.
+     * - Se não existir, cria nova e marca estado como 'Propor alteração'.
+     * - Se nenhum código for informado, cria nova disciplina e marca estado como 'criar'.
+     *
+     * @param  string|null  $coddis  Código da disciplina
+     * @return self
      */
-    public static function primeiroOuNovo($coddis = null)
+    public static function primeiroOuNovo(?string $coddis = null): self
     {
-        if ($coddis) {
-            $dr = self::obterDisciplinaReplicado($coddis);
-            $disc = self::where('coddis', $coddis)->first();
-            if (!$disc) {
-                $disc = self::novo($dr);
-                $disc->estado = 'Propor alteração';
-            }
-            $disc->dr = $dr;
-        } else {
+        // criar nova disciplina
+        if (!$coddis) {
             $disc = self::novo();
-            $disc->estado = 'criar';
+            $disc->estado = 'Criar';
+            return $disc;
         }
+
+        // alterar disciplina existente
+        $disc = self::where('coddis', $coddis)->where('estado', '!=', 'Finalizado')->first();
+
+        $verdis = $disc ? $disc->verdis : 'max';
+        $dr = self::obterDisciplinaReplicado($coddis, $verdis);
+
+        if (!$disc) {
+            $disc = self::novo($dr);
+            $disc->estado = 'Propor alteração';
+        }
+
+        $disc->dr = $dr;
+
         return $disc;
     }
 
@@ -369,7 +573,7 @@ class Disciplina extends Model
             $drs = Graduacao::listarDisciplinas();
             $discs = self::mergearResponsaveis(collect(), $drs);
 
-            $discsLocal = self::all();
+            $discsLocal = self::where('estado', '!=', 'Finalizado')->get();
             $discs = self::limparDisciplinasReplicado($discs, $discsLocal);
 
             return $discs;
@@ -393,10 +597,7 @@ class Disciplina extends Model
         $discs = self::mergearResponsaveis(collect(), $drs);
 
         // vamos pegar as disciplinas locais do prefixo
-        $discsLocal = self::where('coddis', 'like', $prefixo . '%')->get();
-
-        // vamos juntar as disciplinas em aprovação
-        // $discs = $discs->merge(self::where('coddis', 'like', $prefixo . '%')->where('estado', 'Em aprovação')->get());
+        $discsLocal = self::where('coddis', 'like', $prefixo . '%')->where('estado', '!=','Finalizado')->get();
 
         // vamos limpar repetidos
         $discs = self::limparDisciplinasReplicado($discs, $discsLocal);
@@ -562,6 +763,81 @@ class Disciplina extends Model
     }
 
     /**
+     * Método genérico para retornar itens marcados (habilidades ou competências)
+     *
+     * @param string $codcur Código do curso
+     * @param string $colDisc Coluna do modelo Disciplina (array JSON)
+     * @param string $colCurso Coluna do modelo Curso em português
+     * @param string|null $colCursoIgl Coluna do modelo Curso em inglês (opcional)
+     * @param string $prefix Prefixo para numerar (H ou C)
+     * @param bool $ingles Se true, retorna versão em inglês
+     * @return array
+     */
+    protected function marcarItens(string $codcur, string $colDisc, bool $ingles = false): array
+    {
+        $curso = Curso::where('codcur', $codcur)->first();
+        if (!$curso) {
+            return [];
+        }
+
+        // Determina o prefix automaticamente
+        $prefix = match ($colDisc) {
+            'habilidades' => 'H',
+            'competencias' => 'C',
+            default => 'I',
+        };
+
+        // Colunas do curso
+        $colCursoPt = $colDisc;
+        $colCursoEn = $colDisc . '_igl';
+
+        // Todas as linhas
+        $todasPt = preg_split('/\r\n|\r|\n/', trim($curso->{$colCursoPt}));
+        $todasEn = $ingles && isset($curso->{$colCursoEn})
+            ? preg_split('/\r\n|\r|\n/', trim($curso->{$colCursoEn}))
+            : [];
+
+        // Itens escolhidos pela disciplina
+        $escolhidas = $this->{$colDisc}[$codcur] ?? [];
+
+        $resultado = [];
+        foreach ($todasPt as $i => $itemPt) {
+            if (in_array($itemPt, $escolhidas)) {
+                $valor = $ingles ? ($todasEn[$i] ?? '') : $itemPt;
+                if (!empty(trim($valor))) {
+                    $resultado[] = $prefix . ($i + 1) . '. ' . $valor . ';';
+                }
+            }
+        }
+
+        return $resultado;
+    }
+
+    // Habilidades
+    public function habilidades(string $codcur): array
+    {
+        return $this->marcarItens($codcur, 'habilidades');
+    }
+
+    public function habilidadesIgl(string $codcur): array
+    {
+        return $this->marcarItens($codcur, 'habilidades', true);
+    }
+
+    // Competências
+    public function competencias(string $codcur): array
+    {
+        return $this->marcarItens($codcur, 'competencias');
+    }
+
+    public function competenciasIgl(string $codcur): array
+    {
+        return $this->marcarItens($codcur, 'competencias', true);
+    }
+
+
+
+    /**
      * Retorna o estado checked ou não para input type radio das habilidades
      */
     public function checkHabilidades($codcur, $habilidade)
@@ -583,6 +859,17 @@ class Disciplina extends Model
             return 'checked';
         }
         return null;
+    }
+
+    /**
+     * Retorna a descrição da língua estrangeira a partir do código ISO639-3.
+     *
+     * @param string|null $codlinegr Código da língua (ISO639-3), por exemplo "ENG", "POR".
+     * @return string Nome da língua correspondente ou "-" se não encontrado.
+     */
+    public function codlinegr($codlinegr)
+    {
+        return Graduacao::$codlinegr[$codlinegr] ?? '-';
     }
 
     /**

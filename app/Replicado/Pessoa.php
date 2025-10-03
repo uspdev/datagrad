@@ -90,6 +90,19 @@ class Pessoa extends PessoaReplicado
     }
 
     /**
+     * Retorna o setor do 1o vinculo ativo da pessoa formatado. Ex.: SIGLA - Extenso
+     */
+    public static function retornarSetorFormatado($codpes)
+    {
+        if ($vinculos = Pessoa::listarVinculosAtivosDeVinculo($codpes)) {
+            $ret = $vinculos[0]['nomabvset'] . ' - ' . $vinculos[0]['nomset'];
+        } else {
+            $ret = '-';
+        }
+        return $ret;
+    }
+
+    /**
      * Mostra o endereço formatado em pessoa->replicado()
      */
     public static function retornarEnderecoFormatado($codpes)
@@ -154,10 +167,8 @@ class Pessoa extends PessoaReplicado
                 AND L.tipdsg = NULL --exclui designações
                 ORDER BY P.nompes ASC";
                 $param['nome'] =  '%' . Uteis::fonetico($busca) . '%';
-                
             }
-
-        } 
+        }
 
         $res = DB::fetch($query, $param);
         if (isset($res[0]) && is_array($res[0])) {
@@ -184,7 +195,7 @@ class Pessoa extends PessoaReplicado
         }
 
         $aposentados = $aposentados ? "OR L.tipvinext='Docente Aposentado'" : '';
-        
+
         $query = "SELECT DISTINCT P.*
             FROM PESSOA P
             INNER JOIN LOCALIZAPESSOA L ON (P.codpes = L.codpes)

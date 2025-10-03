@@ -1,4 +1,4 @@
-<div>
+<div class="mb-1">
   Responsáveis/Professors
   @include('disciplinas.partials.codpes-adicionar-btn')
 </div>

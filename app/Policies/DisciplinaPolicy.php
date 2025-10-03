@@ -25,8 +25,11 @@ class DisciplinaPolicy
      */
     public function viewAny(User $user): bool
     {
+        return $user->canAny(['senhaunica.docente', 'senhaunica.admin']) ||
+            $user->canAny(['disciplina-cg', 'disciplina-cc', 'disciplina-chefe']);
+
         // servidores, estagiários e docentes
-        return Gate::check('senhaunica.servidor') || Gate::check('senhaunica.estagiario') || Gate::check('senhaunica.docente');
+        // return Gate::check('senhaunica.servidor') || Gate::check('senhaunica.estagiario') || Gate::check('senhaunica.docente');
     }
 
     /**

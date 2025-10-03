@@ -22,7 +22,8 @@
           @if (empty($curso->habilidades))
             Habilidades não cadastradas!
           @else
-            Habilidades<br>
+          {{-- <x-disciplina-checkbox name="x" :model="$disc"></x-disciplina-checkbox> --}}
+            <b>Habilidades</b><br>
             @foreach (explode(PHP_EOL, $curso->habilidades) as $hab)
               <div class="custom-control custom-checkbox">
                 <input type="checkbox" class="custom-control-input check-with-label"
@@ -40,7 +41,7 @@
           @if (empty($curso->competencias))
             Competências não cadastradas!
           @else
-            Competências <br>
+            <b>Competências</b><br>
             @foreach (explode(PHP_EOL, $curso->competencias) as $con)
               <div class="custom-control custom-checkbox">
                 <input type="checkbox" class="custom-control-input check-with-label"

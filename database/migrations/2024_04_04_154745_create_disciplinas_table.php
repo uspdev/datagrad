@@ -31,6 +31,7 @@ class CreateDisciplinasTable extends Migration
             $table->text('pgmrsudis')->nullable(); // programa resumido
             $table->text('pgmrsudisigl')->nullable();
 
+            $table->boolean('atividade_extensionista')->nullable();
             $table->string('cgahoratvext')->nullable(); // carga horaria extensionista
             $table->text('grpavoatvext')->nullable(); // grupo social alvo
             $table->text('grpavoatvextigl')->nullable();
@@ -55,7 +56,6 @@ class CreateDisciplinasTable extends Migration
             $table->string('ano')->nullable(); // alteração para o ano / semestre
             $table->string('semestre')->nullable();
             $table->text('justificativa')->nullable();
-            $table->boolean('atividade_extensionista')->nullable();
 
             $table->text('habilidades')->nullable(); // habilidades e competencias separados por curso. (cast para array)
             $table->text('competencias')->nullable(); // habilidades e competencias separados por curso. (cast para array)

@@ -12,130 +12,70 @@
       padding-top: 6px;
       padding-bottom: 6px;
     }
-
-    /* formatando as cores do diff */
-    ins {
-      /* background-color: lightgreen; // setado no JS */
-      text-decoration: none;
-    }
-
-    del {
-      background-color: lightsalmon;
-    }
-
-    /* * {
-          scroll-behavior: smooth;
-        } */
   </style>
 @endsection
 
 @section('content')
-  <form method="post" id="disciplinas-edit-form" action="{{ route('disciplinas.update', $disc->coddis) }}">
+  <form action="{{ route('disciplinas.update', $disc->coddis) }}" method="POST" id="disciplinas-edit-form">
     @csrf
     @method('put')
     <input type="hidden" name="id" value={{ $disc->id }}>
     <input type="hidden" name="coddis" value={{ $disc->coddis }}>
-    @include('disciplinas.partials.navbar-edit')
+
+    @php
+      // as várias abas são incluídas com base no id
+      $abas = [
+          ['id' => 'aba-disciplina', 'titulo' => 'Disciplina', 'cor' => 'bg-primary text-white'],
+          ['id' => 'aba-basicas', 'titulo' => 'Ementa', 'cor' => 'bg-primary text-white'],
+          ['id' => 'aba-avaliacao', 'titulo' => 'Avaliação', 'cor' => 'bg-warning text-dark'],
+          ['id' => 'aba-bibliografia', 'titulo' => 'Bibliografia', 'cor' => 'bg-warning text-dark'],
+          ['id' => 'aba-ods', 'titulo' => 'ODS', 'cor' => 'bg-warning text-dark'],
+          ['id' => 'aba-viagem', 'titulo' => 'Viagem didática', 'cor' => 'bg-success text-white'],
+          ['id' => 'aba-extensionista', 'titulo' => 'Atividade extensionista', 'cor' => 'bg-success text-white'],
+          ['id' => 'aba-animais', 'titulo' => 'Atividade com animais', 'cor' => 'bg-success text-white'],
+          ['id' => 'aba-cursos', 'titulo' => 'Cursos', 'cor' => 'bg-warning text-dark'],
+          ['id' => 'aba-justificativa', 'titulo' => 'Justificativa', 'cor' => 'bg-warning text-dark'],
+      ];
+    @endphp
+    <!-- Nav tabs -->
+    <div class="card-header-sticky">
+      @include('disciplinas.partials.edit-navbar')
+
+      <ul class="nav nav-tabs" id="formTabs" role="tablist">
+        @foreach ($abas as $i => $aba)
+          <li class="nav-item">
+            <a class="nav-link @if ($i === 0) active @endif " id="{{ $aba['id'] }}-tab"
+              data-toggle="tab" href="#{{ $aba['id'] }}" role="tab">
+              {{ $aba['titulo'] }}
+            </a>
+          </li>
+        @endforeach
+      </ul>
+    </div>
 
     <fieldset {{ $disc->isEditavel() ? '' : 'disabled' }}>
-      @include('disciplinas.partials.edit-form')
-      @include('disciplinas.partials.form-habilidades-competencias')
-      @include('disciplinas.partials.form-justificativa')
-
-      {{-- @include('disciplinas.partials.card-curso') --}}
+      <!-- Tab panes -->
+      <div class="tab-content mt-3">
+        @foreach ($abas as $i => $aba)
+          <div class="tab-pane fade @if ($i === 0) show active @endif " id="{{ $aba['id'] }}"
+            role="tabpanel">
+            @includeIf("disciplinas.partials.{$aba['id']}")
+          </div>
+        @endforeach
+      </div>
+      <button type="submit" id="btn-next-tab" class="btn btn-primary mt-3">Salvar e continuar</button>
     </fieldset>
   </form>
 @endsection
 
 @section('javascripts_bottom')
   @parent
-  <script src="{{ asset('js/diff-match-patch.js') }}"></script>
-  <script src="{{ asset('js/jquery.pretty-text-diff.js') }}"></script>
   <script>
     $(document).ready(function() {
 
       // habilitando popover
       $(function() {
         $('[data-toggle="popover"]').popover()
-      })
-
-      // mostrar-ocultar diffs *******************************
-      var mostrarOcultarDiff = function() {
-        if (mostrarDiff == true) {
-          $('.diff').removeClass('d-none')
-          $('ins').css('background-color', 'lightgreen')
-          $('ins').css('text-decoration', 'underline')
-        } else {
-          $('.diff').addClass('d-none')
-          $('ins').css('background-color', 'inherit')
-          $('ins').css('text-decoration', 'inherit')
-        }
-      }
-
-      // botão de mostrar/ocultar diffs
-      $('#mostrar-ocultar-diff').on('click', function(e) {
-        e.preventDefault();
-        mostrarDiff = !mostrarDiff
-        mostrarOcultarDiff()
-        console.log('clicou')
-      })
-
-      // ao submeter form vamos salvar estado do diff
-      $('form').on('submit', function() {
-        sessionStorage.setItem('mostrarDiff', mostrarDiff == true ? 'sim' : 'nao');
-      })
-
-      // mostrar diff valor padrão
-      var mostrarDiff = true
-
-      // restaura estado do mostrarDiff ao carregar página
-      var sessionDiff = sessionStorage.getItem('mostrarDiff')
-      if (sessionDiff == 'sim') {
-        mostrarDiff = true
-      }
-      if (sessionDiff == 'nao') {
-        mostrarDiff = false
-      }
-      sessionStorage.removeItem('mostrarDiff');
-
-      if (mostrarDiff == true) {
-        mostrarOcultarDiff()
-      }
-
-      // calcula diff e aplica sempre que necessário ***********
-      // https://github.com/arnab/jQuery.PrettyTextDiff
-      var computarDiff = function(el) {
-        el.closest('table').prettyTextDiff({
-          cleanup: true,
-          debug: false,
-          originalContainer: false,
-          changedContainer: false,
-          originalContent: el.data('original') + ' ',
-          changedContent: el.val() + ' ',
-          diffContainer: '.diff',
-        })
-        mostrarOcultarDiff()
-      }
-
-      // calcula diff no carregamento da página
-      $('textarea, input').each(function() {
-        computarDiff($(this))
-        mostrarOcultarDiff()
-      })
-
-      // aplica diff depois de 1000ms
-      var diff_timer = null
-      $('body').on('change keyup keydown paste cut', 'textarea, input', function() {
-        if (diff_timer) {
-          clearTimeout(diff_timer)
-        }
-        // var el = $(this)
-        diff_timer = setTimeout(computarDiff, 1000, $(this))
-      })
-
-      // aplica diff ao mudar o foco do input (blur)
-      $('body').on('blur', 'textarea, input', function() {
-        computarDiff($(this))
       })
 
       // restaura posição do scroll ao carregar a página
@@ -150,7 +90,51 @@
       $('form').on('submit', function() {
         sessionStorage.setItem('scrollpos', window.scrollY);
       })
-
     })
+
+
+    $(document).ready(function() {
+
+      // Ao mudar de aba, salva o id no localStorage
+      $('a[data-toggle="tab"]').on('shown.bs.tab', function(e) {
+        const tabId = $(e.target).attr('href'); // ex: "#aba1"
+        localStorage.setItem('ultimaAba', tabId);
+      });
+
+      // Ao carregar a página, ativa a aba salva
+      const ultimaAba = localStorage.getItem('ultimaAba');
+      if (ultimaAba) {
+        const link = $('a[data-toggle="tab"][href="' + ultimaAba + '"]');
+        if (link.length) {
+          link.tab('show');
+        }
+      }
+
+
+      // Ao clicar em "Salvar e continuar", vai para próxima aba e salva no localStorage
+      $('#btn-next-tab').on('click', function() {
+        const $tabs = $('.nav-tabs .nav-link');
+        const $active = $tabs.filter('.active');
+        const currentIndex = $tabs.index($active);
+        const $next = $tabs.eq(currentIndex + 1);
+
+        if ($next.length) {
+          // salva a próxima aba como última aba
+          localStorage.setItem('ultimaAba', $next.attr('href'));
+
+          // ativa a próxima aba
+          $next.tab('show');
+
+          // opcional: foco no primeiro input da nova aba
+          $($next.attr('href')).find('input, textarea, select').first().focus();
+        } else {
+          // se não houver próxima aba, envia o form
+          $(this).closest('form').submit();
+        }
+      });
+
+
+
+    });
   </script>
 @endsection

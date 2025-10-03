@@ -23,7 +23,7 @@ if (!function_exists('md2html')) {
      * @return String
      * @author Masakik, em 16/11/2022
      */
-    function md2html($markdown, $style = 'default.css')
+    function md2html(string $path, string $style = 'github.css'): string
     {
         $environment = new Environment();
         $environment->addExtension(new GithubFlavoredMarkdownExtension());
@@ -33,13 +33,24 @@ if (!function_exists('md2html')) {
 
         $markdownConverter = new MarkdownConverter($environment);
 
-        $html = '<style>' . file_get_contents(base_path('vendor/scrivo/highlight.php/styles/' . $style)) . '</style>';
-        
-        if (is_file(base_path('docs/'.$markdown))) {
-            $markdown = file_get_contents(base_path('docs/'.$markdown));
+        // adiciona CSS do highlight
+        $html = '';
+        $styleFile = base_path('vendor/scrivo/highlight.php/styles/' . $style);
+        if (is_file($styleFile)) {
+            $html .= '<style>' . file_get_contents($styleFile) . '</style>';
         }
-        
-        $html .= $markdownConverter->convertToHtml($markdown);
+
+        // caminho do arquivo markdown
+        $file = base_path('docs/' . $path);
+        if (is_file($file)) {
+            $markdown = file_get_contents($file);
+        } else {
+            return '<p><em>Arquivo não encontrado: ' . e($path) . '</em></p>';
+        }
+
+        // converter markdown para HTML
+        $html .= $markdownConverter->convert($markdown)->getContent();
+
         return $html;
     }
 }
