@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Services;
 
 use Amenadiel\JpGraph\Graph;
@@ -52,5 +53,4 @@ class Grafico
         // Codificar a imagem em base64
         return base64_encode($image_data);
     }
-
 }

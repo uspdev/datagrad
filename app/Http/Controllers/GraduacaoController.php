@@ -573,6 +573,13 @@ class GraduacaoController extends Controller
 
         $taxaEvasao = Evasao::taxaEvasao($request->ano, $request->curso);
 
+        if (empty($taxaEvasao)) {
+            return redirect()
+                ->route('graduacao.relatorio.evasao')
+                ->with('alert-warning', 'Não há alunos no intervalo informado.')
+                ->withInput();
+        }
+
         $formRequest = ($request->curso !== null ? Evasao::retornarCodcurNomcur((int) $request->curso) : ['codcur' => '18', 'nomcur' => 'Todos os cursos']);
 
         $formRequest = array_merge($formRequest, ['anoIngresso' => $request->ano]);
