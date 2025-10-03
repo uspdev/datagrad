@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Services;
 
 use App\Replicado\Graduacao;
@@ -18,6 +19,10 @@ class Evasao
     {
         $alunos = Graduacao::listarAlunosIngressantesPorAnoIngresso($anoIngresso, $codcur);
 
+        if (count($alunos) < 1) {
+            return [];
+        }
+
         for ($ano = $anoIngresso; $ano <= date('Y'); $ano++) {
             $contagem[$ano]['countD'] = 0;
             $contagem[$ano]['countC'] = 0;
@@ -34,7 +39,6 @@ class Evasao
                 default:
                     $contagem[$aluno['ano']]['countD']++;
             }
-
         }
 
         // calculando taxa de evasão por ano
@@ -80,9 +84,9 @@ class Evasao
                 $curso['nomcur'] = $curso['nomcur'];
             } else {
                 $curso['nomcur'] =
-                ($curso['nomcur'] == $curso['nomhab'])
-                ? $curso['nomcur']
-                : "{$curso['nomcur']} ({$curso['codhab']}) {$curso['nomhab']}";
+                    ($curso['nomcur'] == $curso['nomhab'])
+                    ? $curso['nomcur']
+                    : "{$curso['nomcur']} ({$curso['codhab']}) {$curso['nomhab']}";
             }
 
             $elem = [
@@ -100,5 +104,4 @@ class Evasao
         }
         return $cursosTratados;
     }
-
 }
