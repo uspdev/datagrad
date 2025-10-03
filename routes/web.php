@@ -40,16 +40,20 @@ Route::post('graduacao/relatorio/cargadidatica', [GraduacaoController::class, 'c
 Route::get('graduacao/relatorio/evasao', [GraduacaoController::class, 'relatorioEvasao'])->name('graduacao.relatorio.evasao');
 Route::post('graduacao/relatorio/evasao', [GraduacaoController::class, 'relatorioEvasao'])->name('graduacao.relatorio.evasao.post');
 
+Route::get('graduacao/relatorio/turma', [GraduacaoController::class, 'relatorioTurma'])->name('graduacao.relatorio.turma');
+Route::post('graduacao/relatorio/turma', [GraduacaoController::class, 'relatorioTurma'])->name('graduacao.relatorio.turma.post');
+
 Route::get('graduacao/cursos', [GraduacaoController::class, 'cursos'])->name('graduacao.cursos');
 Route::get('graduacao/cursos/{codcur}/{codhab}/gradeCurricular', [GraduacaoController::class, 'gradeCurricular'])->name('graduacao.gradeCurricular');
 Route::get('graduacao/cursos/{codcur}/{codhab}/turmas', [GraduacaoController::class, 'turmas'])->name('graduacao.turmas');
 Route::post('graduacao/cursos/{codcur}/{codhab}/turmas', [GraduacaoController::class, 'turmas'])->name('graduacao.turmas.post');
 
-Route::get('disciplinas/ajuda',[DisciplinaController::class, 'ajuda'])->name('disciplinas.ajuda');
-Route::get('disciplinas/{coddis}/preview',[DisciplinaController::class, 'preview'])->name('disciplinas.preview');
+Route::get('disciplinas/ajuda', [DisciplinaController::class, 'ajuda'])->name('disciplinas.ajuda');
+Route::get('disciplinas/{coddis}/preview', [DisciplinaController::class, 'preview'])->name('disciplinas.preview');
 Route::resource('disciplinas', DisciplinaController::class)->parameters(['disciplinas' => 'coddis']);
 
-Route::get('arquivos/download',[ArquivoController::class, 'download'])->name('arquivos.download');
+Route::get('arquivos/download', [ArquivoController::class, 'download'])->name('arquivos.download');
 
 Route::resource('/roles', RoleController::class);
 Route::resource('/cursos', CursoController::class);
+
