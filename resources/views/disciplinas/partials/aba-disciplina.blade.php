@@ -14,4 +14,8 @@
   </div>
 </div>
 
-{{-- @include('disciplinas.partials.form-historico') --}}
+@can('admin')
+<div class="pl-2" style="border-left:4px solid red;">
+  @include('disciplinas.partials.form-historico')
+</div>
+@endcan
