@@ -22,6 +22,12 @@ Sistema que auxilia na elaboração do relatório de revalidação de cursos de 
 - na relação que for apresentada, no usuário em questão, clicar em qualquer permissão dele (por exemplo, "admin (env)" ou "Servidor");
 - no pop-up que se abre, marcar os itens a serem autorizados e então clicar no botão "Salvar".
 
+## Documentação
+
+- [Disciplinas](docs/disciplinas.md)
+- [Dokku Deploy](docs/dokku-deploy.md)
+- [Starter](docs/starter.md)
+
 ## Changelog
 
 03/2024
