@@ -31,6 +31,7 @@ modais.
               .find('br').replaceWith('\n') // substitui <br> por \n
               .end()
               .text() // pega o texto completo
+              .replace(/¶/g, '') // remove caracteres de parágrafo
               .split('\n') // divide em linhas
               .map(line => line.trim()) // trim em cada linha
               .filter(line => line.length) // remove linhas vazias
