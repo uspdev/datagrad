@@ -601,11 +601,28 @@ class GraduacaoController extends Controller
             return view('grad.relatorio-turma', ['disciplinas' => $disciplinas]);
         }
 
-        $request->validate([
+        $rules = [
             'disciplina' => 'required',
-            'anoInicio' => 'required|integer',
-            'anoFim' => 'required|integer|lte:' . (date('Y')),
-        ]);
+            'anoInicio'  => 'required|integer',
+            'anoFim'     => 'required|integer|lte:' . date('Y'),
+        ];
+
+        $messages = [
+            'disciplina.required' => 'Informe a disciplina.',
+            'anoInicio.required'  => 'Informe o ano de início.',
+            'anoFim.required'     => 'Informe o ano final.',
+            'anoFim.lte'          => 'O ano final não pode ser depois do ano atual.',
+        ];
+
+        $validated = $request->validate($rules, $messages);
+
+        if ($request->filled('anoInicio') && $request->filled('anoFim')) {
+            if ($request->anoFim < $request->anoInicio) {
+                return back()
+                    ->withErrors(['anoFim' => 'O ano final deve ser maior ou igual ao ano de início.'])
+                    ->withInput();
+            }
+        }
 
         $formRequest = [
             'disciplina' => $request->disciplina,
