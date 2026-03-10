@@ -23,7 +23,7 @@
         <div class="mx-2"></div>
 
         <input type="hidden" name="codhab" value="{{ $curso['codhab'] }}">
-        <button class="btn btn-sm btn-primary d-none btn-spinner py-0 mr-2" type="submit">OK</button>
+        <button class="btn btn-sm btn-primary btn-spinner py-0 mr-2" type="submit">OK</button>
       </form>
     </div>
 
@@ -110,7 +110,7 @@
   </table>
 @endsection
 
-@section('javascripts_bottom')
+{{-- @section('javascripts_bottom')
   @parent
   <script>
     $('#form-semestre select').change(function() {
@@ -118,4 +118,4 @@
       console.log('mudou')
     })
   </script>
-@endsection
+@endsection --}}
