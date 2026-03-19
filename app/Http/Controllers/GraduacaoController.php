@@ -388,20 +388,43 @@ class GraduacaoController extends Controller
         $this->authorize('datagrad');
         \UspTheme::activeUrl('graduacao/relatorio/gradehoraria');
 
-        $nusps = SELF::limparNomes($request->nusps); //limpando os números usp na verdade
+        $entradas = SELF::limparNomes($request->nusps);  //limpando os números usp na verdade
 
+        $codpesParaProcessar = [];
         $horarios = [];
         $naoEncontrados = [];
 
-        foreach ($nusps as $codpes) {
-            // recupera a grade completa do aluno
-            $gradeAluno = Graduacao::obterGradeHoraria($codpes);
-            if (!$gradeAluno) {
-                $naoEncontrados[] = $codpes;
+        foreach ($entradas as $entrada) {
+            if (is_numeric($entrada)) {
+                $codpesParaProcessar[] = $entrada;
+            } else {
+                $pessoas = Pessoa::procurarPorNome($entrada);
+
+                if (!empty($pessoas)) {
+                    foreach ($pessoas as $pessoa) {
+                        $codpesParaProcessar[] = $pessoa['codpes'];
+                    }
+                } else {
+                    $naoEncontrados[] = $entrada;
+                }
+            }
+        }
+
+        foreach ($codpesParaProcessar as $codpes) {
+            $nome = Pessoa::obterNome($codpes);
+
+            if (!$nome) {
+                $naoEncontrados[] = $codpes . " (Número USP não encontrado na base)";
                 continue;
             }
 
-            $nome = Pessoa::obterNome($codpes);
+            $gradeAluno = Graduacao::obterGradeHoraria($codpes);
+            
+            if (!$gradeAluno) {
+                $naoEncontrados[] = $codpes . " - " . $nome . " (Sem grade horária)";
+                continue;
+            }
+
             $gradeAluno = array_map(function ($horario) use ($nome, $codpes) {
                 $horario['nome'] = $nome;
                 $horario['codpes'] = $codpes;
