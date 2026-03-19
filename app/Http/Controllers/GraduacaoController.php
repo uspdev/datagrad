@@ -410,8 +410,14 @@ class GraduacaoController extends Controller
             }
         }
 
+        $nomesEncontrados = [];
+
+        if (!empty($codpesParaProcessar)) {
+            $nomesEncontrados = Pessoa::obterNome($codpesParaProcessar);
+        }
+
         foreach ($codpesParaProcessar as $codpes) {
-            $nome = Pessoa::obterNome($codpes);
+            $nome = $nomesEncontrados[$codpes] ?? null;
 
             if (!$nome) {
                 $naoEncontrados[] = $codpes . " (Número USP não encontrado na base)";

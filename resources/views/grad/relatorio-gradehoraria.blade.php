@@ -9,7 +9,7 @@
   <form method="POST" action="">
     @csrf
     <div class="form-group">
-      <label for="nuspsTextarea">Forneça uma lista de números USP (1 por linha)</label>
+      <label for="nuspsTextarea">Forneça uma lista que contenha nomes ou números USP (1 por linha)</label>
       <textarea name="nusps" class="form-control" id="nuspsTextarea" rows="4">{{ old('nusps') }}</textarea>
     </div>
     <button type="submit" class="btn btn-sm btn-primary spinner mt-3">Enviar</button>
