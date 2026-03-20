@@ -9,8 +9,8 @@
   <div class="input-group input-group-sm ml-2">
     <div class="input-group-prepend">
       <span class="input-group-text diff d-none px-2 py-0">
-        {{ $model->dr[$name] == 'S' ? 'Sim' : '' }}
-        {{ $model->dr[$name] == 'N' ? 'Não' : '' }}
+        {{ ($model->dr[$name] ?? null) == 'S' ? 'Sim' : '' }}
+        {{ ($model->dr[$name] ?? null) == 'N' ? 'Não' : '' }}
       </span>
       <span class="input-group-text bg-white px-2 py-0">
         {!! $model->{$name} == 'S' ? 'Sim' : '&nbsp;' !!}

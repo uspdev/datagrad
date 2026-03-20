@@ -10,7 +10,7 @@
 
   <div>
     Versão base: {{ $disc->verdis }}
-    (atv: {{ formatarData($disc->dr['dtaatvdis']) }} | dtv: {{ formatarData($disc->dr['dtadtvdis']) }})
+    (atv: {{ formatarData($disc->dr['dtaatvdis'] ?? null) }} | dtv: {{ formatarData($disc->dr['dtadtvdis'] ?? null) }})
   </div>
 </div>
 

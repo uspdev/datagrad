@@ -18,11 +18,11 @@
   </tr>
   <tr>
     <td class="d-none diff px-3" style="width: 50%;">
-      {!! str_replace("\n", '&para;<br>', $model->dr[$name]) !!}
+      {!! str_replace("\n", '&para;<br>', $model->dr[$name] ?? null) !!}
     </td>
     <td class="px-3" style="width: 50%;">
       {{-- o proximo div precisa ficar todo na mesma linha para não quebrar o diff --}}
-      <div class="textarea {{ $italico_igl }} }}" data-original="{!! $model->dr[$name] !!}">{!! str_replace("\n", '&para;<br>', htmlspecialchars_decode($model[$name])) !!}</div>
+      <div class="textarea {{ $italico_igl }} }}" data-original="{!! $model->dr[$name] ?? '' !!}">{!! str_replace("\n", '&para;<br>', htmlspecialchars_decode($model[$name])) !!}</div>
     </td>
   </tr>
 </table>

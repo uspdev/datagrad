@@ -1,9 +1,9 @@
-@if (Auth::user()->can('senhaunica.docente'))
+@can('senhaunica.docente')
   <a href="{{ route('disciplinas.index') }}?visao=docente"
     class="btn btn-sm {{ $visao == 'docente' ? 'btn-primary' : 'btn-outline-primary' }} ml-2">
     Visão Docente
   </a>
-@endif
+@endcan
 
 @can('disciplina-chefe')
   <a href="{{ route('disciplinas.index') }}?visao=departamento"

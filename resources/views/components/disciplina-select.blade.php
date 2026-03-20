@@ -18,7 +18,7 @@
     <div class="input-group-prepend diff d-none">
       <span class="input-group-text px-3">
         @foreach ($options as $value => $label)
-          {{ $model->dr[$name] == $value ? $label : '' }}
+          {{ ($model->dr[$name] ?? null) == $value ? $label : '' }}
         @endforeach
       </span>
     </div>

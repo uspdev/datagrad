@@ -13,8 +13,8 @@ atividade_extensionista não possui DR xxx
   <div class="input-group input-group-sm ml-2">
     <div class="input-group-prepend diff d-none">
       <span class="input-group-text px-3">
-        {{ ($model->dr[$name]) == 'S' ? 'Sim' : '' }}
-        {{ ($model->dr[$name]) == 'N' ? 'Não' : '' }}
+        {{ ($model->dr[$name] ?? null) == 'S' ? 'Sim' : '' }}
+        {{ ($model->dr[$name] ?? null) == 'N' ? 'Não' : '' }}
       </span>
     </div>
     <select class="form-control" name="{{ $name }}" id="{{ $id }}">

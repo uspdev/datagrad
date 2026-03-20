@@ -45,8 +45,8 @@
         </div>
 
         <div>@include('disciplinas.partials.vigencia')</div>
-        <div>Última versão: <b>{{ $dr['maxverdis'] }}</b></div>
-        <div>Situação: <b>{{ $dr['sitdistxt'] }}</b></div>
+        <div>Última versão: <b>{{ $dr['maxverdis'] ?? '-' }}</b></div>
+        <div>Situação: <b>{{ $dr['sitdistxt'] ?? '-' }}</b></div>
         <div>Idioma: <b>{{ $disc->codlinegr($dr['codlinegr']) }}</b></div>
       </div>
 

@@ -9,32 +9,32 @@
         {{ $disc->estado == 'Propor alteração' ? 'Cancelar' : 'Voltar para disciplina' }}
       </a>
 
-      @if ($disc->estado == 'Em edição' || $disc->estado == 'Propor alteração')
+      @if (in_array($disc->estado, ['Em edição', 'Propor alteração']))
         <button class="btn btn-sm btn-primary ml-2 default-submit-btn" type="submit" name="submit" value="save">
           Salvar e continuar
         </button>
       @endif
 
-      @if ($disc->estado == 'Em edição')
+      @if (in_array($disc->estado, ['Em edição', 'Criar']))
         <button class="btn btn-sm btn-danger ml-2" type="submit" name="submit" value="preview-html">
           Salvar e visualizar HTML
         </button>
       @else
-        <a href="{{ route('disciplinas.preview-html', $disc->coddis) }}" target="_blank"
-          class="btn btn-sm btn-danger ml-2">Visualizar HTML</a>
+        @if ($disc->estado != 'Propor alteração')
+          <a href="{{ route('disciplinas.preview-html', $disc->coddis) }}" target="_blank"
+            class="btn btn-sm btn-danger ml-2">Visualizar HTML</a>
+        @endif
       @endif
     </span>
   </div>
 
   <div>
-
-    @include('disciplinas.partials.mostrar-ocultar-diff-btn')
-
+    @includeWhen($disc->estado != 'Criar', 'disciplinas.partials.mostrar-ocultar-diff-btn')
     @include('disciplinas.partials.ajuda-modal')
   </div>
 </div>
 
-@section('javascripts_bottom')
+{{-- @section('javascripts_bottom')
   @parent
   <script>
     $(document).ready(function() {
@@ -49,4 +49,4 @@
 
     })
   </script>
-@endsection
+@endsection --}}

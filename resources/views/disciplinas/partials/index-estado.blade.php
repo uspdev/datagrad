@@ -1,8 +1,14 @@
 @if (isset($disc->estado) && $disc->estado == 'Em edição')
+  @if($disc->dr != [])
   <a href="{{ route('disciplinas.edit', $disc->coddis) }}" class="btn btn-sm btn-outline-warning py-0">
     Em edição
   </a>
-@elseif(isset($disc->estado) && $disc->estado == 'criar')
+  @else
+    <a href="{{ route('disciplinas.edit', $disc->coddis) }}" class="btn btn-sm btn-outline-primary py-0">
+    Em criação
+  </a>
+  @endif
+@elseif(isset($disc->estado) && $disc->estado == 'Criar')
   <a href="{{ route('disciplinas.edit', $disc->coddis) }}" class="btn btn-sm btn-outline-success py-0">
     Em criação
   </a>

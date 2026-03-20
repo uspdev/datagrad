@@ -1,5 +1,6 @@
 @php
   $badgeClass = match ($disc->estado) {
+      'Criar' => 'primary',
       'Em edição' => 'warning',
       'Em aprovação' => 'danger',
       'Aprovado' => 'success',

@@ -20,6 +20,9 @@
 @endsection
 
 @section('content')
+  {{-- @php
+    $dr = $dr ?: $disc->toArray();
+  @endphp --}}
   @include('disciplinas.partials.show-navbar')
 
   {{-- <span class="d-block alert alert-info">
@@ -40,8 +43,11 @@
         @include('disciplinas.partials.show-curso')
       </fieldset>
     </form>
-  @else
-    Sem informações para a disciplina {{ $coddis }}.
+  @else 
+    <div>A disciplina {{ $coddis }} não foi encontrada no Jupiter. Deseja criar?</div>
+
+    <a href="{{ route('disciplinas.edit', $coddis) }}"> Criar disciplina</a>
+
   @endif
 @endsection
 

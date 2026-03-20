@@ -36,7 +36,7 @@
         <th>Taxa de evasão acumulada (%)</th>
         <th>Taxa de conclusão acumulada (%)</th>
       </tr>
-      @foreach ($taxaEvasao as $ano => $taxa)
+      @foreach ($taxaEvasao['data'] as $ano => $taxa)
         <tr>
           <td>{{ $ano }}</td>
           <td> {{ $taxa['txPermanencia'] }}</td>

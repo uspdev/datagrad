@@ -7,7 +7,7 @@
       <i class="fas fa-angle-right"></i> Preparado para impressão
     </span>
 
-    @if ($disc->estado == 'Em edição')
+    @if ($disc->estado == 'Em edição' || $disc->estado == 'Criar')
       <a href="{{ route('disciplinas.edit', $disc['coddis']) }}" class="btn btn-sm btn-primary" type="submit">
         Voltar para edição
       </a>
@@ -19,7 +19,7 @@
   </div>
 
   <div class="">
-    @include('disciplinas.partials.mostrar-ocultar-diff-btn')
+    @includeWhen($disc->estado != 'Criar', 'disciplinas.partials.mostrar-ocultar-diff-btn')
     @include('disciplinas.partials.ajuda-modal')
   </div>
 </div>

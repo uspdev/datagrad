@@ -9,7 +9,7 @@
 ])
 @php
   $center = $options['diff'] ? '' : 'text-center';
-  $dataOriginal = $options['diff'] ? $model->dr[$name] : '';
+  $dataOriginal = $options['diff'] ? $model->dr[$name] ?? '' : '';
 @endphp
 
 <table class="table table-bordered table-sm {{ $model->meta[$name]['class'] ?? '' }}" id="{{ $id }}">

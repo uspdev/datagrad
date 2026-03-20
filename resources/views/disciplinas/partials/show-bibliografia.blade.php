@@ -13,8 +13,8 @@
   <div class="card-header">
     Bibliografia / Bibliography
     <span class="badge badge-info">
-      a partir de {{ formatarData($dr['dtainibbg']) }}
-      @if ($dr['dtafimbbg'])
+      a partir de {{ formatarData($dr['dtainibbg'] ?? null) }}
+      @if ($dr['dtafimbbg'] ?? null)
         até {{ formatarData($dr['dtafimbbg']) }}
       @endif
     </span>

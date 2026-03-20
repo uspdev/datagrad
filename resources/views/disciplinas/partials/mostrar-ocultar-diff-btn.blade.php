@@ -1,3 +1,8 @@
+{{-- 
+Este código usa a classe diff para ocultar e mostrar ela.
+usa também as classes .ins e .del similar às tags ins e del
+--}}
+
 <button id="mostrar-ocultar-diff" type="button" class="btn btn-sm btn-outline-danger ml-2"
   style="background-color: lightsalmon;">
   Mostrar/ocultar diferenças
@@ -9,8 +14,8 @@
     @parent
     <style>
       /* formatando as cores do diff, importante para impressão */
-      ins {
-        background-color: lightgreen !important; // setado no JS
+      ins, .ins {
+        background-color: lightgreen; // setado no JS
         text-decoration: none;
         -webkit-print-color-adjust: exact;
         /* Chrome/Edge */
@@ -18,8 +23,9 @@
         /* Firefox */
       }
 
-      del {
-        background-color: lightsalmon;
+      del, .del {
+        background-color: lightsalmon !important;
+        text-decoration: line-through;
       }
 
       .diff {
@@ -52,10 +58,12 @@
         function mostrarOcultarDiff() {
           $('.diff').toggleClass('d-none', !mostrarDiff);
 
-          $('ins').css({
+          $('ins, .ins').css({
             'background-color': mostrarDiff ? 'lightgreen' : 'inherit',
             'text-decoration': mostrarDiff ? 'underline' : 'inherit'
           });
+
+          $('.del').toggleClass('d-none', !mostrarDiff);
 
           // recalcula altura dos textareas caso o componente esteja presente
           if (typeof autoExpand === 'function') {

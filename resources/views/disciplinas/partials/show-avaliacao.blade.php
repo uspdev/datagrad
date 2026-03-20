@@ -12,8 +12,8 @@
   <div class="card-header">
     Instrumentos e critérios de avaliação
     <span class="badge badge-info">
-      a partir de {{ formatarData($dr['dtainiifmavl']) }}
-      @if ($dr['dtafimifmavl'])
+      a partir de {{ formatarData($dr['dtainiifmavl'] ?? null) }}
+      @if ($dr['dtafimifmavl'] ?? null)
         até {{ formatarData($dr['dtafimifmavl']) }}
       @endif
     </span>

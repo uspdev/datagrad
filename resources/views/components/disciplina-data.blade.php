@@ -14,10 +14,10 @@
   </tr>
   <tr>
     <td class="col-6 d-none diff" style="background-color: #e9ecef; padding: 12px">
-      {!! str_replace("\n", '&para;<br>', $model->dr[$name]) !!}
+      {!! str_replace("\n", '&para;<br>', $model->dr[$name] ?? null) !!}
     </td>
     <td class="col-6">
-      <input name="{{ $name }}" type="text" class="form-control changed datepicker" data-original="{!! $model->dr[$name] !!}" value="{{ $model[$name] }}">
+      <input name="{{ $name }}" type="text" class="form-control changed datepicker" data-original="{!! $model->dr[$name] ?? null !!}" value="{{ $model[$name] }}">
     </td>
   </tr>
 </table>

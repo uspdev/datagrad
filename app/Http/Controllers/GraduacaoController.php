@@ -425,7 +425,7 @@ class GraduacaoController extends Controller
             }
 
             $gradeAluno = Graduacao::obterGradeHoraria($codpes);
-            
+
             if (!$gradeAluno) {
                 $naoEncontrados[] = $codpes . " - " . $nome . " (Sem grade horária)";
                 continue;
@@ -513,7 +513,7 @@ class GraduacaoController extends Controller
 
     protected function semestres()
     {
-        $semestres = ['20261','20252', '20251', '20242', '20241', '20232', '20231', '20222', '20221', '20212', '20211', '20202', '20201', '20192', '20191', '20182', '20181'];
+        $semestres = ['20261', '20252', '20251', '20242', '20241', '20232', '20231', '20222', '20221', '20212', '20211', '20202', '20201', '20192', '20191', '20182', '20181'];
         return $semestres;
     }
 
@@ -589,10 +589,10 @@ class GraduacaoController extends Controller
         $this->authorize('evasao');
         \UspTheme::activeUrl('graduacao/relatorio/evasao');
 
-        $CodcurNomecur = Evasao::retornarCodcurNomcur();
+        $cursoOpcao = Evasao::retornarCodcurNomcur();
 
         if ($request->isMethod('get')) {
-            return view('grad.relatorio-evasao', ['cursoOpcao' => $CodcurNomecur]);
+            return view('grad.relatorio-evasao', ['cursoOpcao' => $cursoOpcao]);
         }
 
         $request->validate([
@@ -600,9 +600,8 @@ class GraduacaoController extends Controller
             'ano' => 'required|integer|between:2015,' . (date('Y') - 1),
         ]);
 
-        $taxaEvasao = Evasao::taxaEvasao($request->ano, $request->curso);
-
-        if (empty($taxaEvasao)) {
+        [$taxa, $espacoAmostral] = Evasao::taxaEvasao($request->ano, $request->curso);
+        if (empty($taxa)) {
             return redirect()
                 ->route('graduacao.relatorio.evasao')
                 ->with('alert-warning', 'Não há alunos no intervalo informado.')
@@ -610,12 +609,14 @@ class GraduacaoController extends Controller
         }
 
         $formRequest = ($request->curso !== null ? Evasao::retornarCodcurNomcur((int) $request->curso) : ['codcur' => '18', 'nomcur' => 'Todos os cursos']);
-
         $formRequest = array_merge($formRequest, ['anoIngresso' => $request->ano]);
+
+        $taxaEvasao['data'] = $taxa;
+        $taxaEvasao['title'] = "Fluxo de alunos | {$formRequest['nomcur']} ({$formRequest['codcur']}) | Ingressantes {$formRequest['anoIngresso']} | Total: {$espacoAmostral} alunos";
 
         $imagemEvasao = Grafico::criarGraficoEvasao($taxaEvasao, $formRequest);
 
-        return view('grad.relatorio-evasao', ['taxaEvasao' => $taxaEvasao, 'formRequest' => $formRequest, 'cursoOpcao' => $CodcurNomecur, 'imagemEvasao' => $imagemEvasao]);
+        return view('grad.relatorio-evasao', compact('taxaEvasao', 'formRequest', 'cursoOpcao', 'imagemEvasao'));
     }
 
     public function relatorioTurma(Request $request)

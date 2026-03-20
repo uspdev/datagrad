@@ -8,7 +8,7 @@
   {{ $model->meta[$name]['titulo'] }}
   <div class="input-group input-group-sm ml-2">
     <div class="input-group-prepend diff d-none">
-      <span class="input-group-text px-3">{{ $model->dr[$name] }}</span>
+      <span class="input-group-text px-3">{{ $model->dr[$name] ?? '' }}</span>
     </div>
     <input type="text" name="{{ $name }}" value="{{ $model->{$name} }}" class="form-control text-center"
     style="width:60px;">

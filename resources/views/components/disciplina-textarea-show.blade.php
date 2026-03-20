@@ -5,8 +5,8 @@
     'id' => $name . rand(10000, 99999),
 ])
 @php
-  $c = $model->dr[$name];
-  $cIgl = $model->dr[$name . 'igl'];
+  $c = $model->dr[$name] ?? '';
+  $cIgl = $model->dr[$name . 'igl'] ?? '';
 @endphp
 
 <div class="row {{ $class }}">

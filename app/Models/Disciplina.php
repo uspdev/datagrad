@@ -65,17 +65,10 @@ class Disciplina extends Model
 
     /**
      * Estado da disciplina
-     * 
+     *
      * propor alteração - quando o objeto é criado mas não foi salvo: ainda não foi proposto a alteração
      */
-    public static $estados = [
-        'Criar',
-        'Propor alteração',
-        'Em edição',
-        'Em aprovação',
-        'Aprovado',
-        'Finalizado'
-    ];
+    public static $estados = ['Criar', 'Propor alteração', 'Em edição', 'Em aprovação', 'Aprovado', 'Finalizado'];
 
     /** Dados que vem do replicado */
     public $dr;
@@ -136,7 +129,7 @@ class Disciplina extends Model
         'objdis' => [
             'titulo' => 'Objetivos',
             'ajuda' => 'O que se quer alcançar com a disciplina, em termos de aprendizagem dos estudantes;
-             ou seja, expressa o que se espera que os estudantes aprendam ao final da disciplina, 
+             ou seja, expressa o que se espera que os estudantes aprendam ao final da disciplina,
              em determinadas condições de ensino, tendo em vista que a ocorrência dessa aprendizagem possa ser verificada.',
         ],
         'objdisigl' => [
@@ -146,10 +139,10 @@ class Disciplina extends Model
         'pgmdis' => [
             'titulo' => 'Conteúdo Programático',
             'ajuda' => 'Indica os conteúdos que permitirão o alcance dos objetivos definidos.
-             Nesse sentido, os conteúdos de ensino são meios para a realização dos objetivos, 
-             e não os objetivos em si. Conteúdos são conhecimentos que se considera essencial 
-             que sejam apreendidos e reelaborados pelos estudantes para que os objetivos sejam alcançados. 
-             Conteúdo é o conjunto de conhecimentos, habilidades, atitudes e valores que serão 
+             Nesse sentido, os conteúdos de ensino são meios para a realização dos objetivos,
+             e não os objetivos em si. Conteúdos são conhecimentos que se considera essencial
+             que sejam apreendidos e reelaborados pelos estudantes para que os objetivos sejam alcançados.
+             Conteúdo é o conjunto de conhecimentos, habilidades, atitudes e valores que serão
              desenvolvidos ao longo da disciplina.',
         ],
         'pgmdisigl' => [
@@ -159,9 +152,9 @@ class Disciplina extends Model
         'mtdens' => [
             // otitulo combina com inglês pois será apenas um checkbox em pt-br
             'titulo' => 'Métodos de Ensino',
-            'ajuda' => 'Descreve como os conteúdos serão desenvolvidos para que os objetivos possam ser alcançados: 
-            considerar tempos, espaços e recursos que possam contribuir para a aprendizagem. 
-            São os procedimentos de ensino, as ações e atividades que serão propostas ao longo da disciplina, 
+            'ajuda' => 'Descreve como os conteúdos serão desenvolvidos para que os objetivos possam ser alcançados:
+            considerar tempos, espaços e recursos que possam contribuir para a aprendizagem.
+            São os procedimentos de ensino, as ações e atividades que serão propostas ao longo da disciplina,
             em função dos objetivos previstos. Apresenta as estratégias de ensino que orientarão a prática educativa',
             'options' => [
                 'Aula expositiva',
@@ -200,51 +193,18 @@ class Disciplina extends Model
         'mtdensigl' => [
             'titulo' => 'Teaching Methods',
             'class' => 'ingles',
-            'options' => [
-                'Lecture',
-                'Dialogued class',
-                'Laboratory activities',
-                'Simulations',
-                'Seminars',
-                'Collective study with or without presentation of results',
-                'Portfolio development',
-                'Roundtable discussion',
-                'Brainstorming',
-                'Concept map',
-                'Guided study',
-                'Tutored classes',
-                'Discussion list via digital media',
-                'Case study: problem-situation, films, images, sentences, expressions, news, interviews, testimonials, documents.',
-                'Activity for discussion and problem solving',
-                'Exercise solving',
-                'Small group teaching',
-                'Group work / working groups',
-                'Role play',
-                'Seminar, Symposium, Lectures - with the class or jointly organized',
-                'Panel',
-                'Interviews',
-                'Guest lecture',
-                'Discussion forum and debates',
-                'Workshop or construction and testing lab',
-                'Field study',
-                'Research-based teaching',
-                'Exhibitions and visits with report production',
-                'Individualized teaching',
-                'Learning journals',
-                'Project-based and problem-based learning',
-            ],
-
+            'options' => ['Lecture', 'Dialogued class', 'Laboratory activities', 'Simulations', 'Seminars', 'Collective study with or without presentation of results', 'Portfolio development', 'Roundtable discussion', 'Brainstorming', 'Concept map', 'Guided study', 'Tutored classes', 'Discussion list via digital media', 'Case study: problem-situation, films, images, sentences, expressions, news, interviews, testimonials, documents.', 'Activity for discussion and problem solving', 'Exercise solving', 'Small group teaching', 'Group work / working groups', 'Role play', 'Seminar, Symposium, Lectures - with the class or jointly organized', 'Panel', 'Interviews', 'Guest lecture', 'Discussion forum and debates', 'Workshop or construction and testing lab', 'Field study', 'Research-based teaching', 'Exhibitions and visits with report production', 'Individualized teaching', 'Learning journals', 'Project-based and problem-based learning'],
         ],
         'dscmtdavl' => [
             'titulo' => 'Método de Avaliação',
-            'ajuda' => 'Descrever com clareza o processo de avaliação de aprendizagem para que o aluno compreenda 
-            como todos os elementos do plano de ensino se articulam e para que o professor possa realizar a gestão 
-            da aprendizagem na sua disciplina, com base em evidências do que o aluno aprendeu, 
-            as lacunas na aprendizagem e o que precisa ser redimensionado em termos de ensino. 
-            O estudante precisa também ter clareza do que o professor espera dele em relação à aprendizagem e, 
-            portanto, o que será avaliado, a partir do que foi ensinado. A avaliação, portanto, deve gerar informações 
-            sobre o processo de ensino e de aprendizagem para que o próprio processo possa ser replanejado, 
-            se necessário. O feedback da aprendizagem para o estudante, durante o processo, é fundamental 
+            'ajuda' => 'Descrever com clareza o processo de avaliação de aprendizagem para que o aluno compreenda
+            como todos os elementos do plano de ensino se articulam e para que o professor possa realizar a gestão
+            da aprendizagem na sua disciplina, com base em evidências do que o aluno aprendeu,
+            as lacunas na aprendizagem e o que precisa ser redimensionado em termos de ensino.
+            O estudante precisa também ter clareza do que o professor espera dele em relação à aprendizagem e,
+            portanto, o que será avaliado, a partir do que foi ensinado. A avaliação, portanto, deve gerar informações
+            sobre o processo de ensino e de aprendizagem para que o próprio processo possa ser replanejado,
+            se necessário. O feedback da aprendizagem para o estudante, durante o processo, é fundamental
             para que ele esteja seguro de onde precisa avançar e como, por isso, ele deve ser disponibilizado a tempo.',
         ],
         'dscmtdavligl' => [
@@ -253,9 +213,9 @@ class Disciplina extends Model
         ],
         'crtavl' => [
             'titulo' => 'Critérios de Aprovação',
-            'ajuda' => 'A escolha do instrumento de avaliação deve levar em conta aquele que poderá fornecer 
-            o maior conjunto de informações sobre a aprendizagem dos estudantes, para que o professor possa 
-            tomar decisões seguras e precisas sobre como intervir para potencializar a aprendizagem e intervir 
+            'ajuda' => 'A escolha do instrumento de avaliação deve levar em conta aquele que poderá fornecer
+            o maior conjunto de informações sobre a aprendizagem dos estudantes, para que o professor possa
+            tomar decisões seguras e precisas sobre como intervir para potencializar a aprendizagem e intervir
             onde haja necessidade, para tornar a aprendizagem mais efetiva para todos.',
         ],
         'crtavligl' => [
@@ -264,9 +224,9 @@ class Disciplina extends Model
         ],
         'dscnorrcp' => [
             'titulo' => 'Norma de recuperação (da aprendizagem)',
-            'ajuda' => 'Nesse caso, o foco é a recuperação da aprendizagem. Para isso, o estudante deve saber onde 
-            precisa melhorar, em termos de aprendizagem, e como, quais recursos adicionais ele poderá buscar 
-            para aprender o que não conseguiu ainda.'
+            'ajuda' => 'Nesse caso, o foco é a recuperação da aprendizagem. Para isso, o estudante deve saber onde
+            precisa melhorar, em termos de aprendizagem, e como, quais recursos adicionais ele poderá buscar
+            para aprender o que não conseguiu ainda.',
         ],
         'dscnorrcpigl' => [
             'titulo' => 'Recovery standard',
@@ -278,27 +238,10 @@ class Disciplina extends Model
         'dscbbgdiscpl' => [
             'titulo' => 'Bibliografia Complementar',
         ],
-        'objdslsut' => [ // 17 ODS da ONU
+        'objdslsut' => [
+            // 17 ODS da ONU
             'titulo' => 'Objetivos de Desenvolvimento Sustentável',
-            'options' => [
-                'Erradicação da pobreza',
-                'Fome zero e agricultura sustentável',
-                'Saúde e bem-estar',
-                'Educação de qualidade',
-                'Igualdade de gênero',
-                'Água potável e saneamento',
-                'Energia limpa e acessível',
-                'Trabalho decente e crescimento econômico',
-                'Indústria, inovação e infraestrutura',
-                'Redução das desigualdades',
-                'Cidades e comunidades sustentáveis',
-                'Consumo e produção responsáveis',
-                'Ação contra a mudança global do clima',
-                'Vida na água',
-                'Vida terrestre',
-                'Paz, justiça e instituições eficazes',
-                'Parcerias e meios de implantação',
-            ],
+            'options' => ['Erradicação da pobreza', 'Fome zero e agricultura sustentável', 'Saúde e bem-estar', 'Educação de qualidade', 'Igualdade de gênero', 'Água potável e saneamento', 'Energia limpa e acessível', 'Trabalho decente e crescimento econômico', 'Indústria, inovação e infraestrutura', 'Redução das desigualdades', 'Cidades e comunidades sustentáveis', 'Consumo e produção responsáveis', 'Ação contra a mudança global do clima', 'Vida na água', 'Vida terrestre', 'Paz, justiça e instituições eficazes', 'Parcerias e meios de implantação'],
         ],
         'stavgmdid' => [
             'titulo' => 'Viagem didática?',
@@ -429,17 +372,37 @@ class Disciplina extends Model
             return $disc;
         }
 
-        // alterar disciplina existente
-        $disc = self::where('coddis', $coddis)->where('estado', '!=', 'Finalizado')->first();
+        // obter disciplina local
+        $disc = self::where('coddis', $coddis)
+            ->where(function ($q) {
+                $q->where('estado', '!=', 'Finalizado')->orWhereNull('estado');
+            })
+            ->first();
 
         $verdis = $disc ? $disc->verdis : 'max';
         $dr = self::obterDisciplinaReplicado($coddis, $verdis);
 
-        if (!$disc) {
+        // existe no bd mas não existe no replicado
+        if ($disc && !$dr) {
+            $disc->estado = 'Criar';
+        }
+
+        // nao existe no bd mas existe no replicado
+        if (!$disc && $dr) {
             $disc = self::novo($dr);
             $disc->estado = 'Propor alteração';
         }
 
+        // nao existe no bd nem no replicado
+        if (!$disc && !$dr) {
+            $disc = self::novo();
+            $disc->coddis = $coddis;
+            $disc->tipdis = null;
+            $disc->codlinegr = null;
+            $disc->estado = 'Criar';
+        }
+
+        // dd($disc->tipdis, $dr);
         $disc->dr = $dr;
 
         return $disc;
@@ -465,6 +428,8 @@ class Disciplina extends Model
                 $resps[] = ['codpes' => $r['codpes'], 'nompesttd' => $r['nompesttd']];
             }
             $disc->responsaveis = $resps;
+        } else {
+            $disc->responsaveis = [['codpes' => Auth::user()->codpes, 'nompesttd' => Pessoa::obterNome(Auth::user()->codpes)]];
         }
         $disc->atualizado_por_id = Auth::user()->id;
         $disc->criado_por_id = Auth::user()->id;
@@ -481,7 +446,7 @@ class Disciplina extends Model
     {
         $resps = [];
         $dr = $this->dr;
-        foreach ($dr['responsaveis'] as $r) {
+        foreach ($dr['responsaveis'] ?? [] as $r) {
             if (strpos(json_encode($this->responsaveis), $r['codpes']) !== false) {
                 // está no replicado e está no novo => mesmo
                 $resps[] = ['codpes' => $r['codpes'], 'nompesttd' => $r['nompesttd'], 'status' => 'mesmo'];
@@ -492,7 +457,7 @@ class Disciplina extends Model
         }
 
         foreach ($this->responsaveis as $r) {
-            if (strpos(json_encode($dr['responsaveis']), $r['codpes']) !== false) {
+            if (strpos(json_encode($dr['responsaveis'] ?? []), $r['codpes']) !== false) {
                 // esta no novo e está no replicado => já foi inserido
             } else {
                 // esta no novo mas não está no replicado => novo
@@ -597,7 +562,9 @@ class Disciplina extends Model
         $discs = self::mergearResponsaveis(collect(), $drs);
 
         // vamos pegar as disciplinas locais do prefixo
-        $discsLocal = self::where('coddis', 'like', $prefixo . '%')->where('estado', '!=','Finalizado')->get();
+        $discsLocal = self::where('coddis', 'like', $prefixo . '%')
+            ->where('estado', '!=', 'Finalizado')
+            ->get();
 
         // vamos limpar repetidos
         $discs = self::limparDisciplinasReplicado($discs, $discsLocal);
@@ -663,14 +630,21 @@ class Disciplina extends Model
      */
     protected static function limparDisciplinasReplicado($discs, $discsLocal)
     {
+        $replicados = $discs->keyBy('coddis');
+        $result = collect();
+
         foreach ($discsLocal as $discLocal) {
-            if ($discs->where('coddis', $discLocal->coddis) != false) {
-                // tem no replicado e no BD local => vamos remover do arr do replicado
-                $discs = $discs->where('coddis', '!=', $discLocal->coddis);
+            if ($replicados->has($discLocal->coddis)) {
+                // associar o objeto replicado ao local
+                $discLocal->dr = $replicados->get($discLocal->coddis);
+                // remover do replicado para não adicionar depois
+                $replicados->forget($discLocal->coddis);
             }
-            $discs[] = $discLocal;
+            $result->push($discLocal);
         }
-        return $discs;
+
+        // adicionar os replicados restantes (não repetidos)
+        return $result->concat($replicados->values())->values();
     }
 
     /**
@@ -694,7 +668,7 @@ class Disciplina extends Model
     public function retornarListaResponsaveis($dr = false)
     {
         $ret = '';
-        $src = $dr ? $this->dr['responsaveis'] : $this->responsaveis;
+        $src = $dr ? $this->dr['responsaveis'] ?? $this->responsaveis : $this->responsaveis;
         foreach ($src as $k => $r) {
             $ret .= $r['nompesttd'] . ', ';
         }
@@ -709,7 +683,14 @@ class Disciplina extends Model
      */
     public function tipdis($dr = false)
     {
-        return $dr ? self::$tipdis[$this->dr['tipdis']] : self::$tipdis[$this->tipdis];
+        if ($dr) {
+            $ret = self::$tipdis[$this->dr['tipdis']];
+        } else {
+            $ret = self::$tipdis[$this->tipdis] ?? '-';
+        }
+        return $ret;
+
+        // return $dr ? self::$tipdis[$this->dr['tipdis']] : self::$tipdis[$this->tipdis];
     }
 
     /**
@@ -754,12 +735,12 @@ class Disciplina extends Model
 
     /**
      * Retorna se a disciplina está em um estado editável ou não
-     * 
+     *
      * @return boolean
      */
     public function isEditavel()
     {
-        return $this->estado == 'Em edição' || $this->estado == 'Propor alteração';
+        return $this->estado == 'Em edição' || $this->estado == 'Propor alteração' || $this->estado == 'Criar';
     }
 
     /**
@@ -793,9 +774,7 @@ class Disciplina extends Model
 
         // Todas as linhas
         $todasPt = preg_split('/\r\n|\r|\n/', trim($curso->{$colCursoPt}));
-        $todasEn = $ingles && isset($curso->{$colCursoEn})
-            ? preg_split('/\r\n|\r|\n/', trim($curso->{$colCursoEn}))
-            : [];
+        $todasEn = $ingles && isset($curso->{$colCursoEn}) ? preg_split('/\r\n|\r|\n/', trim($curso->{$colCursoEn})) : [];
 
         // Itens escolhidos pela disciplina
         $escolhidas = $this->{$colDisc}[$codcur] ?? [];
@@ -803,7 +782,7 @@ class Disciplina extends Model
         $resultado = [];
         foreach ($todasPt as $i => $itemPt) {
             if (in_array($itemPt, $escolhidas)) {
-                $valor = $ingles ? ($todasEn[$i] ?? '') : $itemPt;
+                $valor = $ingles ? $todasEn[$i] ?? '' : $itemPt;
                 if (!empty(trim($valor))) {
                     $resultado[] = $prefix . ($i + 1) . '. ' . $valor . ';';
                 }
@@ -834,8 +813,6 @@ class Disciplina extends Model
     {
         return $this->marcarItens($codcur, 'competencias', true);
     }
-
-
 
     /**
      * Retorna o estado checked ou não para input type radio das habilidades
@@ -882,6 +859,6 @@ class Disciplina extends Model
 
     public function atualizadoPor()
     {
-        return $this->belongsTo(User::class, 'atualizado_por_id');
+        return $this->belongsTo(User::class, 'atualizado_por_id', 'id');
     }
 }

@@ -1,3 +1,19 @@
+{{-- 
+Componente que mostra o conteúdo de um aqruivo no formato markdown da pasta docs.
+Exemplo de uso:
+<x-markdown file="disciplinas.md" />
+
+Parâmetros:
+- file: nome do arquivo markdown na pasta docs (obrigatório)
+- style: nome do arquivo CSS de destaque de sintaxe na pasta vendor/scrivo/highlight.php/styles (opcional, padrão: github.css)
+
+Dependências:
+- spatie/commonmark-highlighter
+
+Autor:
+- Masaki K neto, em 6/10/2025
+--}}
+
 @props([
     'file',
     'style' => 'github.css',
@@ -10,8 +26,8 @@ use League\CommonMark\Extension\GithubFlavoredMarkdownExtension;
 use League\CommonMark\MarkdownConverter;
 use League\CommonMark\Extension\CommonMark\Node\Block\FencedCode;
 use League\CommonMark\Extension\CommonMark\Node\Block\IndentedCode;
-use League\CommonMark\Extension\CommonMark\Renderer\Block\FencedCodeRenderer;
-use League\CommonMark\Extension\CommonMark\Renderer\Block\IndentedCodeRenderer;
+use Spatie\CommonMarkHighlighter\FencedCodeRenderer;
+use Spatie\CommonMarkHighlighter\IndentedCodeRenderer;
 
 $markdownPath = base_path('docs/' . $file);
 $stylePath = base_path('vendor/scrivo/highlight.php/styles/' . $style);

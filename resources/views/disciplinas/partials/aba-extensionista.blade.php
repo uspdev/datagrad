@@ -6,7 +6,7 @@
     Atividade extensionista
     <div class="input-group input-group-sm ml-2">
       <div class="input-group-prepend diff d-none">
-        <span class="input-group-text">{{ $disc->dr['cgahoratvext'] ? 'Sim' : 'Não' }}</span>
+        <span class="input-group-text">{{ ($disc->dr['cgahoratvext'] ?? null) ? 'Sim' : 'Não' }}</span>
       </div>
       <select class="form-control" name="atividade_extensionista" id="atividade-extensionista">
         <option value="1" {{ $disc->atividade_extensionista ? 'selected' : '' }}>Sim</option>

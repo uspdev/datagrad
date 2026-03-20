@@ -11,6 +11,7 @@
 <div class="card" id="card-curso">
   <div class="card-header">Cursos</div>
   <div class="card-body">
+    @if($disc->dr['cursos'] ?? null)
     <div class="row">
       <div class="col-6">
         <b>Minha unidade</b><hr>
@@ -44,7 +45,7 @@
         @endforeach
 
       </div>
-    </div>
-
+    </div>  
+    @endif
   </div>
 </div>

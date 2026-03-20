@@ -2,16 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Curso;
-use App\Models\Disciplina;
-use App\Services\Diff;
-use App\Services\Pdf;
 use Closure;
+use App\Models\Curso;
+use App\Services\Pdf;
+use App\Services\Diff;
+use App\Replicado\Pessoa;
+use App\Models\Disciplina;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Storage;
 use Uspdev\UspTheme\Facades\UspTheme;
+use Illuminate\Support\Facades\Storage;
 
 class DisciplinaController extends Controller
 {
@@ -91,7 +92,33 @@ class DisciplinaController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        // dd($request->all());
+        $validated = $request->validate([
+            'coddis' => 'required|string|max:10|unique:disciplinas,coddis',
+            'nomdis' => 'required|string|max:255',
+            'codpes' => 'required|integer',
+        ]);
+        $coddis = strtoupper($validated['coddis']);
+
+        $existe = Disciplina::where('coddis', $coddis)->exists();
+        if ($existe){
+            return redirect()->route('disciplinas.index')
+            ->with('alert-warning', 'Já existe uma disciplina com esse código.');
+        }
+
+        $disc = Disciplina::create([
+            'coddis' => $coddis,
+            'nomdis' => $validated['nomdis'],
+            'responsaveis' => [
+                ['codpes' => $validated['codpes'], 'nompesttd' => Pessoa::obterNome($validated['codpes'])]
+            ],
+            'estado' => 'Criar',
+        ]);
+
+        $disc->save();
+        Disciplina::renovarCacheAfterResponse();
+
+        return redirect()->route('disciplinas.edit', $disc->coddis);
     }
 
     /**
@@ -132,7 +159,7 @@ class DisciplinaController extends Controller
 
         // disciplina-replicado -> cursos da unidade que aparece a disciplina
         $cursos = [];
-        foreach ($disc->dr['cursos'] as $curso_dr) {
+        foreach ($disc->dr['cursos'] ?? [] as $curso_dr) {
             if (stripos(config('replicado.codundclgs'), $curso_dr['codclg']) !== false) {
                 // é curso da unidade
                 $curso = Curso::where('codcur', $curso_dr['codcur'])->first();
@@ -173,6 +200,7 @@ class DisciplinaController extends Controller
         }
 
         $disc->atualizarEstado('Em edição');
+        $disc->atualizado_por_id = Auth::id();
 
         if ($add = $request->codpes_add) {
             $disc->adicionarResponsavel($add);
@@ -241,7 +269,7 @@ class DisciplinaController extends Controller
 
         // disciplina-replicado -> cursos da unidade que aparece a disciplina
         $cursos = [];
-        foreach ($disc->dr['cursos'] as $curso_dr) {
+        foreach ($disc->dr['cursos'] ?? [] as $curso_dr) {
             if (stripos(config('replicado.codundclgs'), $curso_dr['codclg']) !== false) {
                 // é curso da unidade
                 $curso = Curso::where('codcur', $curso_dr['codcur'])->first();

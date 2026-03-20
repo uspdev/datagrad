@@ -15,10 +15,10 @@
   </tr>
   <tr>
     <td class="d-none diff" style="background-color: #e9ecef; padding: 12px; width: 50%;">
-      {!! str_replace("\n", '&para;<br>', $model->dr[$name]) !!}
+      {!! str_replace("\n", '&para;<br>', $model->dr[$name] ?? null) !!}
     </td>
     <td class="" style="width: 50%;">
-      <textarea name="{{ $name }}" class="form-control changed autoexpand w-100" data-original="{!! $model->dr[$name] !!}">{!! htmlspecialchars_decode($model[$name]) !!}</textarea>
+      <textarea name="{{ $name }}" class="form-control changed autoexpand w-100" data-original="{!! $model->dr[$name] ?? null !!}">{!! htmlspecialchars_decode($model[$name]) !!}</textarea>
     </td>
   </tr>
 </table>

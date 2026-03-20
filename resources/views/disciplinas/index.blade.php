@@ -15,21 +15,8 @@
 @endsection
 
 @section('content')
-  <div
-    class="navbar navbar-light card-header-sticky justify-content-between mb-3 {{ $visao == 'docente' ? 'navbar-index' : 'navbar-index-cg' }}">
-    <div class="h5">
-      {{ $visao == 'docente' ? 'Minhas' : '' }}
-      Disciplinas
-      {{ $visao == 'cg' ? 'CG' : '' }}
-      {{ $visao == 'departamento' ? 'com prefixo(s) ' . Auth::user()->prefixos()->implode(', ') : '' }}
-    </div>
 
-    <div class="form-inline">
-      @include('disciplinas.partials.visoes-index')
-      @include('disciplinas.partials.consultar-form')
-      @include('disciplinas.partials.ajuda-modal')
-    </div>
-  </div>
+@include('disciplinas.partials.index-navbar')
 
   <table class="table table-sm table-bordered datatable-simples dt-fixed-header dt-buttons">
     <thead>
@@ -50,6 +37,7 @@
     </thead>
     <tbody>
       @foreach ($discs as $disc)
+      {{-- @if($disc->dr == null) @dd($disc) @endif --}}
         <tr>
           <td>
             {{ $disc->coddis }}

@@ -9,7 +9,7 @@
   <div class="input-group input-group-sm ml-2">
     <div class="input-group-prepend">
       <span class="input-group-text diff d-none px-2 py-0">
-        {{ $model->dr[$name] }}
+        {{ $model->dr[$name] ?? null }}
       </span>
       <span class="input-group-text bg-white px-2 py-0">
         {{ $model->{$name} ?? '-' }}

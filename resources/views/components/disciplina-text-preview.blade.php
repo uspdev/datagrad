@@ -16,11 +16,11 @@
     </th>
   </tr>
   <tr>
-    <td class="d-none diff px-3" style="width: 50%;" >
-      {!! str_replace("\n", '&para;<br>', $model->dr[$name]) !!}
+    <td class="d-none diff px-3" style="width: 50%;">
+      {!! str_replace("\n", '&para;<br>', $model->dr[$name] ?? null) !!}
     </td>
-    <td class="px-3" style="width: 50%;" >
-      <div class="input {{ $italico_igl }}" data-original="{!! $model->dr[$name] !!}">{!! str_replace("\n", '&para;<br>', $model->$name) !!}</div>
+    <td class="px-3" style="width: 50%;">
+      <div class="input {{ $italico_igl }}" data-original="{!! $model->dr[$name] ?? null !!}">{!! str_replace("\n", '&para;<br>', $model->$name) !!}</div>
     </td>
   </tr>
 </table>

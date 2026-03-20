@@ -71,7 +71,8 @@
   @include('disciplinas.partials.preview-navbar')
 
   <div class="h4 text-center my-3">
-    Alteração da disciplina: <b>{{ $disc->coddis }} - {{ $disc->nomdis }}</b>
+    {{ $disc->dr ? 'Alteração' : 'Criação' }} da disciplina:
+    <b>{{ $disc->coddis }} - {{ $disc->nomdis }}</b>
   </div>
 
   <div class="my-2">
@@ -83,14 +84,14 @@
   </div>
 
   <div class="my-2">
-    <b>Alteração para o ano/semestre</b>
+    <b>{{ $disc->dr ? 'Alteração' : 'Criação' }} para o ano/semestre</b>
     <span class="border rounded px-2 py-1">
       {{ $disc->ano }} / {{ $disc->semestre }}
     </span>
   </div>
 
   <div class="my-2">
-    <b>Justificativa da alteração</b><br>
+    <b>Justificativa</b><br>
     <div class="border rounded px-2 py-1">
       {{ $disc->justificativa }} &nbsp;
     </div>
@@ -99,8 +100,8 @@
   <div>&nbsp;</div>
 
   <div class="mt-3">
-    Data: {{ date('d/m/Y') }}<br>
-    {{ Auth::user()->name ?? 'N/A' }}
+    Data: {{ $disc->updated_at->format('d/m/Y') }}<br>
+    {{ $disc->atualizadoPor->name }}
   </div>
 
   <hr class="my-3" />
@@ -124,18 +125,15 @@
           Gere o PDF e encaminhe-o para os responsáveis pela aprovação.
         </div>
       @endif
+      
       @can('disciplina-cg')
         @include('disciplinas.partials.preview-finalizar-btn')
       @endcan
     @endif
 
-    @if ($disc->estado == 'Em aprovação' || $disc->estado == 'Finalizado')
-      @can('admin')
-        @include('disciplinas.partials.preview-admin')
-      @endcan
-    @endif
+    @include('disciplinas.partials.preview-admin')
 
-    @if ($disc->estado == 'Em edição')
+    @if ($disc->estado == 'Em edição' || $disc->estado == 'Criar')
       @include('disciplinas.partials.preview-em-aprovacao-btn')
     @endif
 
@@ -160,11 +158,11 @@
       <div class="ml-2">
         @foreach ($disc->responsaveis as $r)
           @if ($r['status'] == 'mesmo')
-            <div>{{ $r['codpes'] }} - {{ $r['nompesttd'] }}</div>
+            <div class="my-1">{{ $r['codpes'] }} - {{ $r['nompesttd'] }}</div>
           @elseif($r['status'] == 'novo')
-            <ins>{{ $r['codpes'] }} - {{ $r['nompesttd'] }}</ins><br>
+            <div class="ins my-1">{{ $r['codpes'] }} - {{ $r['nompesttd'] }}</div>
           @elseif($r['status'] == 'removido')
-            <del>{{ $r['codpes'] }} - {{ $r['nompesttd'] }}</del><br>
+            <div class="del my-1">{{ $r['codpes'] }} - {{ $r['nompesttd'] }}</div>
           @endif
         @endforeach
       </div>
