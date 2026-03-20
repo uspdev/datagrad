@@ -62,7 +62,7 @@ class Evasao
                 break;
             }
         }
-        return $evasao;
+        return [$evasao, count($alunos)];
     }
 
     /**
