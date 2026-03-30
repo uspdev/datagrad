@@ -2,7 +2,7 @@
   <div>
     <span class="h5">
       <a href="{{ route('disciplinas.index') }}">Disciplinas</a>
-      <i class="fas fa-angle-right"></i> {{ $disc['coddis'] }} - {{ $disc['nomdis'] }}
+      <i class="fas fa-angle-right"></i> {{ $disc['coddis'] }} - @limit($disc['nomdis'], 50)
       <i class="fas fa-angle-right"></i> {{ $disc->estado }}
 
       <a href="{{ route('disciplinas.show', $disc->coddis) }}" class="btn btn-sm btn-secondary ml-2">
@@ -34,19 +34,3 @@
   </div>
 </div>
 
-{{-- @section('javascripts_bottom')
-  @parent
-  <script>
-    $(document).ready(function() {
-
-      $('.aprovacao-confirm').on('click', function() {
-        if (confirm('Ao enviar para aprovação, não será possivel mais alterar. Confirma?')) {
-          return true
-        } else {
-          return false
-        }
-      })
-
-    })
-  </script>
-@endsection --}}

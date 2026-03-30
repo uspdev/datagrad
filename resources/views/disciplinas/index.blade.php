@@ -15,10 +15,9 @@
 @endsection
 
 @section('content')
+  @include('disciplinas.partials.index-navbar')
 
-@include('disciplinas.partials.index-navbar')
-
-  <table class="table table-sm table-bordered datatable-simples dt-fixed-header dt-buttons">
+  <table class="table table-sm table-bordered datatable-simples dt-fixed-header dt-buttons dt-state-save">
     <thead>
       <tr>
         <th>Código</th>
@@ -37,16 +36,11 @@
     </thead>
     <tbody>
       @foreach ($discs as $disc)
-      {{-- @if($disc->dr == null) @dd($disc) @endif --}}
+        {{-- @if ($disc->dr == null) @dd($disc) @endif --}}
         <tr>
-          <td>
-            {{ $disc->coddis }}
-          </td>
-          <td>@include('disciplinas.partials.index-estado')
-          </td>
-          <td>
-            <a href="{{ route('disciplinas.show', $disc->coddis) }}">{{ $disc->nomdis }}</a>
-          </td>
+          <td>{{ $disc->coddis }}</td>
+          <td>@include('disciplinas.partials.index-estado')</td>
+          <td><a href="{{ route('disciplinas.show', $disc->coddis) }}">{{ $disc->nomdis }}</a></td>
           <td>{{ $disc->creaul }}</td>
           <td>{{ $disc->cretrb }}</td>
           <td>{{ $disc->atividade_extensionista ? $disc->cgahoratvext : '' }}</td>

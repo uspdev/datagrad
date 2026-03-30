@@ -3,7 +3,7 @@
   <div>
     <span class="h5">
       Disciplinas
-      <i class="fas fa-angle-right"></i> {{ $disc['coddis'] }} - {{ $disc['nomdis'] }}
+      <i class="fas fa-angle-right"></i> {{ $disc['coddis'] }} - @limit($disc['nomdis'], 50)
       <i class="fas fa-angle-right"></i> Preparado para impressão
     </span>
 
