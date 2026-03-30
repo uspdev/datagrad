@@ -3,11 +3,10 @@
 namespace App\Providers;
 
 use DateTime;
-use Spatie\Permission\Models\Role;
-use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
-use Spatie\Permission\Models\Permission;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -38,5 +37,13 @@ class AppServiceProvider extends ServiceProvider
                 );
             }
         );
+
+        Blade::directive('limit', fn($e) => "<?php echo Str::limit($e); ?>");
+        Blade::directive('upper', fn($e) => "<?php echo strtoupper($e); ?>");
+        Blade::directive('lower', fn($e) => "<?php echo strtolower($e); ?>");
+        Blade::directive('money', fn($e) => "<?php echo number_format($e, 2, ',', '.'); ?>");
+        Blade::directive('date', fn($e) => "<?php echo date('d/m/Y', strtotime($e)); ?>");
+        Blade::directive('datetime', fn($e) => "<?php echo date('d/m/Y H:i', strtotime($e)); ?>");
+        Blade::directive('ago', fn($e) => "<?php echo \\Carbon\\Carbon::parse($e)->diffForHumans(); ?>");
     }
 }
