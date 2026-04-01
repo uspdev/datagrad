@@ -21,15 +21,17 @@
             <div class="row">
               <div class="col-md-3 mb-3">
                 <label for="coddis" class="form-label">Prefixo</label>
-                <input type="text" name="coddis" id="coddis" class="form-control" required>
-                <small class="form-text text-muted">
-                  O código da disciplina será atribuído pelo serviço de graduação.
-                </small>
+                <select name="coddis" id="coddis" class="form-control" required>
+                  <option value="" disabled selected>Selecione um prefixo ..</option>
+                  @foreach ($prefixos as $prefixo)
+                    <option value="{{ $prefixo }}">{{ $prefixo }}</option>
+                  @endforeach
+                </select>
               </div>
 
               <div class="col-md-9 mb-3">
                 <label for="nomdis" class="form-label">Nome</label>
-                <input type="text" name="nomdis" id="nomdis" class="form-control" required>
+                <input type="text" name="nomdis" id="nomdis" class="form-control" maxlength="240" required>
               </div>
             </div>
 
