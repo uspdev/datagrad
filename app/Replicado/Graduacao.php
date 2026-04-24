@@ -891,4 +891,40 @@ class Graduacao extends GraduacaoReplicado
         $ret = DB::fetchAll($query, $param);
         return $ret;
     }
+
+    public static function retornarCargaHorariaExtensionista($codcur, $anoIngresso)
+    {
+        $query = "
+            SELECT
+                YEAR(V.dtainivin) AS ano_ingresso,
+                V.codpes,
+                V.nompes,
+                E.codema AS email,
+                COALESCE(AEX.carga_aex_horas, 0) + COALESCE(HIST.carga_hist_horas, 0) AS carga_total_extensao_horas
+            FROM VINCULOPESSOAUSP V
+            LEFT JOIN EMAILPESSOA E ON E.codpes = V.codpes AND E.stamtr = 'S'
+            LEFT JOIN (
+                SELECT codpes, SUM(cgahorrlzaex) / 60.0 AS carga_aex_horas
+                FROM AEXINSCRICAO
+                GROUP BY codpes
+            ) AS AEX ON AEX.codpes = V.codpes
+            LEFT JOIN (
+                SELECT H.codpes, SUM(D.cgahoratvext) AS carga_hist_horas
+                FROM HISTESCOLARGR H
+                INNER JOIN DISCIPLINAGR D ON H.coddis = D.coddis AND H.verdis = D.verdis
+                WHERE H.rstfim = 'A' AND D.cgahoratvext IS NOT NULL
+                GROUP BY H.codpes
+            ) AS HIST ON HIST.codpes = V.codpes
+            WHERE V.codcurgrd = :codcur
+            AND YEAR(V.dtainivin) = :ano
+            ORDER BY V.nompes ";
+
+        $params = [
+            'codcur' => $codcur,
+            'ano' => $anoIngresso,
+        ];
+
+        $ret = DB::fetchAll($query, $params);
+        return $ret;
+    }
 }
