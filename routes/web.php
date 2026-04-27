@@ -58,3 +58,5 @@ Route::get('arquivos/download', [ArquivoController::class, 'download'])->name('a
 Route::resource('/roles', RoleController::class);
 Route::resource('/cursos', CursoController::class);
 
+Route::get('graduacao/relatorio/carga-extensao', [GraduacaoController::class, 'relatorioCargaExtensao'])->name('graduacao.relatorio.carga-extensao');
+Route::post('graduacao/relatorio/carga-extensao', [GraduacaoController::class, 'relatorioCargaExtensao'])->name('graduacao.relatorio.carga-extensao.post');
