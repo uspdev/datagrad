@@ -662,4 +662,35 @@ class GraduacaoController extends Controller
 
         return view('grad.relatorio-turma', ['formRequest' => $formRequest, 'disciplinas' => $disciplinas, 'resultadosTurmas' => $resultadosTurmas]);
     }
+
+    public function relatorioCargaExtensao(Request $request)
+    {
+        $this->authorize('disciplinas');
+        \UspTheme::activeUrl('graduacao/relatorio/carga-extensao');
+
+        $cursos = Evasao::retornarCodcurNomcur();
+
+        if ($request->isMethod('get')) {
+            return view('grad.relatorio-carga-extensao', ['cursoOpcao' => $cursos]);
+        }
+
+        $request->validate([
+            'curso' => 'required|integer',
+            'ano' => 'required|integer|between:2000,' . date('Y'),
+        ]);
+
+        $alunosCarga = \App\Replicado\Graduacao::retornarCargaHorariaExtensionista($request->curso, $request->ano);
+
+        if (empty($alunosCarga)) {
+            return redirect()->back()
+                ->with('alert-warning', 'Nenhum dado encontrado para os critérios informados.')
+                ->withInput();
+        }
+
+        return view('grad.relatorio-carga-extensao', [
+            'alunosCarga' => $alunosCarga,
+            'cursoOpcao' => $cursos,
+            'params' => $request->all()
+        ]);
+    }
 }
