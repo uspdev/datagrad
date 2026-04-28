@@ -892,7 +892,16 @@ class Graduacao extends GraduacaoReplicado
         return $ret;
     }
 
-    public static function retornarCargaHorariaExtensionista($codcur, $anoIngresso)
+    /**
+     * Método para listar a carga horária total extensionista de alunos
+     * de um determinado curso e ano de ingresso.
+     * 
+     * @param Int $codcur
+     * @param Int $anoIngresso 
+     * @return Array Lista com ano, codpes, nome, email e carga total de extensão
+     * @author Vinicius Rafael do Vale, em 27/04/2026
+     */
+    public static function listarCargaHorariaExtensionista($codcur, $anoIngresso)
     {
         $query = "
             SELECT
