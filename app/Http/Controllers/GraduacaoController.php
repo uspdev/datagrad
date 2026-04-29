@@ -679,7 +679,7 @@ class GraduacaoController extends Controller
             'ano' => 'required|integer|between:2000,' . date('Y'),
         ]);
 
-        $alunosCarga = \App\Replicado\Graduacao::retornarCargaHorariaExtensionista($request->curso, $request->ano);
+        $alunosCarga = Graduacao::listarCargaHorariaExtensionista($request->curso, $request->ano);
 
         if (empty($alunosCarga)) {
             return redirect()->back()
