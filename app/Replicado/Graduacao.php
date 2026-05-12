@@ -628,6 +628,8 @@ class Graduacao extends GraduacaoReplicado
     {
         if (is_array($coddis)) {
             $coddis = implode(',', array_map(fn($c) => "'{$c}'", $coddis));
+        } else {
+            $coddis = "'{$coddis}'";
         }
 
         $query = "SELECT DR.*, P.nompesttd FROM DISCIPGRRESP DR
