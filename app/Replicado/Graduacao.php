@@ -626,11 +626,10 @@ class Graduacao extends GraduacaoReplicado
      */
     public static function listarResponsaveisDisciplina($coddis): array
     {
-        if (is_array($coddis)) {
-            $coddis = implode(',', array_map(fn($c) => "'{$c}'", $coddis));
-        } else {
-            $coddis = "'{$coddis}'";
-        }
+        $coddis = implode(
+            ',',
+            array_map(fn($c) => "'" . addslashes($c) . "'",(array) $coddis)
+        );
 
         $query = "SELECT DR.*, P.nompesttd FROM DISCIPGRRESP DR
             INNER JOIN PESSOA P ON P.codpes = DR.codpes
@@ -639,7 +638,7 @@ class Graduacao extends GraduacaoReplicado
             ORDER BY DR.coddis
         ";
 
-$ret =  DB::fetchAll($query);
+        $ret =  DB::fetchAll($query);
 
         return $ret;
     }
