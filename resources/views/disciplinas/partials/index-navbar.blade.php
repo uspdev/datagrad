@@ -21,7 +21,7 @@
   $titulo = match ($visao) {
       'docente' => 'Minhas Disciplinas',
       'cg' => 'Disciplinas CG',
-      'departamento' => 'Disciplinas com prefixo(s) ' . Auth::user()->prefixos()->implode(', '),
+      'departamento' => 'Disciplinas com prefixo(s) ' . implode(', ', Auth::user()->prefixos()),
       default => 'Disciplinas',
   };
 @endphp

@@ -279,8 +279,8 @@ class Disciplina extends Model
         $drs = Graduacao::listarDisciplinasPorResponsavel($codpes);
         $discs = self::mergearResponsaveis(collect(), $drs);
 
-        $discsLocal = self::where('responsaveis', 'like', '%' . $codpes . '%')->get();
-        $discs = self::limparDisciplinasReplicado($discs, $discsLocal);
+        $discsLocal = self::naoFinalizado()->responsavel($codpes)->get();
+        $discs = self::mergearDisciplinas($discs, $discsLocal);
 
         return $discs;
     }
@@ -302,20 +302,12 @@ class Disciplina extends Model
             $discs = self::mergearResponsaveis(collect(), $drs);
 
             $discsLocal = self::naoFinalizado()->get();
-            $discs = self::limparDisciplinasReplicado($discs, $discsLocal);
+            $discs = self::mergearDisciplinas($discs, $discsLocal);
 
             return $discs;
         });
 
         return $discs;
-    }
-
-    /**
-     * Escopo para filtrar disciplinas que não estão finalizadas
-     */
-    public function scopeNaoFinalizado($query)
-    {
-        return $query->where('estado', '!=', 'Finalizado');
     }
 
     /**
@@ -325,20 +317,16 @@ class Disciplina extends Model
      * Ex.: SET0199, o prefixo é SET
      *
      * @param String $prefixo
-     * @return Illuminate\Support\Collection
+     * @return \Illuminate\Support\Collection
      */
-    public static function listarDisciplinasPorPrefixo($prefixo)
+    public static function listarDisciplinasPorPrefixo(string|array $prefixo)
     {
-        $drs = Graduacao::listarDisciplinasPorPrefixo($prefixo);
+        $prefixos = (array) $prefixo;
+        $drs = Graduacao::listarDisciplinasPorPrefixo($prefixos);
         $discs = self::mergearResponsaveis(collect(), $drs);
 
-        // vamos pegar as disciplinas locais do prefixo
-        $discsLocal = self::where('coddis', 'like', $prefixo . '%')
-            ->naoFinalizado()
-            ->get();
-
-        // vamos limpar repetidos
-        $discs = self::limparDisciplinasReplicado($discs, $discsLocal);
+        $discsLocal = self::prefixo($prefixos)->naoFinalizado()->get();
+        $discs = self::mergearDisciplinas($discs, $discsLocal);
 
         return $discs;
     }
@@ -391,22 +379,20 @@ class Disciplina extends Model
     /**
      * Limpa de $discs as disciplinas repetidas em $discsLocal
      */
-    protected static function limparDisciplinasReplicado($discs, $discsLocal)
+    protected static function mergearDisciplinas($discs, $discsLocal)
     {
         $replicados = $discs->keyBy('coddis');
         $result = collect();
 
         foreach ($discsLocal as $discLocal) {
-            if ($replicados->has($discLocal->coddis)) {
-                // associar o objeto replicado ao local
-                $discLocal->dr = $replicados->get($discLocal->coddis);
-                // remover do replicado para não adicionar depois
-                $replicados->forget($discLocal->coddis);
+            if ($dr = $replicados->get($discLocal->coddis)) {
+                $discLocal->dr = $dr; // associa versão do replicado
+                $replicados->forget($discLocal->coddis); // remove para evitar duplicidade
             }
             $result->push($discLocal);
         }
 
-        // adicionar os replicados restantes (não repetidos)
+        // adiciona disciplinas existentes apenas no replicado
         return $result->concat($replicados->values())->values();
     }
 
@@ -672,6 +658,45 @@ class Disciplina extends Model
     {
         return Graduacao::$codlinegr[$codlinegr] ?? '-';
     }
+
+
+    // ESCOPOS *********************************
+
+    /**
+     * Escopo para filtrar disciplinas que não estão finalizadas
+     */
+    public function scopeNaoFinalizado($query)
+    {
+        return $query->where('estado', '!=', 'Finalizado');
+    }
+
+    /**
+     * Escopo para filtrar disciplinas sob responsabilidade de um codpes específico
+     */
+    public function scopeResponsavel($query, $codpes)
+    {
+        return $query->where(
+            'responsaveis',
+            'like',
+            "%{$codpes}%"
+        );
+    }
+
+    /**
+     * Escopo para filtrar disciplinas por prefixo
+     */
+    public function scopePrefixo($query, string|array $prefixos)
+    {
+        $prefixos = (array) $prefixos;
+
+        return $query->where(function ($q) use ($prefixos) {
+            foreach ($prefixos as $prefixo) {
+                $q->orWhere('coddis', 'like', "{$prefixo}%");
+            }
+        });
+    }
+
+    // RELACIONAMENTOS *************************
 
     /**
      * Relacionamento com user:criado por

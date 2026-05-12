@@ -45,7 +45,8 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
-    public function isCG() {
+    public function isCG()
+    {
         return $this->hasRole('CG');
     }
 
@@ -54,11 +55,13 @@ class User extends Authenticatable
      *
      * @return Array
      */
-    public function prefixos() {
-        $prefixos = $this->roles()->where('name', 'like', 'disciplinas_%')->get()->pluck('name');
-        $prefixos->transform(function($item, $key) {
-           return substr($item, 12);
-        });
-        return $prefixos;
+    public function prefixos(): array
+    {
+    return $this->roles()
+        ->where('name', 'like', 'disciplinas_%')
+        ->pluck('name')
+        ->map(fn ($role) =>str_replace('disciplinas_', '', $role))
+        ->values()
+        ->all();
     }
 }

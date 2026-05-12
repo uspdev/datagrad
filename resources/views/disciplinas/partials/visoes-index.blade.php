@@ -18,7 +18,7 @@
     Visão CG
   </a>
 
-  @can('admin')
+  @can('disciplina-cg')
     <a href="{{ route('disciplinas.index') }}?visao=finalizados"
       class="btn btn-sm {{ $visao == 'finalizados' ? 'btn-danger' : 'btn-outline-danger' }}">
       Disciplinas finalizadas

@@ -702,7 +702,7 @@ $ret =  DB::fetchAll($query);
     /**
      * Retorna lista de disciplinas de responsabilidade de $codpes
      *
-     * @param Integer $codpes
+     * @param Int $codpes
      * @return Array
      */
     public static function listarDisciplinasPorResponsavel($codpes): array

@@ -62,17 +62,15 @@ class DisciplinaController extends Controller
                     return redirect()->action([self::class, 'index']);
                 }
                 $request->session()->put('disciplinas.visao', 'departamento');
-                $discs = collect($user->prefixos())
-                    ->flatMap(
-                        fn($prefixo) => Disciplina::listarDisciplinasPorPrefixo($prefixo)
-                    );
+                $discs = Disciplina::listarDisciplinasPorPrefixo($user->prefixos());
                 break;
             case 'finalizados':
                 $request->session()->put('disciplinas.visao', 'finalizados');
                 $discs = Disciplina::listarDisciplinasFinalizadas();
                 break;
-            default:
+            case 'docente':
                 $discs = Disciplina::listarDisciplinasPorResponsavel($user->codpes);
+                break;
         }
         $discs = $discs->sortBy('coddis');
 
