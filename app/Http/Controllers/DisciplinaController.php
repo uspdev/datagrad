@@ -48,36 +48,35 @@ class DisciplinaController extends Controller
 
         switch ($visao) {
             case 'cg':
-                if (! Gate::allows('disciplina-cg')) {
+                if (Gate::denies('disciplina-cg')) {
                     $request->session()->put('disciplinas.visao', 'docente');
                     return redirect()->action([self::class, 'index']);
                 }
-                $discs = Disciplina::listarDisciplinas();
                 $request->session()->put('disciplinas.visao', 'cg');
+                $discs = Disciplina::listarDisciplinas();
                 break;
 
             case 'departamento':
-                if (! Gate::allows('disciplina-chefe')) {
+                if (Gate::denies('disciplina-chefe')) {
                     $request->session()->put('disciplinas.visao', 'docente');
                     return redirect()->action([self::class, 'index']);
                 }
-                $discs = collect();
-                foreach ($user->prefixos() as $prefixo) {
-                    $discs = $discs->merge(Disciplina::listarDisciplinasPorPrefixo($prefixo));
-                }
                 $request->session()->put('disciplinas.visao', 'departamento');
+                $discs = collect($user->prefixos())
+                    ->flatMap(
+                        fn($prefixo) => Disciplina::listarDisciplinasPorPrefixo($prefixo)
+                    );
                 break;
             case 'finalizados':
-                $discs = Disciplina::listarDisciplinasFinalizadas();
                 $request->session()->put('disciplinas.visao', 'finalizados');
+                $discs = Disciplina::listarDisciplinasFinalizadas();
                 break;
             default:
                 $discs = Disciplina::listarDisciplinasPorResponsavel($user->codpes);
         }
         $discs = $discs->sortBy('coddis');
-        $prefixos = Graduacao::listarPrefixosDisciplinas();
 
-        return view('disciplinas.index', compact('discs', 'visao', 'prefixos'));
+        return view('disciplinas.index', compact('discs', 'visao'));
     }
 
     /**
