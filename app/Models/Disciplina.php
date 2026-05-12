@@ -133,7 +133,7 @@ class Disciplina extends Model
         // obter disciplina local
         $disc = self::where('coddis', $coddis)
             ->where(function ($q) {
-                $q->where('estado', '!=', 'Finalizado')->orWhereNull('estado');
+                $q->naoFinalizado()->orWhereNull('estado');
             })
             ->first();
 
@@ -291,7 +291,7 @@ class Disciplina extends Model
      * Guarda em cache do Laravel por 12h pois é uma consulta demorada.
      * O cache é renovado quando há alteração da diciplina no sistema passando $refresh = true
      */
-    public static function listarDisciplinas($refresh = false)
+    public static function listarDisciplinas($refresh = true)
     {
         if ($refresh) {
             Cache::forget('listarDisciplinas');
@@ -301,13 +301,21 @@ class Disciplina extends Model
             $drs = Graduacao::listarDisciplinas();
             $discs = self::mergearResponsaveis(collect(), $drs);
 
-            $discsLocal = self::where('estado', '!=', 'Finalizado')->get();
+            $discsLocal = self::naoFinalizado()->get();
             $discs = self::limparDisciplinasReplicado($discs, $discsLocal);
 
             return $discs;
         });
 
         return $discs;
+    }
+
+    /**
+     * Escopo para filtrar disciplinas que não estão finalizadas
+     */
+    public function scopeNaoFinalizado($query)
+    {
+        return $query->where('estado', '!=', 'Finalizado');
     }
 
     /**
@@ -326,7 +334,7 @@ class Disciplina extends Model
 
         // vamos pegar as disciplinas locais do prefixo
         $discsLocal = self::where('coddis', 'like', $prefixo . '%')
-            ->where('estado', '!=', 'Finalizado')
+            ->naoFinalizado()
             ->get();
 
         // vamos limpar repetidos
