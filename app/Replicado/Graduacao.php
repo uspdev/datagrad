@@ -620,7 +620,7 @@ class Graduacao extends GraduacaoReplicado
     /**
      * Retorna os responsáveis de uma disciplina
      *
-     * @param String $coddis
+     * @param String|Array $coddis
      * @return Array
      */
     public static function listarResponsaveisDisciplina($coddis): array
@@ -921,9 +921,9 @@ class Graduacao extends GraduacaoReplicado
     /**
      * Método para listar a carga horária total extensionista de alunos
      * de um determinado curso e ano de ingresso.
-     * 
+     *
      * @param Int $codcur
-     * @param Int $anoIngresso 
+     * @param Int $anoIngresso
      * @return Array Lista com ano, codpes, nome, email e carga total de extensão
      * @author Vinicius Rafael do Vale, em 27/04/2026
      */
