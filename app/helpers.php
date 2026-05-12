@@ -15,7 +15,7 @@ use Spatie\CommonMarkHighlighter\IndentedCodeRenderer;
 if (!function_exists('md2html')) {
     /**
      * Converte markdown para html (github flavored)
-     * 
+     *
      * Caso seja passado o nome do arquivo, ele irá procurar na pasta docs e carregar
      *
      * @param String $markdown String contendo markdown ou nome do arquivo em docs/
@@ -55,12 +55,3 @@ if (!function_exists('md2html')) {
     }
 }
 
-if (!function_exists('formatarData')) {
-    function formatarData($dateString, $format = 'd/m/Y')
-    {
-        if (empty($dateString)) {
-            return '';
-        }
-        return Carbon::parse($dateString)->format($format);
-    }
-}
