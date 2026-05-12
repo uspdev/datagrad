@@ -611,7 +611,6 @@ class Graduacao extends GraduacaoReplicado
             $ret['maxverdis'] = $maxverdis;
             $ret['sitdistxt'] = self::$sitdis[$ret['sitdis']] ?? '';
             $ret['codlinegrtxt'] = self::$codlinegr[$ret['codlinegr']] ?? '-';
-
         }
 
         return $ret;
@@ -620,22 +619,25 @@ class Graduacao extends GraduacaoReplicado
     /**
      * Retorna os responsáveis de uma disciplina
      *
+     * Se $coddis for array retorna os responsáveis de todas as disciplinas do array
+     *
      * @param String|Array $coddis
      * @return Array
      */
     public static function listarResponsaveisDisciplina($coddis): array
     {
         if (is_array($coddis)) {
-            $coddis = implode(',', $coddis);
+            $coddis = implode(',', array_map(fn($c) => "'{$c}'", $coddis));
         }
 
         $query = "SELECT DR.*, P.nompesttd FROM DISCIPGRRESP DR
             INNER JOIN PESSOA P ON P.codpes = DR.codpes
-            WHERE coddis IN (:coddis)
+            WHERE coddis IN ({$coddis})
             AND dtafimrsp is NULL
+            ORDER BY DR.coddis
         ";
-        $params['coddis'] = $coddis;
-        $ret =  DB::fetchAll($query, $params);
+
+$ret =  DB::fetchAll($query);
 
         return $ret;
     }
@@ -727,22 +729,34 @@ class Graduacao extends GraduacaoReplicado
      *   ou seja, a entrar em vigência no futuro.
      * Ex.: SET0199, o prefixo é SET
      *
-     * @param String $prefixo
+     * @param String|Array $prefixo
      * @return Array
      * @author Masakik, em 27/5/2024
      * @author MasakiK, em 11/9/2024, comentado dtaatvdis para listar disciplinas ainda não ativadas
+     * @author Masakik, em 12/5/2026, refatorado para nao usar like e aceitar array de prefixos
      */
     public static function listarDisciplinasPorPrefixo($prefixo)
     {
-        $query = "SELECT D1.*
-        FROM DISCIPLINAGR AS D1
-        WHERE (D1.verdis = (SELECT MAX(D2.verdis) FROM DISCIPLINAGR AS D2 WHERE (D2.coddis = D1.coddis)))
-            AND D1.dtadtvdis IS NULL -- nao foi desativado
-            -- AND D1.dtaatvdis IS NOT NULL -- foi ativado
-            AND D1.coddis LIKE :prefixo
-        ORDER BY D1.nomdis ASC";
+        $prefixos = (array) $prefixo;
+        $likes = [];
+        $params = [];
 
-        $params['prefixo'] = $prefixo . '%';
+        foreach ($prefixos as $i => $prefixo) {
+            $param = "prefixo{$i}";
+            $likes[] = "LEFT(D1.coddis, 3) = :{$param}";
+            $params[$param] = $prefixo;
+        }
+        $wherePrefixos = implode(' OR ', $likes);
+
+        $query = "SELECT D1.*
+            FROM DISCIPLINAGR AS D1
+            WHERE D1.verdis = (
+                SELECT MAX(D2.verdis) FROM DISCIPLINAGR AS D2 WHERE D2.coddis = D1.coddis
+            )
+            AND D1.dtadtvdis IS NULL
+            AND ({$wherePrefixos})
+            ORDER BY D1.nomdis ASC
+        ";
 
         return DB::fetchAll($query, $params);
     }

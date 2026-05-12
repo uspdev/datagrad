@@ -357,13 +357,23 @@ class Disciplina extends Model
      */
     protected static function mergearResponsaveis($discs, $drs)
     {
-        foreach ($drs as $k => $dr) {
-            $disc = new Disciplina();
+        $codigos = collect($drs)
+            ->pluck('coddis')
+            ->unique()
+            ->values()
+            ->all();
+
+        $responsaveisPorCoddis = collect(Graduacao::listarResponsaveisDisciplina($codigos))
+            ->groupBy('coddis');
+
+        foreach ($drs as $dr) {
+            $disc = new self();
             $disc->fill($dr);
             $disc->dr = $dr;
-            $disc->responsaveis = Graduacao::listarResponsaveisDisciplina($disc->coddis);
+            $disc->responsaveis = $responsaveisPorCoddis[$disc->coddis] ?? [];
             $discs[] = $disc;
         }
+
         return $discs;
     }
 
