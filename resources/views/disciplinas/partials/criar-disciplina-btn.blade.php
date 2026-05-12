@@ -23,7 +23,7 @@
                 <label for="coddis" class="form-label">Prefixo</label>
                 <select name="coddis" id="coddis" class="form-control" required>
                   <option value="" disabled selected>Selecione um prefixo ..</option>
-                  @foreach ($prefixos as $prefixo)
+                  @foreach (App\Replicado\Graduacao::listarPrefixosDisciplinas() as $prefixo)
                     <option value="{{ $prefixo }}">{{ $prefixo }}</option>
                   @endforeach
                 </select>
