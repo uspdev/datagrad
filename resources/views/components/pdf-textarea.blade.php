@@ -8,7 +8,7 @@
   <table>
     <tr>
       <th colspan="2">
-        {{ $model->meta[$name]['titulo'] }}
+        {{ $model::meta()[$name]['titulo'] }}
         {{ $loop->index > 0 ? '(continuação ..)' : '' }}
       </th>
     </tr>

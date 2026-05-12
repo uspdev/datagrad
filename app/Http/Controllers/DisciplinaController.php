@@ -2,17 +2,19 @@
 
 namespace App\Http\Controllers;
 
-use Closure;
 use App\Models\Curso;
-use App\Services\Pdf;
-use App\Services\Diff;
-use App\Replicado\Pessoa;
 use App\Models\Disciplina;
+use App\Replicado\Graduacao;
+use App\Replicado\Pessoa;
+use App\Services\Diff;
+use App\Services\Pdf;
+use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
-use Uspdev\UspTheme\Facades\UspTheme;
 use Illuminate\Support\Facades\Storage;
+use Uspdev\UspTheme\Facades\UspTheme;
 
 class DisciplinaController extends Controller
 {
@@ -46,7 +48,7 @@ class DisciplinaController extends Controller
 
         switch ($visao) {
             case 'cg':
-                if (!Gate::allows('disciplina-cg')) {
+                if (! Gate::allows('disciplina-cg')) {
                     $request->session()->put('disciplinas.visao', 'docente');
                     return redirect()->action([self::class, 'index']);
                 }
@@ -55,7 +57,7 @@ class DisciplinaController extends Controller
                 break;
 
             case 'departamento':
-                if (!Gate::allows('disciplina-chefe')) {
+                if (! Gate::allows('disciplina-chefe')) {
                     $request->session()->put('disciplinas.visao', 'docente');
                     return redirect()->action([self::class, 'index']);
                 }
@@ -65,13 +67,17 @@ class DisciplinaController extends Controller
                 }
                 $request->session()->put('disciplinas.visao', 'departamento');
                 break;
+            case 'finalizados':
+                $discs = Disciplina::listarDisciplinasFinalizadas();
+                $request->session()->put('disciplinas.visao', 'finalizados');
+                break;
             default:
                 $discs = Disciplina::listarDisciplinasPorResponsavel($user->codpes);
         }
-
         $discs = $discs->sortBy('coddis');
+        $prefixos = Graduacao::listarPrefixosDisciplinas();
 
-        return view('disciplinas.index', compact('discs', 'visao'));
+        return view('disciplinas.index', compact('discs', 'visao', 'prefixos'));
     }
 
     /**
@@ -85,32 +91,33 @@ class DisciplinaController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Cria nova disciplina
+     *
+     * O prefixo é informado pelo usuário, e o código completo
+     * é gerado automaticamente para evitar colisões.
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
     {
-        // dd($request->all());
         $validated = $request->validate([
-            'coddis' => 'required|string|max:10|unique:disciplinas,coddis',
-            'nomdis' => 'required|string|max:255',
+            'coddis' => 'required|string|max:3',
+            'nomdis' => 'required|string|max:240',
             'codpes' => 'required|integer',
         ]);
-        $coddis = strtoupper($validated['coddis']);
+        $prefixo = strtoupper($validated['coddis']);
 
-        $existe = Disciplina::where('coddis', $coddis)->exists();
-        if ($existe){
-            return redirect()->route('disciplinas.index')
-            ->with('alert-warning', 'Já existe uma disciplina com esse código.');
-        }
+        // vamos garantir um coddis aleatório e único
+        do {
+            $coddis = $prefixo . '-N' . substr(str_shuffle('0123456789'), 0, 4);
+        } while (Disciplina::where('coddis', $coddis)->exists());
 
         $disc = Disciplina::create([
             'coddis' => $coddis,
             'nomdis' => $validated['nomdis'],
             'responsaveis' => [
-                ['codpes' => $validated['codpes'], 'nompesttd' => Pessoa::obterNome($validated['codpes'])]
+                ['codpes' => $validated['codpes'], 'nompesttd' => Pessoa::obterNome($validated['codpes'])],
             ],
             'estado' => 'Criar',
         ]);
@@ -124,19 +131,21 @@ class DisciplinaController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  String  $coddis
+     * @param  string  $coddis
      * @return \Illuminate\Http\Response
      */
     public function show(Request $request, $coddis)
     {
         $this->authorize('viewAny', Disciplina::class);
 
-        $versao = $request->v ?: null; // vai desarivar versões anteriores?
+        $versao = $request->v ?: null; // vai desativar versões anteriores?
         $coddis = strtoupper($coddis);
-        $cursos = [];
 
-        $disc = Disciplina::primeiroOuNovo($coddis);
-        $dr = $disc->dr;
+        if ($dr = Disciplina::obterDisciplinaReplicado($coddis)) {
+            $dr['meta'] = Disciplina::meta();
+        }
+        $disc = Disciplina::where('coddis', $coddis)->first() ?? Disciplina::novo($dr);
+        $disc->dr = $dr;
 
         return view('disciplinas.show', compact('dr', 'coddis', 'disc'));
 
@@ -146,8 +155,8 @@ class DisciplinaController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param string $coddis
-     * @return \Illuminate\Http\Response
+     * @param  string  $coddis
+     * @return Response
      */
     public function edit(Request $request, $coddis)
     {
@@ -163,8 +172,8 @@ class DisciplinaController extends Controller
             if (stripos(config('replicado.codundclgs'), $curso_dr['codclg']) !== false) {
                 // é curso da unidade
                 $curso = Curso::where('codcur', $curso_dr['codcur'])->first();
-                if (!$curso) {
-                    $curso = new Curso();
+                if (! $curso) {
+                    $curso = new Curso;
                     $curso->codcur = $curso_dr['codcur'];
                     $curso->dr = $curso_dr;
                 }
@@ -172,16 +181,16 @@ class DisciplinaController extends Controller
             }
         }
         $disc->cursos = $cursos;
+        $cursos = Graduacao::listarCursosHabilitacoes();
 
-        return view('disciplinas.edit', compact('disc'));
+        return view('disciplinas.edit', compact('disc', 'cursos'));
     }
 
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  string $coddis
-     * @return \Illuminate\Http\Response
+     * @param  string  $coddis
+     * @return Response
      */
     public function update(Request $request, $coddis)
     {
@@ -194,12 +203,12 @@ class DisciplinaController extends Controller
             $disc->atualizarEstado('Em aprovação');
             $disc->save();
             Disciplina::renovarCacheAfterResponse();
+
             return redirect()
                 ->route('disciplinas.preview-html', $disc->coddis)
                 ->with('alert-success', 'Disciplina enviada para aprovação com sucesso!');
         }
 
-        $disc->atualizarEstado('Em edição');
         $disc->atualizado_por_id = Auth::id();
 
         if ($add = $request->codpes_add) {
@@ -215,55 +224,48 @@ class DisciplinaController extends Controller
             $disc->save();
             Disciplina::renovarCacheAfterResponse();
         }
-        if ($request->submit == 'preview') {
-            $disc->diffs = Diff::computar($disc);
-            $disc = Pdf::quebrarTextoLongo($disc);
-
-            $pdf = Pdf::gerarPdfAlteracaoDisciplina($disc);
-
-            $disc->refresh();
-            unset($disc->diffs);
-            $disc->pdf = $pdf;
-            $disc->save();
-
-            Disciplina::renovarCacheAfterResponse();
-            return redirect()->route('disciplinas.preview', $disc->coddis);
-        }
 
         $request->session()->flash('alert-info', 'Dados salvo com sucesso!');
 
-        if ($request->submit == 'preview-html') {
+        if ($request->action == 'preview-html') {
             return redirect()->route('disciplinas.preview-html', $disc->coddis);
         }
         if ($request->next) {
             return redirect()->to($request->next);
         }
+
         return redirect()->route('disciplinas.edit', $disc->coddis);
     }
 
     /**
      * Realiza o preview do PDF da disciplina em alteração/criação
      *
-     * @param String $disc
+     * @param  string  $disc
      */
-    public function preview($coddis)
-    {
-        $disc = Disciplina::where('coddis', $coddis)->first();
+    // public function preview($coddis)
+    // {
+    //     $disc = Disciplina::where('coddis', $coddis)->first();
+    //     $url = Storage::temporaryUrl('disciplinas/disciplina-' . $coddis . '.pdf', now()->addMinutes(10), ['ResponseContentDisposition' => 'attachment; filename=file2.pdf']);
 
-        $url = Storage::temporaryUrl('disciplinas/disciplina-' . $coddis . '.pdf', now()->addMinutes(10), ['ResponseContentDisposition' => 'attachment; filename=file2.pdf']);
-
-        return view('disciplinas.preview', compact('disc', 'url'));
-    }
+    //     return view('disciplinas.preview', compact('disc', 'url'));
+    // }
 
     /**
      * Realiza o preview em HTML da disciplina em alteração/criação
-     * 
-     * @param String $coddis
+     *
+     * @param  string  $coddis
      */
     public function previewHtml($coddis)
     {
         $this->authorize('viewAny', Disciplina::class);
+        // $disc = Disciplina::where('coddis', strtoupper($coddis))->first();
         $disc = Disciplina::primeiroOuNovo(strtoupper($coddis));
+        $this->authorize('update', $disc);
+
+        if (! $disc) {
+            return back()
+                ->with('alert-danger', 'Disciplina não encontrada!');
+        }
 
         $disc->mesclarResponsaveisReplicado();
 
@@ -273,8 +275,8 @@ class DisciplinaController extends Controller
             if (stripos(config('replicado.codundclgs'), $curso_dr['codclg']) !== false) {
                 // é curso da unidade
                 $curso = Curso::where('codcur', $curso_dr['codcur'])->first();
-                if (!$curso) {
-                    $curso = new Curso();
+                if (! $curso) {
+                    $curso = new Curso;
                     $curso->codcur = $curso_dr['codcur'];
                     $curso->dr = $curso_dr;
                 }
@@ -290,7 +292,7 @@ class DisciplinaController extends Controller
      * Remove the specified resource from storage.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
     public function destroy($id)
     {
@@ -299,9 +301,7 @@ class DisciplinaController extends Controller
 
     public function ajuda()
     {
-
         $md = file_get_contents(base_path('docs/disciplinas.md'));
-
         return view('disciplinas.ajuda', compact('md'));
     }
 }

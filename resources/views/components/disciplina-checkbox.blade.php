@@ -1,6 +1,6 @@
-{{-- 
+{{--
   Este checkbox verifica a existência de $name. 'igl' para criar e preencher esse campo.
-  Compativel com 
+  Compativel com
   - mtdens e mtdensigl: metodologia de ensino (com ingles)
   - objdslsut: obj des sustentável (sem ingles)
  --}}
@@ -16,18 +16,18 @@
 ])
 
 @php
-  if (isset($model->meta[$name . 'igl'])) {
+  if (isset($model::meta()[$name . 'igl'])) {
       $nameIgl = $name . 'igl';
       $modalWidth = 'modal-lg';
-      $titulo = $model->meta[$name]['titulo'] . ' / ' . $model->meta[$nameIgl]['titulo'];
+      $titulo = $model::meta()[$name]['titulo'] . ' / ' . $model::meta()[$nameIgl]['titulo'];
   } else {
       $nameIgl = null;
       $modalWidth = '';
-      $titulo = $model->meta[$name]['titulo'];
+      $titulo = $model::meta()[$name]['titulo'];
   }
 @endphp
 
-<table class="table table-bordered table-sm {{ $model->meta[$name]['class'] ?? '' }}" id="{{ $id }}">
+<table class="table table-bordered table-sm {{ $model::meta()[$name]['class'] ?? '' }}" id="{{ $id }}">
   <tr>
     <th colspan="2" class="titulo text-center" style="background-color: aliceBlue">
       {{ $titulo }}

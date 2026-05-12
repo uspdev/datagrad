@@ -1,27 +1,12 @@
 @extends('layouts.app')
 
-@section('styles')
-  @parent
-  <style>
-    .navbar-index {
-      background-color: #d6eeff;
-    }
-
-    .navbar-index-cg {
-      background-color: bisque;
-      border-bottom: 3px solid red;
-    }
-  </style>
-@endsection
-
 @section('content')
   @include('disciplinas.partials.index-navbar')
-
   <table class="table table-sm table-bordered datatable-simples dt-fixed-header dt-buttons dt-state-save">
     <thead>
       <tr>
         <th>Código</th>
-        <th style="min-width: 100px;">Estado</th>
+        <th style="min-width: 170px;">Estado</th>
         <th style="min-width: 300px;">Nome</th>
         <th>Cred. Aula</th>
         <th>Cred. Trab.</th>
@@ -36,10 +21,11 @@
     </thead>
     <tbody>
       @foreach ($discs as $disc)
-        {{-- @if ($disc->dr == null) @dd($disc) @endif --}}
         <tr>
           <td>{{ $disc->coddis }}</td>
-          <td>@include('disciplinas.partials.index-estado')</td>
+          <td style="min-width: 170px;" data-order="{{ $disc?->obterEstadoConfig()['order'] ?? '' }}">
+            @include('disciplinas.partials.index-estado')
+          </td>
           <td><a href="{{ route('disciplinas.show', $disc->coddis) }}">{{ $disc->nomdis }}</a></td>
           <td>{{ $disc->creaul }}</td>
           <td>{{ $disc->cretrb }}</td>
@@ -48,13 +34,8 @@
           <td>{{ $disc->habilidades ? 'Sim' : '' }}</td>
           <td>{{ $disc->dr['sitdistxt'] ?? '-' }}</td>
           <td>{{ $disc->dr['verdis'] ?? '' }}</td>
-          <td data-order={{ $disc->dr['dtaultalt'] ?? '' }}>
-            {{ formatarData($disc->dr['dtaultalt'] ?? '') }}
-          </td>
-          <td>
-            {{ $disc->retornarListaResponsaveis() }}
-          </td>
-          {{-- @if (isset($disc->dr['sitdis']) && $disc->dr['sitdis'] == 'AP') @dd($disc)@endif --}}
+          <td data-order={{ $disc->dr['dtaultalt'] ?? '' }}>@date($disc->dr['dtaultalt'] ?? '')</td>
+          <td>{{ $disc->retornarResponsaveis() }}</td>
         </tr>
       @endforeach
     </tbody>

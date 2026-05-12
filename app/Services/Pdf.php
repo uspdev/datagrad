@@ -56,7 +56,7 @@ class Pdf
 
     /**
      * Caso tenha algum texto que não caiba em uma folha vamos colocar indicação de quebra
-     * Para todos os campos de $disciplina->meta
+     * Para todos os campos de $disciplina::meta()
      *
      */
     public static function quebrarTextoLongo($disc, $linhas = 33)
@@ -65,7 +65,7 @@ class Pdf
         $width = '500';
         $size = '14';
         $numlinhas = 31;
-        foreach ($disc->meta as $campo => $valor) {
+        foreach ($disc::meta() as $campo => $valor) {
             // vamos remover alguns desnecessarios. Tem de rever ******
             if (isset($valor['diff']) && $valor['diff'] == false) {
                 continue;

@@ -1,13 +1,22 @@
 @props([
     'class' => '',
-    'name' => '',
+    'name' => '', // nome do campo do model
     'model' => '',
+    'maxlength' => 255,
 ])
-{{-- @dd($model) --}}
-<table class="table table-bordered table-sm {{ $model->meta[$name]['class'] ?? '' }}">
+
+@php
+  if (isset($model::meta()[$name]['maxlength'])) {
+    $maxlength = $model::meta()[$name]['maxlength'];
+  } else {
+    $maxlength = $maxlength;
+  }
+@endphp
+
+<table class="table table-bordered table-sm {{ $model::meta()[$name]['class'] ?? '' }}">
   <tr>
     <th colspan="2" class="titulo text-center" style="background-color: aliceBlue">
-      {{ $model->meta[$name]['titulo'] }}
+      {{ $model::meta()[$name]['titulo'] }}
       @include('components.partials.ajuda')
       @include('components.partials.copiar-btn')
     </th>
@@ -18,7 +27,7 @@
     </td>
     <td class="col-6">
       <input name="{{ $name }}" type="text" class="form-control changed" data-original="{!! $model->dr[$name] ?? '' !!}"
-        value="{{ $model[$name] }}">
+        value="{{ $model[$name] }}" maxlength="{{ $maxlength }}">
     </td>
   </tr>
 </table>

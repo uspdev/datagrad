@@ -20,10 +20,7 @@
 @endsection
 
 @section('content')
-  {{-- @php
-    $dr = $dr ?: $disc->toArray();
-  @endphp --}}
-  @include('disciplinas.partials.show-navbar')
+  @include('disciplinas.partials.show.navbar')
 
   {{-- <span class="d-block alert alert-info">
     Exemplos com extensão: SHS0360, MAE0413, ERM0208, MAT0120<br />
@@ -34,21 +31,26 @@
   @if ($dr)
     <form>
       <fieldset disabled>
-        @include('disciplinas.partials.show-basico')
-        @include('disciplinas.partials.show-avaliacao')
-        @include('disciplinas.partials.show-bibliografia')
-        @includeWhen($dr['cgahoratvext'], 'disciplinas.partials.show-extensao')
-        @includeWhen($dr['stavgmdid'] ==  'S', 'disciplinas.partials.show-viagem')
-        @includeWhen($dr['stapsuatvani'] ==  'S', 'disciplinas.partials.show-animais')
-        @include('disciplinas.partials.show-curso')
+        @include('disciplinas.partials.show.basico')
+        @include('disciplinas.partials.show.avaliacao')
+        @include('disciplinas.partials.show.bibliografia')
+        @includeWhen($dr['cgahoratvext'], 'disciplinas.partials.show.extensao')
+        @includeWhen($dr['stavgmdid'] == 'S', 'disciplinas.partials.show.viagem')
+        @includeWhen($dr['stapsuatvani'] == 'S', 'disciplinas.partials.show.animais')
+        @include('disciplinas.partials.show.curso')
       </fieldset>
     </form>
-  @else 
-    <div>A disciplina {{ $coddis }} não foi encontrada no Jupiter. Deseja criar?</div>
-
-    <a href="{{ route('disciplinas.edit', $coddis) }}"> Criar disciplina</a>
-
+  @else
+    <div>❌ A disciplina <b>{{ $coddis }}</b> não foi encontrada no Jupiter.</div>
+    @if ($disc)
+      ✅ A disciplina <b>{{ $disc->coddis }}</b> foi encontrada no BD no estado {{ $disc->estado }}.
+      Ver a <a href="{{ route('disciplinas.preview-html', $disc->coddis) }}">disciplina</a>.
+    @else
+      ❌ A disciplina <b>{{ $coddis }}</b> não foi encontrada no BD local.
+    @endif
   @endif
+
+
 @endsection
 
 @section('javascripts_bottom')

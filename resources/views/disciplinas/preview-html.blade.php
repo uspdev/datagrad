@@ -68,13 +68,18 @@
 @endsection
 
 @section('content')
-  @include('disciplinas.partials.preview-navbar')
+  @include('disciplinas.partials.preview.navbar')
 
   <div class="h4 text-center my-3">
-    {{ $disc->dr ? 'Alteração' : 'Criação' }} da disciplina:
-    <b>{{ $disc->coddis }} - {{ $disc->nomdis }}</b>
+    {{ $disc->dr ? 'Alteração' : 'Criação' }} da disciplina: <b>{{ $disc->coddis }} - {{ $disc->nomdis }}</b>
   </div>
 
+  @include('disciplinas.partials.preview.em-aprovacao-msg')
+  @include('disciplinas.partials.preview.em-aprovacao-btn')
+  @include('disciplinas.partials.preview.admin')
+  @include('disciplinas.partials.preview.validacao')
+  @include('disciplinas.partials.preview.instrucoes-cg')
+  {{-- @dd($disc) --}}
   <div class="my-2">
     <b>Unidade</b>: {{ \Uspdev\Replicado\Estrutura::obterUnidade(config('datagrad.codundclgs')[0])['sglund'] }}
   </div>
@@ -112,30 +117,19 @@
   </div>
 
   <div>
-    Estado:&nbsp; @include('disciplinas.partials.badge-estado')
+    Estado: @include('disciplinas.partials.badge-estado')
+  </div>
+
+  <div>
+    Versão de referência: {{ $disc->verdis }}
   </div>
 
   <div class="{{ $disc->estado == 'Em aprovação' ? 'd-print-none' : '' }} my-2">
 
-    @if ($disc->estado == 'Em aprovação')
-      @if (session('alert-success'))
-        <div class="alert alert-info d-print-none">
-          <i class="fas fa-info-circle"></i>
-          O documento está pronto para os trâmites de aprovação.<br>
-          Gere o PDF e encaminhe-o para os responsáveis pela aprovação.
-        </div>
-      @endif
-      
-      @can('disciplina-cg')
-        @include('disciplinas.partials.preview-finalizar-btn')
-      @endcan
-    @endif
 
-    @include('disciplinas.partials.preview-admin')
 
-    @if ($disc->estado == 'Em edição' || $disc->estado == 'Criar')
-      @include('disciplinas.partials.preview-em-aprovacao-btn')
-    @endif
+
+
 
     {{-- @includeWhen($disc->estado == 'Em edição', 'disciplinas.partials.print-btn') --}}
   </div>
@@ -258,9 +252,7 @@
   @endif
 
   {{-- habilidades e competencias --}}
-  @include('disciplinas.partials.preview-cursos')
+  @include('disciplinas.partials.preview.cursos')
 
-  @if ($disc->estado == 'Em edição')
-    @include('disciplinas.partials.preview-em-aprovacao-btn')
-  @endif
+  @include('disciplinas.partials.preview.em-aprovacao-btn')
 @endsection

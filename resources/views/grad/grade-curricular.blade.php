@@ -26,9 +26,9 @@
       'view' => 'Grade (' . substr($curso['codcrl'], -3, -1) . '/' . substr($curso['codcrl'], -1) . ')',
   ])
   <div>
-    Curso: Ini: {{ formatarData($curso['dtaatvcur']) }} Fim: {{ formatarData($curso['dtadtvcur']) }}
-    | Habilitação: Ini: {{ formatarData($curso['dtaatvhab']) }} Fim: {{ formatarData($curso['dtadtvhab']) }}
-    | Currículo: Ini: {{ formatarData($curso['dtainicrl']) }} Fim: {{ formatarData($curso['dtafimcrl']) }};
+    Curso: Ini: @date($curso['dtaatvcur']) Fim: @date($curso['dtadtvcur'])
+    | Habilitação: Ini: @date($curso['dtaatvhab']) Fim: @date($curso['dtadtvhab'])
+    | Currículo: Ini: @date($curso['dtainicrl']) Fim: @date($curso['dtafimcrl']);
     Horas total:
     <span class="btn-link" title="Carga horária total do curso (soma de todas as cargas horárias exceto a de estágio).">
       {{ $curso['cgahortot'] }}</span>;
@@ -75,7 +75,7 @@
           <td>{{ $d['nomdis'] }}</td>
           <td><div class="text-info">{{ $d['nomdisigl'] }}</div></td>
           <td class="text-center">{{ $d['verdis'] }}</td>
-          <td class="text-center">{{ formatarData($d['dtaatvdis']) }}</td>
+          <td class="text-center">@date($d['dtaatvdis'])</td>
           <td>{{ App\Replicado\Graduacao::$tipobg[$d['tipobg']] }}</td>
           <td class="text-center">{{ $d['creaul'] }}/{{ $d['cretrb'] }}</td>
           <td class="text-center">{{ $d['cgahoratvext'] ? $d['cgahoratvext'] : 'Não' }}</td>

@@ -13,9 +13,8 @@
   <div class="card-body">
     <div class="ml-2">
       <b>Estruturante</b>: {{ $dr['staetr'] == 'S' ? 'Sim' : 'Não' }}<br>
-      {{ $disc->meta['dscatvpvs']['titulo'] }}
-    <textarea class="form-control autoexpand" disabled>{!! htmlspecialchars_decode($dr['dscatvpvs']) !!}</textarea>
-      
+      {{ $disc::meta()['dscatvpvs']['titulo'] }}
+      <textarea class="form-control autoexpand" disabled>{!! htmlspecialchars_decode($dr['dscatvpvs']) !!}</textarea>
     </div>
   </div>
 </div>

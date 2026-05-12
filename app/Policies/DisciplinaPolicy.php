@@ -53,8 +53,11 @@ class DisciplinaPolicy
      */
     public function update(User $user, Disciplina $disciplina): bool
     {
-        // docente está na lista de responsáveis pela disciplina
-        if (strpos(json_encode($disciplina->responsaveis), $user->codpes) !== false || strpos(json_encode($disciplina->dr['responsaveis']), $user->codpes) !== false) {
+        // docente está na lista de responsáveis pela disciplina (local ou replicado)
+        if (
+            strpos(json_encode($disciplina->responsaveis), $user->codpes) !== false
+            || strpos(json_encode($disciplina->dr['responsaveis'] ?? []), $user->codpes) !== false
+        ) {
             return true;
         }
 

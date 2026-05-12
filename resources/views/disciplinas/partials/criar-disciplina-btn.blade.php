@@ -1,9 +1,9 @@
-<button type="button" class="btn btn-sm btn-success ml-2" data-toggle="modal" data-target="#criarModal"
+<button type="button" class="btn btn-sm btn-success" data-toggle="modal" data-target="#criarModal"
   title="Criar nova disciplina">
   <i class="fas fa-plus"></i> Novo
 </button>
 
-@section('javascripts_bottom')
+@push('modals')
   <!-- Modal -->
   <div class="modal fade" id="criarModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
     aria-labelledby="staticBackdropLabel" aria-hidden="true">
@@ -48,11 +48,9 @@
       </div>
     </div>
   </div>
-  @parent
-@endsection
+@endpush
 
-@section('javascripts_bottom')
-  @parent
+@push('scripts')
   <script>
     $(document).ready(function() {
       // inicializa o select2 somente quando o modal abrir
@@ -85,4 +83,4 @@
       });
     });
   </script>
-@endsection
+@endpush

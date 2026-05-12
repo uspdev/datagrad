@@ -2,17 +2,18 @@
 
 namespace App\Models;
 
-use App\Replicado\Pessoa;
 use App\Casts\AlwaysArray;
 use App\Casts\BrazilianDate;
 use App\Replicado\Graduacao;
+use App\Replicado\Pessoa;
+use Illuminate\Database\Eloquent\Casts\AsCollection;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Casts\AsCollection;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Facades\Validator;
 
 class Disciplina extends Model
 {
@@ -76,250 +77,13 @@ class Disciplina extends Model
     /** Cursos da unidade para os quais a disciplina é ministrada */
     public $cursos;
 
-    /** Dados dos campos do formulário de alteração de disciplina */
-    public $meta = [
-        'tipdis' => [
-            'titulo' => 'Tipo/Type',
-            'diff' => false,
-            'options' => [
-                'S' => 'Semestral',
-                'A' => 'Anual',
-                'Q' => 'Quadrimestral',
-            ],
-        ],
-        'creaul' => [
-            'titulo' => 'Créditos-aula/Semester hour credits',
-            'diff' => false,
-        ],
-        'cretrb' => [
-            'titulo' => 'Créditos-trabalho/Practice hour credits',
-            'diff' => false,
-        ],
-        'numvagdis' => [
-            'titulo' => 'Número de vagas/Number of places',
-            'diff' => false,
-        ],
-        'durdis' => [
-            'titulo' => 'Duração (semanas)',
-            'diff' => false,
-        ],
-        'codlinegr' => [
-            'titulo' => 'Idioma/Language',
-            'options' => [
-                'POR' => 'Português',
-                'ENG' => 'Inglês',
-            ],
-        ],
-        'nomdis' => [
-            'titulo' => 'Nome',
-        ],
-        'nomdisigl' => [
-            'titulo' => 'Name',
-            'class' => 'ingles',
-        ],
-        'pgmrsudis' => [
-            'titulo' => 'Ementa (sinopse da disciplina)',
-            'ajuda' => 'Trata da apresentação da disciplina, em linhas gerais; da descrição de sua proposta.
-            (Associar o conteúdo resumido aos objetivos de aprendizagem com a bibliografia de referência.)',
-        ],
-        'pgmrsudisigl' => [
-            'titulo' => 'Course Description',
-            'class' => 'ingles',
-        ],
-        'objdis' => [
-            'titulo' => 'Objetivos',
-            'ajuda' => 'O que se quer alcançar com a disciplina, em termos de aprendizagem dos estudantes;
-             ou seja, expressa o que se espera que os estudantes aprendam ao final da disciplina,
-             em determinadas condições de ensino, tendo em vista que a ocorrência dessa aprendizagem possa ser verificada.',
-        ],
-        'objdisigl' => [
-            'titulo' => 'Objectives',
-            'class' => 'ingles',
-        ],
-        'pgmdis' => [
-            'titulo' => 'Conteúdo Programático',
-            'ajuda' => 'Indica os conteúdos que permitirão o alcance dos objetivos definidos.
-             Nesse sentido, os conteúdos de ensino são meios para a realização dos objetivos,
-             e não os objetivos em si. Conteúdos são conhecimentos que se considera essencial
-             que sejam apreendidos e reelaborados pelos estudantes para que os objetivos sejam alcançados.
-             Conteúdo é o conjunto de conhecimentos, habilidades, atitudes e valores que serão
-             desenvolvidos ao longo da disciplina.',
-        ],
-        'pgmdisigl' => [
-            'titulo' => 'Full Program',
-            'class' => 'ingles',
-        ],
-        'mtdens' => [
-            // otitulo combina com inglês pois será apenas um checkbox em pt-br
-            'titulo' => 'Métodos de Ensino',
-            'ajuda' => 'Descreve como os conteúdos serão desenvolvidos para que os objetivos possam ser alcançados:
-            considerar tempos, espaços e recursos que possam contribuir para a aprendizagem.
-            São os procedimentos de ensino, as ações e atividades que serão propostas ao longo da disciplina,
-            em função dos objetivos previstos. Apresenta as estratégias de ensino que orientarão a prática educativa',
-            'options' => [
-                'Aula expositiva',
-                'Aula dialogada',
-                'Atividades em laboratório',
-                'Simulações',
-                'Seminários',
-                'Estudo coletivo com ou sem apresentação dos resultados',
-                'Construção de Portfólio',
-                'Roda de conversa',
-                'Tempestade cerebral',
-                'Mapa conceitual',
-                'Estudo dirigido',
-                'Aulas orientadas',
-                'Lista de discussão por meios informatizados',
-                'Estudo de caso: situação-problema, filmes, imagens, frases, expressões, notícias, entrevistas, depoimentos, documentos.',
-                'Atividade para discussão e solução de problemas',
-                'Resolução de exercícios',
-                'Ensino em pequenos grupos',
-                'Trabalho em grupo / grupos de trabalho',
-                'Dramatização de situação',
-                'Seminário, Simpósio, Palestras - com a turma ou sua organização conjunta',
-                'Painel',
-                'Entrevistas',
-                'Aula com Convidados',
-                'Fórum de Discussão e debates',
-                'Oficina ou Laboratório de construção e testagem',
-                'Estudo do meio',
-                'Ensino com pesquisa',
-                'Exposições e visitas com produção de relatório',
-                'Ensino individualizado',
-                'Diários de aprendizagem',
-                'Ensino baseado em projetos, em problemas',
-            ],
-        ],
-        'mtdensigl' => [
-            'titulo' => 'Teaching Methods',
-            'class' => 'ingles',
-            'options' => ['Lecture', 'Dialogued class', 'Laboratory activities', 'Simulations', 'Seminars', 'Collective study with or without presentation of results', 'Portfolio development', 'Roundtable discussion', 'Brainstorming', 'Concept map', 'Guided study', 'Tutored classes', 'Discussion list via digital media', 'Case study: problem-situation, films, images, sentences, expressions, news, interviews, testimonials, documents.', 'Activity for discussion and problem solving', 'Exercise solving', 'Small group teaching', 'Group work / working groups', 'Role play', 'Seminar, Symposium, Lectures - with the class or jointly organized', 'Panel', 'Interviews', 'Guest lecture', 'Discussion forum and debates', 'Workshop or construction and testing lab', 'Field study', 'Research-based teaching', 'Exhibitions and visits with report production', 'Individualized teaching', 'Learning journals', 'Project-based and problem-based learning'],
-        ],
-        'dscmtdavl' => [
-            'titulo' => 'Método de Avaliação',
-            'ajuda' => 'Descrever com clareza o processo de avaliação de aprendizagem para que o aluno compreenda
-            como todos os elementos do plano de ensino se articulam e para que o professor possa realizar a gestão
-            da aprendizagem na sua disciplina, com base em evidências do que o aluno aprendeu,
-            as lacunas na aprendizagem e o que precisa ser redimensionado em termos de ensino.
-            O estudante precisa também ter clareza do que o professor espera dele em relação à aprendizagem e,
-            portanto, o que será avaliado, a partir do que foi ensinado. A avaliação, portanto, deve gerar informações
-            sobre o processo de ensino e de aprendizagem para que o próprio processo possa ser replanejado,
-            se necessário. O feedback da aprendizagem para o estudante, durante o processo, é fundamental
-            para que ele esteja seguro de onde precisa avançar e como, por isso, ele deve ser disponibilizado a tempo.',
-        ],
-        'dscmtdavligl' => [
-            'titulo' => 'Evaluation Method',
-            'class' => 'ingles',
-        ],
-        'crtavl' => [
-            'titulo' => 'Critérios de Aprovação',
-            'ajuda' => 'A escolha do instrumento de avaliação deve levar em conta aquele que poderá fornecer
-            o maior conjunto de informações sobre a aprendizagem dos estudantes, para que o professor possa
-            tomar decisões seguras e precisas sobre como intervir para potencializar a aprendizagem e intervir
-            onde haja necessidade, para tornar a aprendizagem mais efetiva para todos.',
-        ],
-        'crtavligl' => [
-            'titulo' => 'Evaluation Criterion',
-            'class' => 'ingles',
-        ],
-        'dscnorrcp' => [
-            'titulo' => 'Norma de recuperação (da aprendizagem)',
-            'ajuda' => 'Nesse caso, o foco é a recuperação da aprendizagem. Para isso, o estudante deve saber onde
-            precisa melhorar, em termos de aprendizagem, e como, quais recursos adicionais ele poderá buscar
-            para aprender o que não conseguiu ainda.',
-        ],
-        'dscnorrcpigl' => [
-            'titulo' => 'Recovery standard',
-            'class' => 'ingles',
-        ],
-        'dscbbgdis' => [
-            'titulo' => 'Bibliografia Básica / Bibliography',
-        ],
-        'dscbbgdiscpl' => [
-            'titulo' => 'Bibliografia Complementar',
-        ],
-        'objdslsut' => [
-            // 17 ODS da ONU
-            'titulo' => 'Objetivos de Desenvolvimento Sustentável',
-            'options' => ['Erradicação da pobreza', 'Fome zero e agricultura sustentável', 'Saúde e bem-estar', 'Educação de qualidade', 'Igualdade de gênero', 'Água potável e saneamento', 'Energia limpa e acessível', 'Trabalho decente e crescimento econômico', 'Indústria, inovação e infraestrutura', 'Redução das desigualdades', 'Cidades e comunidades sustentáveis', 'Consumo e produção responsáveis', 'Ação contra a mudança global do clima', 'Vida na água', 'Vida terrestre', 'Paz, justiça e instituições eficazes', 'Parcerias e meios de implantação'],
-        ],
-        'stavgmdid' => [
-            'titulo' => 'Viagem didática?',
-        ],
-        'staetr' => [
-            'titulo' => 'É estruturante?',
-        ],
-        'dscatvpvs' => [
-            'titulo' => 'Descrição das atividades previstas',
-        ],
-
-        // atividades animais
-        'stapsuatvani' => [
-            'titulo' => 'Atividades práticas com animais e/ou materiais biológicos?',
-        ],
-        'ptccmseiaani' => [
-            'titulo' => 'Protocolo CEUA',
-            'ajuda' => 'Número do protocolo emitido pela CEUA - Comissão de Ética de Uso de Animais',
-        ],
-        'dtainivalprp' => [
-            'titulo' => 'Data início da validade da proposta',
-            'ajuda' => 'Data início da validade da proposta de manuseio de animais/matérias biológicos encaminhada para comissão CEUA',
-        ],
-        'dtafimvalprp' => [
-            'titulo' => 'Data fim da validade da proposta',
-            'ajuda' => 'Data fim da validade da proposta de manuseio de animais/matérias biológicos encaminhada para comissão CEUA',
-        ],
-
-        // atividades extensionistas
-        'atividade_extensionista' => [
-            'titulo' => 'Atividade extensionista',
-            'diff' => false,
-            'options' => [
-                true => 'Sim',
-                false => 'Não',
-            ],
-        ],
-        'cgahoratvext' => [
-            'titulo' => 'Carga horária (horas)',
-            'ajuda' => 'Carga horária em atividade extensionista, definida em resolução 07/2018 do Conselho Nacional de Educação (CNE), que estabelece as diretrizes para a extensão na educação superior brasileira (instituições públicas e privadas) e que avaliações do Ministério da Educação (MEC) passam a considerar o currículo dos cursos com a extensão obrigatória.',
-        ],
-        'grpavoatvext' => [
-            'titulo' => 'Grupo social alvo',
-            'ajuda' => 'Descrever aqui as características do público com o qual os alunos desenvolverão as atividades',
-        ],
-        'grpavoatvextigl' => [
-            'titulo' => 'Target social group',
-            'ajuda' => 'Descrever aqui as características do público com o qual os alunos desenvolverão as atividades',
-            'class' => 'ingles',
-        ],
-        'objatvext' => [
-            'titulo' => 'Objetivos',
-            'ajuda' => 'Detalhar aqui os resultados esperados com a realização da atividade extensionista, tanto para a formação dos discentes, quanto para o grupo social alvo da ação',
-        ],
-        'objatvextigl' => [
-            'titulo' => 'Objectives',
-            'ajuda' => 'Detalhar aqui os resultados esperados com a realização da atividade extensionista, tanto para a formação dos discentes, quanto para o grupo social alvo da ação',
-            'class' => 'ingles',
-        ],
-        'dscatvext' => [
-            'titulo' => 'Descrição',
-            'ajuda' => 'Relatar aqui o resumo das ações a serem desenvolvidas pelos alunos',
-        ],
-        'dscatvextigl' => [
-            'titulo' => 'Description',
-            'ajuda' => 'Relatar aqui o resumo das ações a serem desenvolvidas pelos alunos',
-            'class' => 'ingles',
-        ],
-        'idcavlatvext' => [
-            'titulo' => 'Indicadores de avaliação da atividade',
-            'ajuda' => 'Sinalizar aqui como o grupo social externo à Universidade poderá avaliar a atividade realizada conjuntamente com os estudantes, durante sua realização e ao final',
-        ],
-        'idcavlatvextigl' => [
-            'titulo' => 'Activity evaluation indicators',
-            'ajuda' => 'Sinalizar aqui como o grupo social externo à Universidade poderá avaliar a atividade realizada conjuntamente com os estudantes, durante sua realização e ao final',
-            'class' => 'ingles',
-        ],
-    ];
+    /**
+     * Dados dos campos do formulário de alteração de disciplina
+     */
+    public static function meta()
+    {
+        return config('datagrad.meta');
+    }
 
     // protected function pdf(): Attribute
     // {
@@ -340,12 +104,6 @@ class Disciplina extends Model
         $dr = Graduacao::obterDisciplina($coddis, $verdis);
         if ($dr) {
             $dr['responsaveis'] = Graduacao::listarResponsaveisDisciplina($coddis);
-
-            // vamos transformar estes campos em objeto de data
-            foreach (['dtaatvdis', 'dtadtvdis'] as $campo) {
-                $dr[$campo] = $dr[$campo] ? Carbon::parse($dr[$campo]) : null;
-            }
-
             $dr['cursos'] = Graduacao::listarCursosDisciplina($coddis);
             return $dr;
         }
@@ -383,9 +141,9 @@ class Disciplina extends Model
         $dr = self::obterDisciplinaReplicado($coddis, $verdis);
 
         // existe no bd mas não existe no replicado
-        if ($disc && !$dr) {
-            $disc->estado = 'Criar';
-        }
+        // if ($disc && !$dr) {
+        //     $disc->estado = 'Criar';
+        // }
 
         // nao existe no bd mas existe no replicado
         if (!$disc && $dr) {
@@ -406,6 +164,11 @@ class Disciplina extends Model
         $disc->dr = $dr;
 
         return $disc;
+    }
+
+    public static function listarDisciplinasFinalizadas()
+    {
+        return self::where('estado', 'Finalizado')->get();
     }
 
     /**
@@ -534,7 +297,7 @@ class Disciplina extends Model
             Cache::forget('listarDisciplinas');
         }
 
-        $discs = Cache::remember('listarDisciplinas', 60 * 60 * 12, function () {
+        $discs = Cache::remember('listarDisciplinas', 60 * 60 * 4, function () {
             $drs = Graduacao::listarDisciplinas();
             $discs = self::mergearResponsaveis(collect(), $drs);
 
@@ -579,24 +342,6 @@ class Disciplina extends Model
         dispatch(function () {
             self::listarDisciplinas(true);
         })->afterResponse();
-    }
-
-    /**
-     * Retorna os prefixos das disciplinas da Unidade
-     *
-     * Corresponde aos 3 primeiros dígitos de coddis
-     */
-    public static function listarPrefixosDisciplinas()
-    {
-        $discs = self::listarDisciplinas();
-        $prefixos = [];
-        foreach ($discs as $disc) {
-            $p = substr($disc['coddis'], 0, 3);
-            $prefixos[$p] = 0;
-        }
-        $prefixos = array_keys($prefixos);
-        sort($prefixos);
-        return $prefixos;
     }
 
     /**
@@ -665,10 +410,10 @@ class Disciplina extends Model
     /**
      * Retorna string com lista de responsáveis separados por vírgula (view)
      */
-    public function retornarListaResponsaveis($dr = false)
+    public function retornarResponsaveis($dr = false)
     {
         $ret = '';
-        $src = $dr ? $this->dr['responsaveis'] ?? $this->responsaveis : $this->responsaveis;
+        $src = $dr ? $this->dr['responsaveis'] ?? '-' : $this->responsaveis;
         foreach ($src as $k => $r) {
             $ret .= $r['nompesttd'] . ', ';
         }
@@ -734,6 +479,29 @@ class Disciplina extends Model
     }
 
     /**
+     * Valida os campos da disciplina de acordo com as regras definidas na função meta()
+     *
+     * Retorna um array de mensagens de erro, ou vazio se estiver tudo ok
+     * 'rules' default é 'required'
+     */
+    public function validarCampos()
+    {
+        $rules = [];
+        $attributes = [];
+        foreach (self::meta() as $campo => $config) {
+            $rules[$campo] = $config['rules'] ?? 'required';
+            $attributes[$campo] = $config['titulo'] ?? $campo;
+        }
+
+        $validator = Validator::make($this->toArray(), $rules, [], $attributes);
+        if ($validator->fails()) {
+            return $validator->errors()->all();
+        }
+
+        return [];
+    }
+
+    /**
      * Retorna se a disciplina está em um estado editável ou não
      *
      * @return boolean
@@ -790,6 +558,44 @@ class Disciplina extends Model
         }
 
         return $resultado;
+    }
+
+    /**
+     * Retorna os dados para configurar o botão de ação da disciplina, com base no estado atual
+     */
+    public function obterEstadoConfig()
+    {
+        return match ($this->estado) {
+            'Criar' => [
+                'route' => 'disciplinas.edit',
+                'class' => 'btn-outline-success',
+                'label' => 'Criação | ' . $this->updated_at->format('d/m/Y'),
+                'order' => '1 ' . $this->updated_at->format('Y-m-d H:i:s'),
+            ],
+            'Em edição' => [
+                'route' => 'disciplinas.edit',
+                // acho q o primary não usa mais. pois agora tem o criar. masaki 11/5/2026.
+                'class' => $this->dr ? 'btn-outline-warning' : 'btn-outline-primary',
+                'label' => 'Edição | ' . $this->updated_at->format('d/m/Y'),
+                'order' => '2 ' . $this->updated_at->format('Y-m-d H:i:s'),
+            ],
+            'Em aprovação' => [
+                'route' => 'disciplinas.preview-html',
+                'class' => 'btn-outline-danger',
+                'label' => 'Aprovação | ' . $this->updated_at->format('d/m/Y'),
+                'order' => '3 ' . $this->updated_at->format('Y-m-d H:i:s'),
+            ],
+            'Aprovado' => [
+                'label' => 'Aprovado | ' . $this->updated_at->format('d/m/Y'),
+                'order' => '4 ' . $this->updated_at->format('Y-m-d H:i:s'),
+            ],
+            'Finalizado' => [
+                'class' => 'btn-outline-secondary',
+                'label' => 'Finalizado | ' . $this->updated_at->format('d/m/Y'),
+                'order' => '5 ' . $this->updated_at->format('Y-m-d H:i:s'),
+            ],
+            default => null,
+        };
     }
 
     // Habilidades

@@ -1,9 +1,9 @@
 <div class="navbar navbar-light text-white card-header-sticky justify-content-between d-print-none"
-  style="background-color: lightCoral;">
+  style="background-color: {{ $disc->estado == 'Criar' ? 'limeGreen' : 'lightCoral' }};">
   <div>
     <span class="h5">
       Disciplinas
-      <i class="fas fa-angle-right"></i> {{ $disc['coddis'] }} - @limit($disc['nomdis'], 50)
+      <i class="fas fa-angle-right"></i> {{ $disc['coddis'] }} - @limit($disc['nomdis'], 40)
       <i class="fas fa-angle-right"></i> Preparado para impressão
     </span>
 
@@ -19,7 +19,7 @@
   </div>
 
   <div class="">
-    @includeWhen($disc->estado != 'Criar', 'disciplinas.partials.mostrar-ocultar-diff-btn')
+    @include('disciplinas.partials.mostrar-ocultar-diff-btn')
     @include('disciplinas.partials.ajuda-modal')
   </div>
 </div>

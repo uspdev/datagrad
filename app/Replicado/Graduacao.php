@@ -4,7 +4,6 @@ namespace App\Replicado;
 
 use Uspdev\Replicado\DB;
 use Uspdev\Replicado\Graduacao as GraduacaoReplicado;
-use Uspdev\Replicado\Replicado;
 use Uspdev\Replicado\Estrutura;
 
 class Graduacao extends GraduacaoReplicado
@@ -171,7 +170,8 @@ class Graduacao extends GraduacaoReplicado
             AND (" . $condicaoCodhab . ")
         ORDER BY C.nomcur, H.nomhab ASC";
 
-        return DB::fetchAll($query);
+        $ret = DB::fetchAll($query);
+        return $ret;
     }
 
     /**
@@ -610,6 +610,8 @@ class Graduacao extends GraduacaoReplicado
         if ($ret) {
             $ret['maxverdis'] = $maxverdis;
             $ret['sitdistxt'] = self::$sitdis[$ret['sitdis']] ?? '';
+            $ret['codlinegrtxt'] = self::$codlinegr[$ret['codlinegr']] ?? '-';
+
         }
 
         return $ret;
@@ -623,15 +625,19 @@ class Graduacao extends GraduacaoReplicado
      */
     public static function listarResponsaveisDisciplina($coddis): array
     {
+        if (is_array($coddis)) {
+            $coddis = implode(',', $coddis);
+        }
+
         $query = "SELECT DR.*, P.nompesttd FROM DISCIPGRRESP DR
             INNER JOIN PESSOA P ON P.codpes = DR.codpes
-            WHERE coddis = :coddis
+            WHERE coddis IN (:coddis)
             AND dtafimrsp is NULL
         ";
-
         $params['coddis'] = $coddis;
+        $ret =  DB::fetchAll($query, $params);
 
-        return DB::fetchAll($query, $params);
+        return $ret;
     }
 
     /**
@@ -742,6 +748,26 @@ class Graduacao extends GraduacaoReplicado
     }
 
     /**
+     * Lista os prefixos das disciplinas de graduação ativas da unidade
+     *
+     * Prefixo são os 3 primeiros digitos do campo coddis, que correspondem ao departamento de origem da disciplina.
+     *
+     * @return Array lista com prefixos das disciplinas
+     * @author Masakik, em 30/3/2026
+     */
+    public static function listarPrefixosDisciplinas()
+    {
+        $query = "SELECT DISTINCT LEFT(D1.coddis, 3) AS prefixo
+            FROM DISCIPLINAGR D1
+            WHERE D1.coddis IN (SELECT coddis FROM DISCIPGRCODIGO WHERE DISCIPGRCODIGO.codclg IN (__codundclgs__))
+            AND D1.dtadtvdis IS NULL -- nao foi desativado
+            AND D1.dtaatvdis IS NOT NULL -- foi ativado
+            ORDER BY prefixo ASC";
+        $ret = DB::fetchAll($query);
+        return array_column($ret, 'prefixo');
+    }
+
+    /**
      * Ajustado do replicado para incluir o nome do ministrante da disciplina
      * Porém se a disciplina tem mais de um ministrante ele retornará em linhas separadas.
      *
@@ -775,7 +801,7 @@ class Graduacao extends GraduacaoReplicado
             if (is_array($n) && $n['coddis'] == $d['coddis'] && $n['codtur'] == $d['codtur'] && $n['diasmnocp'] == $d['diasmnocp'] && $n['horent'] == $d['horent'] && $n['horsai'] == $d['horsai']) {
                 $res[$k + 1]['nompesmin'] .= ', ' . $d['nompesmin'];
             } else {
-                $d['statusMatricula'] = SELF::$stamtr[$d['stamtr']]; // obtendo stamtr por extenso
+                $d['statusMatricula'] = self::$stamtr[$d['stamtr']]; // obtendo stamtr por extenso
                 $ret[] = $d;
             }
         }
@@ -809,7 +835,7 @@ class Graduacao extends GraduacaoReplicado
             $r['sitdistxt'] = self::$sitdis[$r['sitdis']] ?? '';
             return $r;
         }, $ret);
-        
+
         return $ret;
     }
 
@@ -903,8 +929,7 @@ class Graduacao extends GraduacaoReplicado
      */
     public static function listarCargaHorariaExtensionista($codcur, $anoIngresso)
     {
-        $query = "
-            SELECT
+        $query = "SELECT
                 YEAR(V.dtainivin) AS ano_ingresso,
                 V.codpes,
                 V.nompes,

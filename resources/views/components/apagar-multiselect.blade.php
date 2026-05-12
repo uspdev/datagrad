@@ -7,14 +7,14 @@
     'selected' => [],
 ])
 
-<table class="table table-bordered table-sm {{ $model->meta[$name]['class'] ?? '' }}" id="{{ $id }}">
+<table class="table table-bordered table-sm {{ $model::meta()[$name]['class'] ?? '' }}" id="{{ $id }}">
   <tr>
     <th colspan="2" class="titulo text-center" style="background-color: aliceBlue">
-      {{ $model->meta[$name]['titulo'] }}
-      @if (isset($model->meta[$name]['ajuda']))
+      {{ $model::meta()[$name]['titulo'] }}
+      @if (isset($model::meta()[$name]['ajuda']))
         <span class="text-primary">
           <i class="fas fa-question-circle" data-toggle="popover" data-trigger="hover"
-            data-content="{{ $model->meta[$name]['ajuda'] }}"></i>
+            data-content="{{ $model::meta()[$name]['ajuda'] }}"></i>
         </span>
       @endif
 
@@ -30,7 +30,7 @@
       <select name="{{ $name }}[]" multiple="multiple" class='form-control multiselect'>
         <option value="">-- Selecione --</option>
         <option value="">Masaki</option>
-        @foreach ($model->meta[$name]['options'] as $value => $label)
+        @foreach ($model::meta()[$name]['options'] as $value => $label)
           <option value="{{ $value }}" @if (in_array($value, old($name, $selected))) selected @endif>
             {{ $label }}
           </option>

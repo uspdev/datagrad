@@ -27,7 +27,7 @@ $menu = [
         'can' => 'datagrad',
     ],
     [
-        'text' => 'Relatório carga de extensão',
+        'text' => 'Relatório carga extensionista',
         'url'  => 'graduacao/relatorio/carga-extensao',
         'can'  => 'disciplinas',
     ],
@@ -39,7 +39,7 @@ $menu = [
     [
         'text' => 'Relatório de turmas',
         'url' => 'graduacao/relatorio/turma',
-        'can' => 'disciplinas',
+        'can' => 'datagrad',
     ],
     [
         'text' => 'Disciplinas',

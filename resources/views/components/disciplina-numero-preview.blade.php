@@ -5,7 +5,7 @@
 ])
 
 <div class="form-inline my-1 {{ $class }}">
-  <div class=" font-weight-bold">{{ $model->meta[$name]['titulo'] }}</div>
+  <div class=" font-weight-bold">{{ $model::meta()[$name]['titulo'] }}</div>
   <div class="input-group input-group-sm ml-2">
     <div class="input-group-prepend">
       <span class="input-group-text diff d-none px-2 py-0">

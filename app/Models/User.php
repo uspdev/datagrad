@@ -44,10 +44,14 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
-    
+
+    public function isCG() {
+        return $this->hasRole('CG');
+    }
+
     /**
      * Retorna os prefixos associados ao docente, caso esteja cadastrado em algum
-     * 
+     *
      * @return Array
      */
     public function prefixos() {

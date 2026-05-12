@@ -1,4 +1,4 @@
-<form id="disciplina-form" class="form-inline ml-2" method="get" action="">
+<form id="disciplina-form" class="my-0" method="get" action="">
   <div class="input-group input-group-sm">
     <div class="input-group-prepend">
       <span class="input-group-text">Consultar</span>

@@ -13,8 +13,8 @@
   <div class="card-body">
     <div class="ml-2">
       <b>Número do protocolo emitido pela CEUA:</b> {{ $dr['ptccmseiaani'] }}<br>
-      <b>Data início da validade da proposta:</b> {{ formatarData($dr['dtainivalprp']) }}<br>
-      <b>Data fim da validade da proposta:</b> {{ formatarData($dr['dtafimvalprp']) }}<br>
+      <b>Data início da validade da proposta:</b> @date($dr['dtainivalprp'])<br>
+      <b>Data fim da validade da proposta:</b> @date($dr['dtafimvalprp'])<br>
     </div>
   </div>
 </div>

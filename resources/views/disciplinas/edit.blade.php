@@ -26,7 +26,7 @@
       // as várias abas são incluídas com base no id
       $abas = [
           ['id' => 'aba-disciplina', 'titulo' => 'Disciplina', 'cor' => 'bg-primary text-white'],
-          ['id' => 'aba-basicas', 'titulo' => 'Ementa', 'cor' => 'bg-primary text-white'],
+          ['id' => 'aba-ementa', 'titulo' => 'Ementa', 'cor' => 'bg-primary text-white'],
           ['id' => 'aba-avaliacao', 'titulo' => 'Avaliação', 'cor' => 'bg-warning text-dark'],
           ['id' => 'aba-bibliografia', 'titulo' => 'Bibliografia', 'cor' => 'bg-warning text-dark'],
           ['id' => 'aba-ods', 'titulo' => 'ODS', 'cor' => 'bg-warning text-dark'],
@@ -39,7 +39,7 @@
     @endphp
     <!-- Nav tabs -->
     <div class="card-header-sticky">
-      @include('disciplinas.partials.edit-navbar')
+      @include('disciplinas.partials.edit.navbar')
 
       <ul class="nav nav-tabs" id="formTabs" role="tablist">
         @foreach ($abas as $i => $aba)
@@ -59,7 +59,7 @@
         @foreach ($abas as $i => $aba)
           <div class="tab-pane fade @if ($i === 0) show active @endif " id="{{ $aba['id'] }}"
             role="tabpanel">
-            @includeIf("disciplinas.partials.{$aba['id']}")
+            @includeIf("disciplinas.partials.edit.{$aba['id']}")
           </div>
         @endforeach
       </div>

@@ -8,14 +8,19 @@
   <x-disciplina-numero name="numvagdis" min="0" max="100" :model="$disc"></x-disciplina-numero>
   <x-disciplina-select name="codlinegr" :model="$disc"></x-disciplina-select>
 
-  <div>
-    Versão base: {{ $disc->verdis }}
-    (atv: {{ formatarData($disc->dr['dtaatvdis'] ?? null) }} | dtv: {{ formatarData($disc->dr['dtadtvdis'] ?? null) }})
-  </div>
+  {{-- duração fixa para graduação em 15 semanas --}}
+  <input type="hidden" name="durdis" value="15">
+
+  @if ($disc->dr)
+    <div>
+      Versão base: {{ $disc->verdis }}
+      (atv: @date($disc->dr['dtaatvdis']) | dtv: @date($disc->dr['dtadtvdis']))
+    </div>
+  @endif
 </div>
 
 @can('admin')
-<div class="pl-2" style="border-left:4px solid red;">
-  @include('disciplinas.partials.form-historico')
-</div>
+  <div class="pl-2" style="border-left:4px solid red;">
+    @include('disciplinas.partials.form-historico')
+  </div>
 @endcan

@@ -38,12 +38,31 @@ class AppServiceProvider extends ServiceProvider
             }
         );
 
-        Blade::directive('limit', fn($e) => "<?php echo Str::limit($e); ?>");
+
+        // algumas dessas diretivas ainda não estão sendo usadas
+        Blade::directive('limit', function ($e) {
+            return "<?php echo '<span title=\"'.e($e).'\">'.e(Str::limit($e)).'</span>'; ?>";
+        });
         Blade::directive('upper', fn($e) => "<?php echo strtoupper($e); ?>");
         Blade::directive('lower', fn($e) => "<?php echo strtolower($e); ?>");
         Blade::directive('money', fn($e) => "<?php echo number_format($e, 2, ',', '.'); ?>");
-        Blade::directive('date', fn($e) => "<?php echo date('d/m/Y', strtotime($e)); ?>");
-        Blade::directive('datetime', fn($e) => "<?php echo date('d/m/Y H:i', strtotime($e)); ?>");
-        Blade::directive('ago', fn($e) => "<?php echo \\Carbon\\Carbon::parse($e)->diffForHumans(); ?>");
+        Blade::directive('date', function ($e) {
+            return "<?php echo ($e) ? date('d/m/Y', strtotime($e)) : ''; ?>";
+        });
+        Blade::directive('datetime', function ($e) {
+            return "<?php echo (!empty($e) && strtotime($e)) ? date('d/m/Y H:i', strtotime($e)) : ''; ?>";
+        });
+        Blade::directive('ago', function ($e) {
+            return "
+            <?php
+                try {
+                    if (!empty($e)) {
+                        echo \\Carbon\\Carbon::parse($e)->diffForHumans(['parts' => 1]);
+                    }
+                } catch (Exception \$ex) {
+                    echo '';
+                }
+            ?>";
+        });
     }
 }

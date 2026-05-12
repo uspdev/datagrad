@@ -60,8 +60,6 @@
   </style>
 @endsection
 
-
-
 <div class="row mt-3">
   <div class="col-md-6">
 

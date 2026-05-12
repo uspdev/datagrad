@@ -1,8 +1,8 @@
-<div class="navbar navbar-light bg-warning card-header-sticky justify-content-between">
+<div class="navbar navbar-light {{ $disc->estado == 'Criar' ? 'bg-success text-white' : 'bg-warning'}} card-header-sticky justify-content-between">
   <div>
     <span class="h5">
       <a href="{{ route('disciplinas.index') }}">Disciplinas</a>
-      <i class="fas fa-angle-right"></i> {{ $disc['coddis'] }} - @limit($disc['nomdis'], 50)
+      <i class="fas fa-angle-right"></i> {{ $disc['coddis'] }} - @limit($disc['nomdis'], 40)
       <i class="fas fa-angle-right"></i> {{ $disc->estado }}
 
       <a href="{{ route('disciplinas.show', $disc->coddis) }}" class="btn btn-sm btn-secondary ml-2">
@@ -16,7 +16,7 @@
       @endif
 
       @if (in_array($disc->estado, ['Em edição', 'Criar']))
-        <button class="btn btn-sm btn-danger ml-2" type="submit" name="submit" value="preview-html">
+        <button class="btn btn-sm btn-danger ml-2" type="submit" name="action" value="preview-html">
           Salvar e visualizar HTML
         </button>
       @else

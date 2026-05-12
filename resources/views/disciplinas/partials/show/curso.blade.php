@@ -20,7 +20,7 @@
             <div class="mb-3">
               Curso: <b>{{ $curso['sglfusclgund'] }} / ({{ $curso['codcur'] }}) {{ $curso['nomcur'] }}</b>
                - habilitação: <b>({{ $curso['codhab'] }}) {{ $curso['nomhab'] }}</b>
-               (de {{ formatarData($curso['dtainicrl']) }} a {{ formatarData($curso['dtafimcrl']) }})
+               (de @date($curso['dtainicrl']) a @date($curso['dtafimcrl']))
                <br />
               &nbsp; Período ideal: {{ $curso['numsemidl'] }} | Ciclo: {{ $curso['cicdisgdecrltxt'] }}
               | Tipo: {{ $curso['tipobgtxt'] }}
@@ -34,18 +34,17 @@
         @foreach ($disc->dr['cursos'] as $curso)
           @if (stripos(config('replicado.codundclgs'), $curso['codclg']) === false)
             <div class="mb-3">
-              Curso: <b>{{ $curso['sglfusclgund'] }} / {{ $curso['nomcur'] }}</b> 
+              Curso: <b>{{ $curso['sglfusclgund'] }} / {{ $curso['nomcur'] }}</b>
               - habilitação: <b>{{ $curso['nomhab'] }}</b>
-               (de {{ formatarData($curso['dtainicrl']) }} a {{ formatarData($curso['dtafimcrl']) }})
+               (de @date($curso['dtainicrl']) a @date($curso['dtafimcrl']))
               <br />
               &nbsp; Período ideal: {{ $curso['numsemidl'] }} | Ciclo: {{ $curso['cicdisgdecrltxt'] }}
               | Tipo: {{ $curso['tipobgtxt'] }}
             </div>
           @endif
         @endforeach
-
       </div>
-    </div>  
+    </div>
     @endif
   </div>
 </div>

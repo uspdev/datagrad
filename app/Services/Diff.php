@@ -11,7 +11,7 @@ class Diff
         $diffs = [];
         $dmp = new DiffMatchPatch();
 
-        foreach ($disc->meta as $campo => $valor) {
+        foreach ($disc::meta() as $campo => $valor) {
             $valorDr = $disc->dr[$campo] ?? '';
             if (is_array($valorDr)) {
                 $valorDr = implode('', $valorDr);

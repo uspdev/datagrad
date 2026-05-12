@@ -13,9 +13,9 @@
   <div class="card-header">
     Bibliografia / Bibliography
     <span class="badge badge-info">
-      a partir de {{ formatarData($dr['dtainibbg'] ?? null) }}
+      a partir de @date($dr['dtainibbg'])
       @if ($dr['dtafimbbg'] ?? null)
-        até {{ formatarData($dr['dtafimbbg']) }}
+        até @date($dr['dtafimbbg'])
       @endif
     </span>
   </div>

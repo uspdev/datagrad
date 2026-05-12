@@ -3,11 +3,11 @@
     <span class="h5">
       <a href="{{ route('disciplinas.index') }}">Disciplinas</a>
     </span>
-    @if ($dr)
       <span class="h5">
-        <i class="fas fa-chevron-right"></i> {{ $dr['coddis'] }} - {{ $dr['nomdis'] }}
+        <i class="fas fa-chevron-right"></i> {{ $coddis }} - {{ $dr['nomdis'] ?? $disc->nomdis ?? 'Não encontrado' }}
       </span>
       {{-- @include('disciplinas.partials.badge-vigencia') --}}
+    @if ($dr)
 
       {{-- badge extensao --}}
       @if ($dr['cgahoratvext'])

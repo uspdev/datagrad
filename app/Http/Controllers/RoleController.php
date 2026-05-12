@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Disciplina;
 use App\Models\User;
+use App\Replicado\Graduacao;
 use Closure;
 use Illuminate\Http\Request;
 use Spatie\Permission\Models\Role;
@@ -31,7 +32,7 @@ class RoleController extends Controller
 
         // cria as permissions referentes aos departamentos no formato disciplinas_xxx,
         // onde xxx é o prefixo da disciplina
-        foreach (Disciplina::listarPrefixosDisciplinas() as $prefixo) {
+        foreach (Graduacao::listarPrefixosDisciplinas() as $prefixo) {
             $role = Role::firstOrCreate(['name' => 'disciplinas_' . $prefixo]);
             $role->givePermissionTo('disciplina-chefe');
             $departamentos[] = Role::firstOrCreate(['name' => 'disciplinas_' . $prefixo]);

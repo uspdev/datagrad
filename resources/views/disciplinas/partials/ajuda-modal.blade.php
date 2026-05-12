@@ -1,4 +1,4 @@
-<button type="button" class="btn btn-sm btn-info ml-2" data-toggle="modal" data-target="#ajudaModal" title="Ajuda">
+<button type="button" class="btn btn-sm btn-info" data-toggle="modal" data-target="#ajudaModal" title="Ajuda">
   Ajuda <i class="fas fa-question"></i>
 </button>
 

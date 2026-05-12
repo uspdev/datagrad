@@ -1,4 +1,4 @@
-{{-- 
+{{--
   Este botão de modal foi ajustado para permitir multiplos includes
   o form-id não deve conter "." pois interfere no javascript
   Masakik, em 22/5/2024
@@ -54,22 +54,29 @@
         })
 
         senhaunicaUserModal.find('.submit-btn').on('click', function() {
-          let codpes = senhaunicaUserModal.find(':input[name=codpes_add]').val()
-          let codpes_input_add = $('<input type="hidden" name="codpes_add" value="' + codpes + '">')
-          $('#' + formId).append(codpes_input_add)
-          // o submit nao funcionou em disciplinas.edit então fizémos um click no botão de submit 
-          $('#' + formId).trigger('submit')
-          $('#' + formId).find('.default-submit-btn').trigger('click')
+          let codpes = $oSelect2.val()
+          if (!codpes) {
+            alert('Selecione um usuário')
+            return
+          }
+
+          let form = $('#' + formId)
+          form.find('input[name="codpes_add"]').remove()
+
+          $('<input>', {
+            type: 'hidden',
+            name: 'codpes_add',
+            value: codpes
+          }).appendTo(form)
+
+          document.getElementById(formId).submit()
         })
 
-        // abre o select2 automaticamente
         senhaunicaUserModal.on('shown.bs.modal', function() {
           $oSelect2.select2('open')
         })
 
-        // coloca o focus no select2
-        // https://stackoverflow.com/questions/25882999/set-focus-to-search-text-field-when-we-click-on-select-2-drop-down
-        $(document).on('select2:open', () => {
+        senhaunicaUserModal.on('select2:open', () => {
           document.querySelector('.select2-search__field').focus();
         });
 

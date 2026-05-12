@@ -2,15 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use App\Services\Evasao;
+use App\Replicado\Graduacao;
 use App\Replicado\Lattes;
 use App\Replicado\Pessoa;
+use App\Services\Evasao;
 use App\Services\Grafico;
-use Uspdev\Replicado\Uteis;
-use App\Replicado\Graduacao;
+use App\Services\Tools;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Gate;
+use Uspdev\Replicado\Uteis;
 use Uspdev\UspTheme\Facades\UspTheme;
 
 class GraduacaoController extends Controller
@@ -29,7 +30,7 @@ class GraduacaoController extends Controller
         $this->authorize('datagrad');
         UspTheme::activeUrl('graduacao/relatorio/sintese');
 
-        $nomes = SELF::limparNomes($request->nomes);
+        $nomes = Tools::limparNomes($request->nomes);
         $pessoas = [];
         $naoEncontrados = [];
         foreach ($nomes as $nome) {
@@ -80,7 +81,7 @@ class GraduacaoController extends Controller
 
         $anoIni = $request->anoIni;
         $anoFim = $request->anoFim;
-        $nomes = SELF::limparNomes($request->nomes);
+        $nomes = Tools::limparNomes($request->nomes);
         $pessoas = [];
         $naoEncontrados = [];
         foreach ($nomes as $nome) {
@@ -136,6 +137,11 @@ class GraduacaoController extends Controller
         ]);
     }
 
+    /**
+     * Relatorio de carga didática
+     * 
+     * Em principio desativado daqui pois foi para o proposta-orcamentária
+     */
     public function cargaDidatica(Request $request)
     {
         if (!Gate::any(['datagrad', 'disciplina-chefe'])) {
@@ -147,7 +153,7 @@ class GraduacaoController extends Controller
         $semestreIni = $request->semestreIni;
         $semestreFim = $request->semestreFim;
 
-        $semestres = $this->iniFim($request->semestreIni, $request->semestreFim);
+        $semestres = Tools::iniFim($request->semestreIni, $request->semestreFim);
 
         if ($request->codsets && $request->nomes) {
             $request->session()->flash('alert-warning', 'Forneça somente nomes ou somente setores!');
@@ -166,10 +172,9 @@ class GraduacaoController extends Controller
             $docentesSetor = Pessoa::listarDocentesSetor($codsets, false);
         } else {
             // se foi passado nomes
-            $nomes = SELF::limparNomes($request->nomes);
+            $nomes = Tools::limparNomes($request->nomes);
             $docentesSetor = 0;
         }
-        sort($nomes);
 
         // estagio: vamos excluir disciplinas que não contam para carga didática
         $exclusao = ['1800078', '1800090', '1800096', '1800097', '1800122', '1800200', '1807100', 'SAA0170', 'SEL0425', 'SEL0625', 'SEM0398', 'SEP0622', 'SMM0324'];
@@ -284,7 +289,7 @@ class GraduacaoController extends Controller
         }
 
         $disciplinasExcluidas = collect($disciplinasExcluidas)->sort()->unique('coddis');
-        $turmaSelect = $this->semestres();
+        $turmaSelect = Tools::semestres();
 
         session()->flashInput($request->input());
 
@@ -306,47 +311,8 @@ class GraduacaoController extends Controller
         ));
     }
 
-    /**
-     * Realiza os calculos da smedias por turma
-     */
-    protected static function computarTurma($turma, $prev = null)
-    {
-        $count = 0;
-        $somaHorasTeorica = 0;
-        $somaHorasPratica = 0;
 
-        $turma['ministrantes'] = collect(Graduacao::listarMinistrantes($turma))->pluck('nompes');
 
-        $divisorQuinzenal = ($turma['stamis'] == 'N') ? 1 : 2; // 'N' -> semanal
-        $divisorMinistrantes = count($turma['ministrantes']);
-
-        // acho que aqui exclui quando a disciplina/turma está repetido, ou seja tem mais de um horario ministrado
-        if (is_null($prev)) {
-            $somaHorasTeorica += (int) $prev['cgahorteo'] / $divisorQuinzenal;
-            $somaHorasPratica += (int) $prev['cgahorpra'] / $divisorQuinzenal;
-            $count++;
-        } else {
-            if (!($prev['codtur'] == $turma['codtur'] && $prev['coddis'] == $turma['coddis'])) {
-                $somaHorasTeorica += (int) $turma['cgahorteo'] / $divisorQuinzenal / $divisorMinistrantes;
-                $somaHorasPratica += (int) $turma['cgahorpra'] / $divisorQuinzenal / $divisorMinistrantes;
-                $count++;
-            }
-        }
-
-        $turma['ministrantes'] = $turma['ministrantes']->implode(', ');
-
-        return $turma;
-    }
-
-    protected static function limparNomes($nomes)
-    {
-        $nomes = str_replace("\r", '', $nomes); // remove carriage return, mantém new line
-        $nomes = explode(PHP_EOL, $nomes);
-        $nomes = array_filter($nomes); // remove elementos empty()
-        $nomes = array_map('trim', $nomes);
-        $nomes = array_unique($nomes); // sem repetidos
-        return $nomes;
-    }
 
     public function cursos()
     {
@@ -386,9 +352,9 @@ class GraduacaoController extends Controller
         }
 
         $this->authorize('datagrad');
-        \UspTheme::activeUrl('graduacao/relatorio/gradehoraria');
+        UspTheme::activeUrl('graduacao/relatorio/gradehoraria');
 
-        $entradas = SELF::limparNomes($request->nusps);  //limpando os números usp na verdade
+        $entradas = Tools::limparNomes($request->nusps);  //limpando os números usp na verdade
 
         $codpesParaProcessar = [];
         $horarios = [];
@@ -478,43 +444,11 @@ class GraduacaoController extends Controller
             'curso' => $ret['curso'],
             'turmas' => $ret['turmas'],
             'graduacao' => Graduacao::class,
-            'turmaSelect' => $this->semestres(),
+            'turmaSelect' => Tools::semestres(),
             'nomes' => $ret['nomes'],
             'nomesCount' => $ret['nomesCount'],
             'timestamp' => $ret['timestamp'],
         ]);
-    }
-
-    /**
-     * Retorna os semestres entre $semestreIni e $semestreFim, inclusive
-     */
-    protected function iniFim($semestreIni, $semestreFim)
-    {
-        $semestres = $this->semestres();
-
-        if ($semestreFim < $semestreIni) {
-            $tmp = $semestreFim;
-            $semestreFim = $semestreIni;
-            $semestreIni = $tmp;
-        }
-
-        $defaultSemestreFim = date('Y') . (date('m') < 7 ? 1 : 2);
-        $semestreFim = $semestreFim ? $semestreFim : $defaultSemestreFim;
-
-        $defaultSemestreIni = $semestres[array_search($semestreFim, $semestres) + 1];
-        $semestreIni = $semestreIni ? $semestreIni : $defaultSemestreIni;
-
-        $keyIni = array_search($semestreIni, $semestres); // chave do array correspondente ao semestreIni
-        $keyFim = array_search($semestreFim, $semestres);
-
-        $ret = array_slice($semestres, $keyFim, $keyIni - $keyFim + 1);
-        return $ret;
-    }
-
-    protected function semestres()
-    {
-        $semestres = ['20261', '20252', '20251', '20242', '20241', '20232', '20231', '20222', '20221', '20212', '20211', '20202', '20201', '20192', '20191', '20182', '20181'];
-        return $semestres;
     }
 
     protected function turmasNoCache(Request $request, int $codcur, int $codhab)
@@ -527,7 +461,7 @@ class GraduacaoController extends Controller
 
         $curso = Graduacao::obterCurso($codcur, $codhab);
 
-        $semestres = $this->iniFim($request->semestreIni, $request->semestreFim);
+        $semestres = Tools::iniFim($request->semestreIni, $request->semestreFim);
         $turmas = [];
         foreach ($semestres as $semestre) {
             $turmas = array_merge($turmas, Graduacao::listarTurmasMinistrantes($codcur, $codhab, $semestre));
@@ -619,9 +553,14 @@ class GraduacaoController extends Controller
         return view('grad.relatorio-evasao', compact('taxaEvasao', 'formRequest', 'cursoOpcao', 'imagemEvasao'));
     }
 
+    /**
+     * Gera relatório de turmas ministradas por disciplina e por semestre
+     * 
+     * Com média de alunos por turma e média de horas teóricas e práticas ministradas por semestre
+     */
     public function relatorioTurma(Request $request)
     {
-        $this->authorize('disciplinas');
+        $this->authorize('datagrad');
         \UspTheme::activeUrl('graduacao/relatorio/turma');
 
         $disciplinas = Graduacao::listarDisciplinas();

@@ -20,19 +20,19 @@
       {{-- Checkbox de opções pré-definidas --}}
       <div class="modal-body">
         <div class="checkbox-group border rounded p-2 overflow-auto text-left" style="max-height: 18em;">
-          @foreach ($model->meta[$name]['options'] as $key => $val)
+          @foreach ($model::meta()[$name]['options'] as $key => $val)
             <div class="form-check">
               <input type="checkbox" id="{{ $name . '_' . $key }}" name="{{ $name }}[]"
                 value="{{ $val }}" class="form-check-input" @checked(in_array((string) $val, $model->{$name}))>
               <label class="form-check-label" for="{{ $name . '_' . $key }}">
                 {{ $val }}
                 @if ($nameIgl)
-                  | <i>{{ $model->meta[$nameIgl]['options'][$key] }}</i>
+                  | <i>{{ $model::meta()[$nameIgl]['options'][$key] }}</i>
                 @endif
               </label>
               @if ($nameIgl)
                 <input type="checkbox" id="{{ $nameIgl . '_' . $key }}" class="d-none" name="{{ $nameIgl }}[]"
-                  value="{{ $model->meta[$nameIgl]['options'][$key] }}" @checked(in_array((string) $val, $model->{$name}))>
+                  value="{{ $model::meta()[$nameIgl]['options'][$key] }}" @checked(in_array((string) $val, $model->{$name}))>
               @endif
             </div>
           @endforeach
@@ -42,12 +42,12 @@
           <!-- Textarea para inserir várias linhas -->
           @php
             // Remove os valores predefinidos para ficar somente com os customs e colocar no textarea
-            $preDefinidos = array_values($model->meta[$name]['options']);
+            $preDefinidos = array_values($model::meta()[$name]['options']);
             $customValues = array_filter($model->{$name}, function ($v) use ($preDefinidos) {
                 return !in_array((string) $v, $preDefinidos);
             });
 
-            $preDefinidosIgl = array_values($model->meta[$nameIgl]['options']);
+            $preDefinidosIgl = array_values($model::meta()[$nameIgl]['options']);
             $customValuesIgl = array_filter($model->{$nameIgl}, function ($v) use ($preDefinidosIgl) {
                 return !in_array((string) $v, $preDefinidosIgl);
             });
