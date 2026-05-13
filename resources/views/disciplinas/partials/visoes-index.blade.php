@@ -17,11 +17,11 @@
     class="btn btn-sm {{ $visao == 'cg' ? 'btn-primary' : 'btn-outline-primary' }}">
     Visão CG
   </a>
+@endcan
 
-  @can('disciplina-cg')
-    <a href="{{ route('disciplinas.index') }}?visao=finalizados"
-      class="btn btn-sm {{ $visao == 'finalizados' ? 'btn-danger' : 'btn-outline-danger' }}">
-      Disciplinas finalizadas
-    </a>
-  @endcan
+@can('disciplina-cg')
+  <a href="{{ route('disciplinas.index') }}?visao=finalizados"
+    class="btn btn-sm {{ $visao == 'finalizados' ? 'btn-danger' : 'btn-outline-danger' }}">
+    Disciplinas finalizadas
+  </a>
 @endcan
