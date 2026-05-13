@@ -345,6 +345,9 @@ class Disciplina extends Model
      */
     protected static function mergearResponsaveis($discs, $drs)
     {
+        if (empty($drs)) {
+            return $discs;
+        }
         $codigos = collect($drs)
             ->pluck('coddis')
             ->unique()
@@ -364,17 +367,6 @@ class Disciplina extends Model
 
         return $discs;
     }
-
-    // protected static function mergearPrefixos($discs, $drs)
-    // {
-    //     foreach ($drs as $k => $dr) {
-    //         $disc = new Disciplina();
-    //         $disc->fill($dr);
-    //         $disc->responsaveis = Graduacao::listarResponsaveisDisciplina($disc->coddis);
-    //         $discs[] = $disc;
-    //     }
-    //     return $discs;
-    // }
 
     /**
      * Limpa de $discs as disciplinas repetidas em $discsLocal
