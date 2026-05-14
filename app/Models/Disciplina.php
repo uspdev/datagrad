@@ -270,28 +270,12 @@ class Disciplina extends Model
     }
 
     /**
-     * Lista todas as diciplinas sob responsabilidade de $codpes
-     *
-     * Vai incluir as disciplinas do replicado e as disciplinas locais, mas sem repetição
-     */
-    public static function listarDisciplinasPorResponsavel($codpes)
-    {
-        $drs = Graduacao::listarDisciplinasPorResponsavel($codpes);
-        $discs = self::mergearResponsaveis(collect(), $drs);
-
-        $discsLocal = self::naoFinalizado()->responsavel($codpes)->get();
-        $discs = self::mergearDisciplinas($discs, $discsLocal);
-
-        return $discs;
-    }
-
-    /**
      * Lista todas as disciplinas da unidade - visão CG
      *
      * Guarda em cache do Laravel por 12h pois é uma consulta demorada.
      * O cache é renovado quando há alteração da diciplina no sistema passando $refresh = true
      */
-    public static function listarDisciplinas($refresh = true)
+    public static function listarDisciplinas($refresh = false)
     {
         if ($refresh) {
             Cache::forget('listarDisciplinas');
@@ -299,14 +283,23 @@ class Disciplina extends Model
 
         $discs = Cache::remember('listarDisciplinas', 60 * 60 * 4, function () {
             $drs = Graduacao::listarDisciplinas();
-            $discs = self::mergearResponsaveis(collect(), $drs);
-
             $discsLocal = self::naoFinalizado()->get();
-            $discs = self::mergearDisciplinas($discs, $discsLocal);
-
+            $discs = self::mergearDisciplinas($drs, $discsLocal);
             return $discs;
         });
+        return $discs;
+    }
 
+    /**
+     * Lista todas as diciplinas sob responsabilidade de $codpes
+     *
+     * Vai incluir as disciplinas do replicado e as disciplinas locais, mas sem repetição
+     */
+    public static function listarDisciplinasPorResponsavel($codpes)
+    {
+        $drs = Graduacao::listarDisciplinasPorResponsavel($codpes);
+        $discsLocal = self::naoFinalizado()->responsavel($codpes)->get();
+        $discs = self::mergearDisciplinas($drs, $discsLocal);
         return $discs;
     }
 
@@ -321,99 +314,91 @@ class Disciplina extends Model
      */
     public static function listarDisciplinasPorPrefixo(string|array $prefixo)
     {
-        $prefixos = (array) $prefixo;
-        $drs = Graduacao::listarDisciplinasPorPrefixo($prefixos);
-        $discs = self::mergearResponsaveis(collect(), $drs);
-
-        $discsLocal = self::prefixo($prefixos)->naoFinalizado()->get();
-        $discs = self::mergearDisciplinas($discs, $discsLocal);
-
+        $drs = Graduacao::listarDisciplinasPorPrefixo($prefixo);
+        $discsLocal = self::naoFinalizado()->prefixo($prefixo)->get();
+        $discs = self::mergearDisciplinas($drs, $discsLocal);
         return $discs;
     }
 
+    /**
+     * Mescla disciplinas locais com replicadas.
+     *
+     * Se existir a mesma coddis em ambas:
+     * - mantém a disciplina local
+     * - adiciona a versão replicada em ->dr
+     *
+     * Disciplinas existentes apenas no replicado
+     * são adicionadas ao final.
+     */
+    protected static function mergearDisciplinas($drs, $discsLocal)
+    {
+        // indexa replicados por coddis
+        $replicados = [];
+        foreach ($drs as $dr) {
+            $replicados[$dr['coddis']] = $dr;
+        }
+
+        // merge locais + replicados
+        $resultado = [];
+        foreach ($discsLocal as $discLocal) {
+            $coddis = $discLocal->coddis;
+            if (isset($replicados[$coddis])) {
+                $discLocal->dr = $replicados[$coddis];
+                $discLocal->origem = 'ambos';
+                unset($replicados[$coddis]);
+            } else {
+                $discLocal->origem = 'local';
+            }
+            $resultado[] = $discLocal;
+        }
+
+        // adiciona apenas replicados restantes
+        foreach ($replicados as $replicado) {
+            $disc = new self();
+            $disc->fill($replicado);
+            $disc->origem = 'replicado';
+            $disc->dr = $replicado;
+            $resultado[] = $disc;
+        }
+
+        return collect($resultado);
+    }
+
+    /**
+     * renova o cache depois de enviar o response para o navegador
+     *
+     * https://laravel.com/docs/10.x/queues#dispatching-after-the-response-is-sent-to-browser
+     */
     public static function renovarCacheAfterResponse()
     {
-        // renova o cache depois de enviar o response para o navegador
-        // https://laravel.com/docs/10.x/queues#dispatching-after-the-response-is-sent-to-browser
         dispatch(function () {
             self::listarDisciplinas(true);
         })->afterResponse();
     }
 
     /**
-     * Pega array de disciplinas do replicado, transforma em objeto e mescla responsaveis
+     * Retorna string com lista de responsáveis local
+     *
+     * ordenado, separados por vírgula (view)
      */
-    protected static function mergearResponsaveis($discs, $drs)
+    public function retornarResponsaveisLocal(): string
     {
-        if (empty($drs)) {
-            return $discs;
-        }
-        $codigos = collect($drs)
-            ->pluck('coddis')
-            ->unique()
-            ->values()
-            ->all();
-
-        $responsaveisPorCoddis = collect(Graduacao::listarResponsaveisDisciplina($codigos))
-            ->groupBy('coddis');
-
-        foreach ($drs as $dr) {
-            $disc = new self();
-            $disc->fill($dr);
-            $disc->dr = $dr;
-            $disc->responsaveis = $responsaveisPorCoddis[$disc->coddis] ?? [];
-            $discs[] = $disc;
-        }
-
-        return $discs;
+        $nomes = array_column($this->responsaveis, 'nompesttd');
+        sort($nomes, SORT_NATURAL | SORT_FLAG_CASE);
+        return implode(', ', $nomes);
     }
 
     /**
-     * Limpa de $discs as disciplinas repetidas em $discsLocal
+     * Retorna string com lista de responsáveis do replicado
+     *
+     * ordenado, separados por vírgula (view)
      */
-    protected static function mergearDisciplinas($discs, $discsLocal)
+    public function retornarResponsaveisDr(): string
     {
-        $replicados = $discs->keyBy('coddis');
-        $result = collect();
-
-        foreach ($discsLocal as $discLocal) {
-            if ($dr = $replicados->get($discLocal->coddis)) {
-                $discLocal->dr = $dr; // associa versão do replicado
-                $replicados->forget($discLocal->coddis); // remove para evitar duplicidade
-            }
-            $result->push($discLocal);
-        }
-
-        // adiciona disciplinas existentes apenas no replicado
-        return $result->concat($replicados->values())->values();
-    }
-
-    /**
-     * Lista os nomes das visoes que o usuário pode ter sobre as disciplinas
-     */
-    // public static function listarVisoes()
-    // {
-    //     $ret = [];
-    //     if (Gate::check('senhaunica.docente')) {
-    //         $ret[] = 'docente';
-    //     }
-    //     if (Gate::check('disciplina-cg')) {
-    //         $ret[] = 'cg';
-    //     }
-    //     return $ret;
-    // }
-
-    /**
-     * Retorna string com lista de responsáveis separados por vírgula (view)
-     */
-    public function retornarResponsaveis($dr = false)
-    {
-        $ret = '';
-        $src = $dr ? $this->dr['responsaveis'] ?? '-' : $this->responsaveis;
-        foreach ($src as $k => $r) {
-            $ret .= $r['nompesttd'] . ', ';
-        }
-        return substr($ret, 0, -2);
+        $responsaveis = $this->dr['responsaveis'] ?? [];
+        $nomes = array_column($responsaveis, 'nompesttd');
+        sort($nomes, SORT_NATURAL | SORT_FLAG_CASE);
+        return implode(', ', $nomes);
     }
 
     /**
@@ -677,13 +662,13 @@ class Disciplina extends Model
     /**
      * Escopo para filtrar disciplinas por prefixo
      */
-    public function scopePrefixo($query, string|array $prefixos)
+    public function scopePrefixo($query, string|array $prefixo)
     {
-        $prefixos = (array) $prefixos;
+        $prefixos = (array) $prefixo;
 
         return $query->where(function ($q) use ($prefixos) {
-            foreach ($prefixos as $prefixo) {
-                $q->orWhere('coddis', 'like', "{$prefixo}%");
+            foreach ($prefixos as $p) {
+                $q->orWhere('coddis', 'like', "{$p}%");
             }
         });
     }

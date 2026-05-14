@@ -163,7 +163,7 @@
 </table>
 <br>
 <div>
-  Responsáveis: {{ $disc->retornarResponsaveis() }}
+  Responsáveis: {{ $disc->retornarResponsaveisLocal() }}
 </div>
 
 <div class="pagebreak"></div>

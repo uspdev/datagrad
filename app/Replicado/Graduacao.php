@@ -567,9 +567,9 @@ class Graduacao extends GraduacaoReplicado
      * Inclui também 'maxverdis' que corresponde ao maior verdis da disciplina.
      *   - Usado para paginar as versões em datatagrad.
      *
-     * @param String $coddis
-     * @param Int|Null $verdis
-     * @return Array|Null
+     * @param string $coddis
+     * @param int|null $verdis
+     * @return array|null
      * @author Masaki K Neto em 25/3/2024
      */
     public static function obterDisciplina($coddis, $verdis = null)
@@ -621,15 +621,13 @@ class Graduacao extends GraduacaoReplicado
      *
      * Se $coddis for array retorna os responsáveis de todas as disciplinas do array
      *
-     * @param String|Array $coddis
-     * @return Array
+     * @param string|array $coddis
+     * @param string $formato 'lista|agrupado' para retornar array agrupado por coddis
+     * @return array
      */
-    public static function listarResponsaveisDisciplina($coddis): array
+    public static function listarResponsaveisDisciplina(string|array $coddis,): array
     {
-        $coddis = implode(
-            ',',
-            array_map(fn($c) => "'" . addslashes($c) . "'",(array) $coddis)
-        );
+        $coddis = self::toSqlQuotedList($coddis);
 
         $query = "SELECT DR.*, P.nompesttd FROM DISCIPGRRESP DR
             INNER JOIN PESSOA P ON P.codpes = DR.codpes
@@ -637,10 +635,39 @@ class Graduacao extends GraduacaoReplicado
             AND dtafimrsp is NULL
             ORDER BY DR.coddis
         ";
+        $resps =  DB::fetchAll($query);
+        return $resps;
+    }
 
-        $ret =  DB::fetchAll($query);
+    /**
+     * Função para converter "array ou string" em string separado por virgula
+     *
+     * Apropriado para para query IN
+     */
+    protected static function toSqlQuotedList(array|string|null $arr): string
+    {
+        return implode(
+            ',',
+            array_map(fn($c) => "'" . addslashes($c) . "'", (array) $arr)
+        );
+    }
 
-        return $ret;
+    /**
+     * Agrupa os responsáveis por coddis
+     *
+     * @param Array $responsaveis Vem de listarResponsaveisDisciplina
+     * @return Array
+     */
+    public static function agruparResponsaveisPorCoddis(array $responsaveis): array
+    {
+        $respsAgrupado = [];
+        foreach ($responsaveis as $r) {
+            $respsAgrupado[$r['coddis']][] = [
+                'codpes' => $r['codpes'],
+                'nompesttd' => $r['nompesttd'],
+            ];
+        }
+        return $respsAgrupado;
     }
 
     /**
@@ -708,17 +735,18 @@ class Graduacao extends GraduacaoReplicado
      */
     public static function listarDisciplinasPorResponsavel($codpes): array
     {
-        $query = 'SELECT DR.codpes, DR.dtainirsp, D.*
-            FROM DISCIPGRRESP DR
-            INNER JOIN DISCIPLINAGR D ON D.coddis = DR.coddis
-                AND D.verdis = (SELECT max(verdis) FROM DISCIPLINAGR where coddis = DR.coddis)
-            WHERE DR.dtafimrsp is NULL
-                AND DR.codpes = CONVERT(INT,:codpes)
-            ORDER BY D.coddis';
+        $query = 'SELECT D2.codpes, D2.dtainirsp, DGR.*
+            FROM DISCIPGRRESP D2
+            INNER JOIN DISCIPLINAGR DGR ON DGR.coddis = D2.coddis
+                AND DGR.verdis = (
+                    SELECT max(verdis) FROM DISCIPLINAGR where coddis = D2.coddis
+                )
+            WHERE D2.dtafimrsp is NULL
+                AND D2.codpes = CONVERT(INT,:codpes)
+            ORDER BY DGR.coddis';
 
         $params['codpes'] = $codpes;
-
-        return DB::fetchAll($query, $params);
+        return self::montarDisciplinas(DB::fetchAll($query, $params));
     }
 
     /**
@@ -738,28 +766,18 @@ class Graduacao extends GraduacaoReplicado
      */
     public static function listarDisciplinasPorPrefixo($prefixo)
     {
-        $prefixos = (array) $prefixo;
-        $likes = [];
-        $params = [];
-
-        foreach ($prefixos as $i => $prefixo) {
-            $param = "prefixo{$i}";
-            $likes[] = "LEFT(D1.coddis, 3) = :{$param}";
-            $params[$param] = $prefixo;
-        }
-        $wherePrefixos = implode(' OR ', $likes);
-
-        $query = "SELECT D1.*
-            FROM DISCIPLINAGR AS D1
-            WHERE D1.verdis = (
-                SELECT MAX(D2.verdis) FROM DISCIPLINAGR AS D2 WHERE D2.coddis = D1.coddis
+        $prefixos = self::toSqlQuotedList($prefixo);
+        $query = "SELECT DGR.*
+            FROM DISCIPLINAGR AS DGR
+            WHERE DGR.verdis = (
+                SELECT MAX(D2.verdis) FROM DISCIPLINAGR AS D2 WHERE D2.coddis = DGR.coddis
             )
-            AND D1.dtadtvdis IS NULL
-            AND ({$wherePrefixos})
-            ORDER BY D1.nomdis ASC
+            AND DGR.dtadtvdis IS NULL
+            AND LEFT(DGR.coddis, 3) IN ({$prefixos})
+            ORDER BY DGR.nomdis ASC
         ";
 
-        return DB::fetchAll($query, $params);
+        return self::montarDisciplinas(DB::fetchAll($query));
     }
 
     /**
@@ -834,24 +852,53 @@ class Graduacao extends GraduacaoReplicado
      * @return Array lista com com disciplinas
      * @author André Canale Garcia <acgarcia@sc.sp.br> (antes de 4/2022)
      * @author Masakik, em 7/5/2024, fix #565 - aplicado filtro de disciplinas não ativadas
+     * @author Masakik, em 13/5/2026, incluindo os responsáveis como array dentro de cada disciplina
      */
     public static function listarDisciplinas()
     {
-        $query = "SELECT D1.*
-            FROM DISCIPLINAGR AS D1
-            WHERE (D1.verdis = (SELECT MAX(D2.verdis) FROM DISCIPLINAGR AS D2 WHERE (D2.coddis = D1.coddis)))
-                AND D1.coddis IN (SELECT coddis FROM DISCIPGRCODIGO WHERE DISCIPGRCODIGO.codclg IN (__codundclgs__))
-                AND D1.dtadtvdis IS NULL -- nao foi desativado
-                -- AND D1.dtaatvdis IS NOT NULL -- foi ativado --11/9/2024
-            ORDER BY D1.nomdis ASC";
-        $ret = DB::fetchAll($query);
+        $query = "SELECT DGR.*
+            FROM DISCIPLINAGR AS DGR
+            WHERE DGR.verdis = (
+                    SELECT MAX(D2.verdis) FROM DISCIPLINAGR D2
+                    WHERE (D2.coddis = DGR.coddis)
+                )
+                AND DGR.coddis IN (
+                    SELECT coddis FROM DISCIPGRCODIGO
+                    WHERE DISCIPGRCODIGO.codclg IN (__codundclgs__)
+                )
+                AND DGR.dtadtvdis IS NULL -- nao foi desativado
+                -- AND DGR.dtaatvdis IS NOT NULL -- foi ativado --11/9/2024
+            ORDER BY DGR.nomdis ASC";
 
-        $ret = array_map(function ($r) {
-            $r['sitdistxt'] = self::$sitdis[$r['sitdis']] ?? '';
-            return $r;
-        }, $ret);
+        $res = DB::fetchAll($query);
+        return self::montarDisciplinas($res);
+    }
 
-        return $ret;
+    /**
+     * Enriqueçe a lista de disciplinas com responsáveis e descrição da situação.
+     *
+     * Para cada disciplina:
+     * - adiciona o índice `responsaveis`
+     * - adiciona o índice `sitdistxt`
+     * - remove campos auxiliares (`codpes`, `dtainirsp`) quando presentes
+     *
+     * @param array $disciplinas Lista de disciplinas retornadas do banco.
+     * @return array  Lista de disciplinas processadas.
+     */
+    private static function montarDisciplinas(array $disciplinas): array
+    {
+        if (empty($disciplinas)) {
+            return [];
+        }
+        $responsaveis = self::listarResponsaveisDisciplina(array_column($disciplinas, 'coddis'));
+        $responsaveisPorCoddis = self::agruparResponsaveisPorCoddis($responsaveis);
+        foreach ($disciplinas as &$disc) {
+            unset($disc['codpes'], $disc['dtainirsp']);
+            $disc['responsaveis'] = $responsaveisPorCoddis[$disc['coddis']] ?? [];
+            $disc['sitdistxt'] = self::$sitdis[$disc['sitdis']] ?? '';
+        }
+        unset($disc);
+        return $disciplinas;
     }
 
     /**
@@ -867,8 +914,7 @@ class Graduacao extends GraduacaoReplicado
      */
     public static function listarTurmasResultados($coddis, $anoInicio, $anoFim)
     {
-        $query = "
-            SELECT
+        $query = "SELECT
                 t.codtur AS 'codigoTurma',
                 p.nompes AS 'ministrante',
                 -- Total de matriculados
