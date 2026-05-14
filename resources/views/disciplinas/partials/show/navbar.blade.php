@@ -51,7 +51,7 @@
       @endcan
     @endif
   </div>
-  <div class="form-inline">
+  <div class="d-flex align-items-center flex-wrap gap-1">
     @include('disciplinas.partials.consultar-form')
     @include('disciplinas.partials.ajuda-modal')
   </div>
