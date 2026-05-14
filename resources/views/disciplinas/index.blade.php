@@ -14,7 +14,7 @@
         <th>Cred. Aula</th>
         <th>Cred. Trab.</th>
         <th>AEx (horas)</th>
-        <th>Viagem didática (VD)</th>
+        <th title="Viagem didática">V.Didat.</th>
         <th style="min-width: 20px;" title="Habilidades e competências">H&C</th>
         <th>Situação</th>
         <th>Versão</th>
@@ -52,8 +52,14 @@
               <span class="text-danger">→ {{ $disc->cgahoratvext }}</span>
             @endif
           </td>
-          <td class="text-center">{{ ($disc->dr['stavgmdid'] ?? '') == '1' ? 'Sim' : '' }}</td>
-          <td class="text-center">{{ $disc->habilidades ? 'Sim' : '' }}</td>
+          <td class="text-center"> {{-- Viagem didática --}}
+            @if (($disc->dr['stavgmdid'] ?? '') == 'S')
+              {{ $disc->dr['staetr'] == 'S' ? 'Estruturante' : 'Não estrut.' }}
+            @endif
+          </td>
+          <td class="text-center">
+            {{ $disc->habilidades ? 'Sim' : '' }}
+          </td>
           <td class="text-center">{{ $disc->dr['sitdistxt'] ?? 'n/a' }}</td>
           <td class="text-center">
             {{ $disc->dr['verdis'] ?? 'n/a' }}

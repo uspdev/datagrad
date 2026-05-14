@@ -34,10 +34,15 @@
         <div>
           Atividade extensionista: @include('disciplinas.partials.show.ativ-extensionista')<br>
         </div>
-
         <div>
           Viagens didáticas:
-          <b>{!! $disc->stavgmdid == 'S' ? '<span class="text-danger">Sim</span>' : 'Não' !!}</b><br>
+          <b>
+            @if ($dr['stavgmdid'] == 'S')
+              <span class="text-danger">Sim</span> - {!! $dr['staetr'] == 'S' ? 'Estruturante</span>' : 'Não estruturante' !!}
+            @else
+              Não
+            @endif
+          </b><br>
         </div>
         <div>Vigência: @include('disciplinas.partials.vigencia')</div>
         <div>Última versão: <b>{{ $dr['maxverdis'] ?? '-' }}</b></div>
