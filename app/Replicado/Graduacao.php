@@ -154,12 +154,12 @@ class Graduacao extends GraduacaoReplicado
         $codhabs = config('datagrad.codhabs');
         $condicaoCodhab = '';
         if (count($codhabs) == 1) {
-            $condicaoCodhab = 'H.codhab = ' . $codhabs[0]; # EESC: Colocado aqui para remover os cursos de dupla formação com IAU.
+            # EESC: Colocado aqui para remover os cursos de dupla formação com IAU.
+            $condicaoCodhab = 'H.codhab = ' . $codhabs[0];
         } else {
-            for ($i = 0; $i < count($codhabs); $i++) {
-                $condicaoCodhab .= "RIGHT(H.codhab, 1) = " . $codhabs[$i] . " OR "; # ECA: Colocado aqui para considerar outras habilitações.
-            }
-            $condicaoCodhab = substr($condicaoCodhab, 0, strlen($condicaoCodhab) - 3);
+        # ECA: Colocado aqui para considerar outras habilitações.
+        $condicoes = array_map(fn($c) => "RIGHT(H.codhab, 1) = $c", $codhabs);
+            $condicaoCodhab = implode(' OR ', $condicoes);
         }
 
         $query = " SELECT C.*, H.* FROM CURSOGR C
