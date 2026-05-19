@@ -32,5 +32,9 @@ class AuthServiceProvider extends ServiceProvider
             || Gate::check('senhaunica.estagiario')
             || Gate::check('senhaunica.docente');
         });
+
+        Gate::define('ver-relatorio', function (User $user) {
+            return Gate::allows('disciplina-cc') || Gate::allows('datagrad');
+        });
     }
 }

@@ -61,6 +61,7 @@
       - <b>Relatório de carga didática</b>: mostra a carga didática de docentes em determinado período;<br>
       - <b>Relatório grade horária</b>: mostra a grade horária corrente para a lista de alunos informada;<br>
       - <b>Relatório carga de extensão</b>: mostra por curso e por ano de ingresso a relação de alunos e o total de carga extensionista cumprida por cada um;<br>
+      - <b>Relatório carga horária cumprida por aluno</b>: mostra a carga horária cumprida pelo aluno e a porcentagem com base na carga exigida pelo curso;<br>
       - <b>Relatório de evasão</b>: mostra gráfico e tabela de evasão por curso e por ano de ingresso;<br>
       - <b>Alteração de ementas de disicplinas</b>: Ferramenta que facilita a atualização das ementas das disciplinas.<br>
     </div>

@@ -32,6 +32,11 @@ $menu = [
         'can'  => 'disciplinas',
     ],
     [
+        'text' => 'Relatório carga horária cumprida por aluno',
+        'url'  => 'graduacao/relatorio/carga-alunos',
+        'can'  => 'ver-relatorio',
+    ],
+    [
         'text' => 'Relatório de evasão',
         'url' => 'graduacao/relatorio/evasao',
         'can' => 'evasao',

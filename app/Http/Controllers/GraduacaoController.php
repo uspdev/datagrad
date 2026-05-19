@@ -632,4 +632,84 @@ class GraduacaoController extends Controller
             'params' => $request->all()
         ]);
     }
+
+    public function relatorioCargaHorariaCumpridaAluno(Request $request)
+    {
+        if (!$request->old()) {
+            session()->flashInput($request->input());
+        }
+    
+        $this->authorize('ver-relatorio');
+        \UspTheme::activeUrl('graduacao/relatorio/carga-alunos');
+
+        $entradas = Tools::limparNomes($request->nusps);
+        
+        $codpesParaProcessar = [];
+        $naoEncontrados = [];
+        $resultados = [];
+
+        foreach ($entradas as $entrada) {
+            if (is_numeric($entrada)) {
+                $codpesParaProcessar[] = $entrada;
+            } else {
+                $pessoas = Pessoa::procurarPorNome($entrada);
+
+                if (!empty($pessoas)) {
+                    foreach ($pessoas as $pessoa) {
+                        $codpesParaProcessar[] = $pessoa['codpes'];
+                    }
+                } else {
+                    $naoEncontrados[] = $entrada;
+                }
+            }
+        }
+
+        $codpesParaProcessar = array_unique($codpesParaProcessar);
+
+        $nomesEncontrados = [];
+
+        if (!empty($codpesParaProcessar)) {
+            $nomesEncontrados = Pessoa::obterNome($codpesParaProcessar);
+        }
+      
+        foreach ($codpesParaProcessar as $codpes) {
+            $nome = $nomesEncontrados[$codpes] ?? null;
+
+            if (!$nome) {
+                $naoEncontrados[] = $codpes . " (Número USP não encontrado na base)";
+                continue;
+            }
+
+            $dadosAluno = Graduacao::obterCargaHorariaCumpridaAluno($codpes);
+
+            if (!$dadosAluno) {
+                $naoEncontrados[] = $codpes . " - " . ($nome ?: 'Nº USP inválido') . " (Sem histórico de aprovações)";
+                continue;
+            }
+
+            $cursoInfo = Graduacao::obterCurso($dadosAluno['codcur'], $dadosAluno['codhab']);
+
+            $cargaExigida = ($cursoInfo['cgahortot'] ?? 0) + ($cursoInfo['cgahorobgaac'] ?? 0);
+            $cumprida = $dadosAluno['carga_horaria_total_cumprida'];
+            
+            $porcentagem = ($cargaExigida > 0) ? ($cumprida / $cargaExigida) * 100 : 0;
+
+            $resultados[] = [
+                'codpes' => $dadosAluno['codpes'],
+                'nompes' => $dadosAluno['nompes'],
+                'email'  => $dadosAluno['email'],
+                'curso'  => $dadosAluno['codcur'] . " - " . ($cursoInfo['nomcur'] ?? 'Não encontrado'),
+                'habilitacao' => $dadosAluno['codhab'] . " - " . ($cursoInfo['nomhab'] ?? 'Não encontrada'),
+                'ano'    => $dadosAluno['ano_ingresso'],
+                'exigida' => $cargaExigida,
+                'cumprida' => round($cumprida),
+                'porcentagem' => number_format($porcentagem, 2, ',', '.')
+            ];
+        }
+
+        $resultados = collect($resultados)->sortBy('nompes')->toArray();
+
+        session()->flashInput($request->input());
+        return view('grad.relatorio-carga-alunos', compact('resultados', 'naoEncontrados'));
+    }
 }
