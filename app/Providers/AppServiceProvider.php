@@ -47,7 +47,15 @@ class AppServiceProvider extends ServiceProvider
         Blade::directive('lower', fn($e) => "<?php echo strtolower($e); ?>");
         Blade::directive('money', fn($e) => "<?php echo number_format($e, 2, ',', '.'); ?>");
         Blade::directive('date', function ($e) {
-            return "<?php echo ($e) ? date('d/m/Y', strtotime($e)) : ''; ?>";
+            return "<?php
+                try {
+                    echo !empty($e)
+                        ? \\Carbon\\Carbon::parse($e)->format('d/m/Y')
+                        : '';
+                } catch (\\Exception \$ex) {
+                    echo '';
+                }
+            ?>";
         });
         Blade::directive('datetime', function ($e) {
             return "<?php echo (!empty($e) && strtotime($e)) ? date('d/m/Y H:i', strtotime($e)) : ''; ?>";
@@ -62,6 +70,13 @@ class AppServiceProvider extends ServiceProvider
                 } catch (Exception \$ex) {
                     echo '';
                 }
+            ?>";
+        });
+        Blade::directive('initial', function ($expression) {
+            return "<?php
+                echo !empty($expression)
+                    ? mb_strtoupper(mb_substr($expression, 0, 1))
+                    : '';
             ?>";
         });
     }

@@ -306,6 +306,10 @@ return [
     'codundclgs' => explode(',', env('REPLICADO_CODUNDCLGS', null)),
     'evasaoCodcurIgnorados' => explode(',', env('EVASAO_CODCUR_IGNORADOS', null)),
     'evasaoCodcurHabIgnorados' => explode(',', env('EVASAO_CODCUR_HAB_IGNORADOS', null)),
+
+    # Quais codhabs serão consideradas?
+    # se for somente 1 exclui ele
+    # se for mais de 1, considera aqueles terminado em codhabs
     'codhabs' => explode(',', env('CODHABS', 0)),
 
     // 'ods' => $ods,

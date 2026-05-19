@@ -71,6 +71,8 @@ class DisciplinaController extends Controller
             case 'docente':
                 $discs = Disciplina::listarDisciplinasPorResponsavel($user->codpes);
                 break;
+            default:
+                $discs = collect();
         }
         $discs = $discs->sortBy('coddis');
 
