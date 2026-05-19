@@ -604,7 +604,7 @@ class GraduacaoController extends Controller
 
     public function relatorioCargaExtensao(Request $request)
     {
-        $this->authorize('disciplinas');
+        $this->authorize('ver-relatorio');
         \UspTheme::activeUrl('graduacao/relatorio/carga-extensao');
 
         $cursos = Evasao::retornarCodcurNomcur();

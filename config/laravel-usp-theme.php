@@ -29,7 +29,7 @@ $menu = [
     [
         'text' => 'Relatório carga extensionista',
         'url'  => 'graduacao/relatorio/carga-extensao',
-        'can'  => 'disciplinas',
+        'can'  => 'ver-relatorio',
     ],
     [
         'text' => 'Relatório carga horária cumprida por aluno',
