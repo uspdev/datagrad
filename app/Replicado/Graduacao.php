@@ -1022,4 +1022,55 @@ class Graduacao extends GraduacaoReplicado
         $ret = DB::fetchAll($query, $params);
         return $ret;
     }
+
+    /**
+     * Método para obter os dados acadêmicos e a carga horária total
+     * cumprida em disciplinas por um aluno.
+     *
+     * @param Int $codpes
+     * @return Array Lista com codpes, nome, email, cod_curso, cod_habilitação, ano_ingresso, carga_horaria_total_cumprida ou false se não encontrado.
+     * @author Vinicius Rafael do Vale, em 15/05/2026
+     */
+    public static function obterCargaHorariaCumpridaAluno($codpes)
+    {
+        $query = "
+            SELECT
+                v.codpes,
+                v.nompes,
+                e.codema AS email,
+                v.codcurgrd AS codcur,
+                v.codhab AS codhab,
+                YEAR(v.dtainivin) AS ano_ingresso,
+                SUM(
+                    (ISNULL(d.creaul, 0) * 15) +
+                    (ISNULL(d.cretrb, 0) * 30)
+                ) AS carga_horaria_total_cumprida
+            FROM VINCULOPESSOAUSP v
+            INNER JOIN HISTESCOLARGR h ON h.codpes = v.codpes
+            INNER JOIN DISCIPLINAGR d ON d.coddis = h.coddis
+            LEFT JOIN EMAILPESSOA e ON e.codpes = v.codpes AND e.stamtr = 'S'
+            WHERE v.codpes = :codpes
+                AND v.tipvin = 'ALUNOGR'
+                AND v.sitatl = 'A'
+                AND h.rstfim IS NOT NULL
+                AND h.rstfim = 'A'
+                AND h.stamtr NOT IN ('E', 'R')
+                AND h.discrl IN ('O', 'L')
+                AND d.dtaatvdis <= ISNULL(h.dtavalfim, h.dtacrihst)
+                AND (
+                    d.dtadtvdis IS NULL
+                    OR ISNULL(h.dtavalfim, h.dtacrihst) <= d.dtadtvdis
+                )
+            GROUP BY
+                YEAR(v.dtainivin),
+                v.codpes,
+                v.codcurgrd,
+                v.codhab,
+                v.nompes,
+                e.codema
+        ";
+
+        $param = ['codpes' => $codpes];
+        return DB::fetch($query, $param);
+    }
 }

@@ -60,3 +60,6 @@ Route::resource('/cursos', CursoController::class);
 
 Route::get('graduacao/relatorio/carga-extensao', [GraduacaoController::class, 'relatorioCargaExtensao'])->name('graduacao.relatorio.carga-extensao');
 Route::post('graduacao/relatorio/carga-extensao', [GraduacaoController::class, 'relatorioCargaExtensao'])->name('graduacao.relatorio.carga-extensao.post');
+
+Route::get('graduacao/relatorio/carga-alunos', [GraduacaoController::class, 'relatorioCargaHorariaCumpridaAluno'])->name('graduacao.relatorio.carga-alunos');
+Route::post('graduacao/relatorio/carga-alunos', [GraduacaoController::class, 'relatorioCargaHorariaCumpridaAluno'])->name('graduacao.relatorio.carga-alunos.post');
