@@ -29,12 +29,19 @@ class AuthServiceProvider extends ServiceProvider
         // disciplinas autorizado para servidores, docentes e estagiários
         Gate::define('disciplinas', function (User $user) {
             return Gate::check('senhaunica.servidor')
-            || Gate::check('senhaunica.estagiario')
-            || Gate::check('senhaunica.docente');
+                || Gate::check('senhaunica.estagiario')
+                || Gate::check('senhaunica.docente');
         });
 
         Gate::define('ver-relatorio', function (User $user) {
             return Gate::allows('disciplina-cc') || Gate::allows('datagrad');
         });
+
+        // relatorio de carga horaria cumprida por aluno
+        Gate::define('relatorio-cgahoralu', fn(User $user) => $user->hasAnyRole(['CG', 'CC']));
+
+        // relatorio de carga extensionista
+        Gate::define('relatorio-cgaext', fn(User $user) => $user->hasAnyRole(['CG', 'CC']));
+
     }
 }

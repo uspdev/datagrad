@@ -139,7 +139,7 @@ class GraduacaoController extends Controller
 
     /**
      * Relatorio de carga didática
-     * 
+     *
      * Em principio desativado daqui pois foi para o proposta-orcamentária
      */
     public function cargaDidatica(Request $request)
@@ -555,7 +555,7 @@ class GraduacaoController extends Controller
 
     /**
      * Gera relatório de turmas ministradas por disciplina e por semestre
-     * 
+     *
      * Com média de alunos por turma e média de horas teóricas e práticas ministradas por semestre
      */
     public function relatorioTurma(Request $request)
@@ -604,7 +604,7 @@ class GraduacaoController extends Controller
 
     public function relatorioCargaExtensao(Request $request)
     {
-        $this->authorize('ver-relatorio');
+        $this->authorize('relatorio-cgaext');
         \UspTheme::activeUrl('graduacao/relatorio/carga-extensao');
 
         $cursos = Evasao::retornarCodcurNomcur();
@@ -638,12 +638,12 @@ class GraduacaoController extends Controller
         if (!$request->old()) {
             session()->flashInput($request->input());
         }
-    
-        $this->authorize('ver-relatorio');
+
+        $this->authorize('relatorio-cgahoralu');
         \UspTheme::activeUrl('graduacao/relatorio/carga-alunos');
 
         $entradas = Tools::limparNomes($request->nusps);
-        
+
         $codpesParaProcessar = [];
         $naoEncontrados = [];
         $resultados = [];
@@ -671,7 +671,7 @@ class GraduacaoController extends Controller
         if (!empty($codpesParaProcessar)) {
             $nomesEncontrados = Pessoa::obterNome($codpesParaProcessar);
         }
-      
+
         foreach ($codpesParaProcessar as $codpes) {
             $nome = $nomesEncontrados[$codpes] ?? null;
 
@@ -691,7 +691,7 @@ class GraduacaoController extends Controller
 
             $cargaExigida = ($cursoInfo['cgahortot'] ?? 0) + ($cursoInfo['cgahorobgaac'] ?? 0);
             $cumprida = $dadosAluno['carga_horaria_total_cumprida'];
-            
+
             $porcentagem = ($cargaExigida > 0) ? ($cumprida / $cargaExigida) * 100 : 0;
 
             $resultados[] = [
