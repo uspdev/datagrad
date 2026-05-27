@@ -3,7 +3,7 @@
 
     <div class="px-3 py-2" style="background-color: rgba(23, 162, 184, 0.2);">
       <div class="mr-2">
-        <strong>Instruções para a CG</strong>
+        <strong>Instruções para a CG/SVGrad</strong>
       </div>
     </div>
     <div class="px-3 py-2">
