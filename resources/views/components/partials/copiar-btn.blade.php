@@ -1,4 +1,4 @@
-{{-- 
+{{--
 Este botão copia o conteúdo do primeiro elemento .textarea, .input, textarea ou input
 dentro da mesma tabela ou div com a classe .copy-limit, ignorando elementos dentro de
 modais.
@@ -28,13 +28,13 @@ modais.
           } else {
             copyText = target
               .clone() // clona para não alterar o DOM
-              .find('br').replaceWith('\n') // substitui <br> por \n
+            //   .find('br').replaceWith('\n') // substitui <br> por \n
               .end()
               .text() // pega o texto completo
               .replace(/¶/g, '') // remove caracteres de parágrafo
               .split('\n') // divide em linhas
               .map(line => line.trim()) // trim em cada linha
-              .filter(line => line.length) // remove linhas vazias
+            //   .filter(line => line.length) // remove linhas vazias
               .join('\n'); // junta de volta
           }
 
