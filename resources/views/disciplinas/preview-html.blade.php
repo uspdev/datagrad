@@ -79,13 +79,13 @@
   @include('disciplinas.partials.preview.admin')
   @include('disciplinas.partials.preview.validacao')
   @include('disciplinas.partials.preview.instrucoes-cg')
-  {{-- @dd($disc) --}}
+
   <div class="my-2">
     <b>Unidade</b>: {{ \Uspdev\Replicado\Estrutura::obterUnidade(config('datagrad.codundclgs')[0])['sglund'] }}
   </div>
 
   <div class="my-2">
-    <b>Departamento</b>: {{ \App\Replicado\Pessoa::retornarSetorFormatado(Auth::user()->codpes) }}
+    <b>Departamento</b>: {{ \App\Replicado\Pessoa::retornarSetorFormatado($disc->atualizadoPor->codpes) }}
   </div>
 
   <div class="my-2">
@@ -95,11 +95,8 @@
     </span>
   </div>
 
-  <div class="my-2">
-    <b>Justificativa</b><br>
-    <div class="border rounded px-2 py-1">
-      {{ $disc->justificativa }} &nbsp;
-    </div>
+  <div class="my-3">
+    <x-disciplina-justificativa-preview name="justificativa" :model="$disc"></x-disciplina-justificativa-preview>
   </div>
 
   <div>&nbsp;</div>
