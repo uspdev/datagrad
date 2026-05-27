@@ -22,6 +22,7 @@
         <div>Tipo/Type: <b>{{ $disc->tipdis() }}</b></div>
         <div>Número de vagas/Number of places: <b>{{ $dr['numvagdis'] }}</b></div>
         <div>Duração (semanas): <b>{{ $dr['durdis'] }}</b></div>
+        <div>Idioma: <b>{{ $dr['codlinegrtxt'] }}</b></div>
         <div>Responsáveis/Professors: @include('disciplinas.partials.show.responsaveis')</div>
       </div>
       <div class="col-md-6">
@@ -42,12 +43,14 @@
             @else
               Não
             @endif
-          </b><br>
+          </b>
         </div>
-        <div>Vigência: @include('disciplinas.partials.vigencia')</div>
+        <hr />
         <div>Última versão: <b>{{ $dr['maxverdis'] ?? '-' }}</b></div>
-        <div>Situação: <b>{{ $dr['sitdistxt'] ?? '-' }}</b></div>
-        <div>Idioma: <b>{{ $dr['codlinegrtxt'] }}</b></div>
+        <div>Vigência: @include('disciplinas.partials.vigencia')</div>
+        <div>Data da última alteração: <b>@datetime($dr['dtaultalt'])</b></div>
+        <div>Situação: <b>@include('disciplinas.partials.show.situacao-disciplina-badge')</b></div>
+        @include('disciplinas.partials.show.nao-vigente-alert')
       </div>
 
     </div>
