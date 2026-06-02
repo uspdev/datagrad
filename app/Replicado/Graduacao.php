@@ -1037,7 +1037,7 @@ class Graduacao extends GraduacaoReplicado
             SELECT
                 v.codpes,
                 v.nompes,
-                e.codema AS email,
+                em.codema AS email,
                 v.codcurgrd AS codcur,
                 v.codhab AS codhab,
                 YEAR(v.dtainivin) AS ano_ingresso,
@@ -1047,27 +1047,75 @@ class Graduacao extends GraduacaoReplicado
                 ) AS carga_horaria_total_cumprida
             FROM VINCULOPESSOAUSP v
             INNER JOIN HISTESCOLARGR h ON h.codpes = v.codpes
-            INNER JOIN DISCIPLINAGR d ON d.coddis = h.coddis
-            LEFT JOIN EMAILPESSOA e ON e.codpes = v.codpes AND e.stamtr = 'S'
-            WHERE v.codpes = :codpes
+
+            -- Subquery para garantir a versão correta da disciplina
+            LEFT JOIN DISCIPLINAGR d 
+                ON  d.coddis    = h.coddis
+                AND d.dtaatvdis = (
+                    SELECT TOP 1 d2.dtaatvdis
+                    FROM DISCIPLINAGR d2
+                    WHERE d2.coddis = h.coddis
+                      AND (
+                          (
+                              d2.dtaatvdis <= ISNULL(h.dtavalfim, h.dtacrihst)
+                              AND (
+                                  d2.dtadtvdis IS NULL
+                                  OR ISNULL(h.dtavalfim, h.dtacrihst) <= d2.dtadtvdis
+                              )
+                          )
+                          OR NOT EXISTS (
+                              SELECT 1
+                              FROM DISCIPLINAGR d3
+                              WHERE d3.coddis    = h.coddis
+                                AND d3.dtaatvdis <= ISNULL(h.dtavalfim, h.dtacrihst)
+                                AND (
+                                    d3.dtadtvdis IS NULL
+                                    OR ISNULL(h.dtavalfim, h.dtacrihst) <= d3.dtadtvdis
+                                )
+                          )
+                      )
+                    ORDER BY
+                        CASE
+                            WHEN d2.dtaatvdis <= ISNULL(h.dtavalfim, h.dtacrihst)
+                                 AND (
+                                     d2.dtadtvdis IS NULL
+                                     OR ISNULL(h.dtavalfim, h.dtacrihst) <= d2.dtadtvdis
+                                 )
+                            THEN 0 ELSE 1
+                        END ASC,
+                        d2.dtaatvdis DESC
+                )
+
+            LEFT JOIN EMAILPESSOA em ON em.codpes = v.codpes AND em.stamtr = 'S'
+
+            WHERE v.codpes = :codpes 
                 AND v.tipvin = 'ALUNOGR'
                 AND v.sitatl = 'A'
                 AND h.rstfim IS NOT NULL
-                AND h.rstfim = 'A'
+                AND h.rstfim NOT IN ('RA', 'RF', 'RN', 'T')
                 AND h.stamtr NOT IN ('E', 'R')
-                AND h.discrl IN ('O', 'L')
-                AND d.dtaatvdis <= ISNULL(h.dtavalfim, h.dtacrihst)
+                AND h.discrl IN ('O', 'L', 'C')
                 AND (
-                    d.dtadtvdis IS NULL
-                    OR ISNULL(h.dtavalfim, h.dtacrihst) <= d.dtadtvdis
+                    ISNULL(h.dtavalfim, h.dtacrihst) >= v.dtainivin
+                    OR h.rstfim = 'D'
                 )
+                AND NOT EXISTS (
+                    SELECT 1
+                    FROM REQUERHISTESC r
+                    INNER JOIN EQUIVEXTERNAGR eq
+                        ON eq.codrqm = r.codrqm
+                       AND eq.codpes = r.codpes
+                    WHERE r.codpes = h.codpes
+                      AND r.coddis = h.coddis
+                )
+
             GROUP BY
                 YEAR(v.dtainivin),
                 v.codpes,
+                v.nompes,
                 v.codcurgrd,
                 v.codhab,
-                v.nompes,
-                e.codema
+                em.codema
         ";
 
         $param = ['codpes' => $codpes];
