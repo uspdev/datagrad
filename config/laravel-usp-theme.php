@@ -27,13 +27,8 @@ $menu = [
         'can' => 'datagrad',
     ],
     [
-        'text' => 'Relatório carga extensionista',
-        'url'  => 'graduacao/relatorio/carga-extensao',
-        'can'  => 'relatorio-cgaext',
-    ],
-    [
-        'text' => 'Relatório carga horária cumprida por aluno',
-        'url'  => 'graduacao/relatorio/carga-alunos',
+        'text' => 'Relatório carga horária acumulada',
+        'url'  => 'graduacao/relatorio/carga-acumulada', 
         'can'  => 'relatorio-cgahoralu',
     ],
     [
