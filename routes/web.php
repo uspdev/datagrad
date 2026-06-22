@@ -58,8 +58,5 @@ Route::get('arquivos/download', [ArquivoController::class, 'download'])->name('a
 Route::resource('/roles', RoleController::class);
 Route::resource('/cursos', CursoController::class);
 
-Route::get('graduacao/relatorio/carga-extensao', [GraduacaoController::class, 'relatorioCargaExtensao'])->name('graduacao.relatorio.carga-extensao');
-Route::post('graduacao/relatorio/carga-extensao', [GraduacaoController::class, 'relatorioCargaExtensao'])->name('graduacao.relatorio.carga-extensao.post');
-
-Route::get('graduacao/relatorio/carga-alunos', [GraduacaoController::class, 'relatorioCargaHorariaCumpridaAluno'])->name('graduacao.relatorio.carga-alunos');
-Route::post('graduacao/relatorio/carga-alunos', [GraduacaoController::class, 'relatorioCargaHorariaCumpridaAluno'])->name('graduacao.relatorio.carga-alunos.post');
+Route::get('graduacao/relatorio/carga-acumulada', [GraduacaoController::class, 'relatorioCargaHorariaAcumulada'])->name('graduacao.relatorio.carga-acumulada');
+Route::post('graduacao/relatorio/carga-acumulada', [GraduacaoController::class, 'relatorioCargaHorariaAcumulada'])->name('graduacao.relatorio.carga-acumulada.post');
