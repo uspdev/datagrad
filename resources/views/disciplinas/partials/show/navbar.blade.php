@@ -37,7 +37,7 @@
           </a>
         @endif
 
-        @if ($disc->estado == 'Propor alteração')
+        @if (empty($disc->estado) || $disc->estado == 'Propor alteração')
           <a href="{{ route('disciplinas.edit', $dr['coddis']) }}" class="btn btn-sm btn-warning ml-2" type="submit">
             Propor alteração da disciplina
           </a>
