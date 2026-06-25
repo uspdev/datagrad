@@ -980,16 +980,43 @@ class Graduacao extends GraduacaoReplicado
     }
     
     /**
-     * Método para obter o detalhamento da carga horária acumulada de um aluno.
+     * Método para obter o detalhamento da carga horária acumulada de alunos.
      *
-     * @param int $codpes
-     * @param int $codcur
-     * @param int $ano_ingresso
-     * @return Array Lista com dados do aluno e tipos de carga horária acumulada do aluno
+     * @param int|null $codpes
+     * @param int|null $codcur
+     * @param int|null $ano_ingresso
+     * @return Array Lista com dados dos alunos
      * @author Vinicius Rafael do Vale, em 16/06/2026
      */
-    public static function obterCargaHorariaAcumuladaAluno($codpes, $codcur, $ano_ingresso)
+    public static function obterCargaHorariaAcumuladaAluno($codpes = null, $codcur = null, $ano_ingresso = null)
     {
+        $whereConditions = [
+            "v.tipvin = 'ALUNOGR'",
+            "v.sitatl = 'A'",
+            "h.rstfim IS NOT NULL",
+            "h.rstfim NOT IN ('RA', 'RF', 'RN', 'T')",
+            "h.stamtr NOT IN ('E', 'R')",
+            "h.discrl IN ('O', 'L', 'C')",
+            "(ISNULL(h.dtavalfim, h.dtacrihst) >= v.dtainivin OR h.rstfim = 'D')"
+        ];
+
+        $param = [];
+
+        if (!empty($codpes)) {
+            $whereConditions[] = "v.codpes = :codpes";
+            $param['codpes'] = $codpes;
+        }
+        if (!empty($codcur)) {
+            $whereConditions[] = "v.codcurgrd = :codcur";
+            $param['codcur'] = $codcur;
+        }
+        if (!empty($ano_ingresso)) {
+            $whereConditions[] = "YEAR(v.dtainivin) = :ano_ingresso";
+            $param['ano_ingresso'] = $ano_ingresso;
+        }
+
+        $whereClause = implode(" AND ", $whereConditions);
+
         $query = "SELECT
                 v.codpes,
                 v.nompes,
@@ -1025,7 +1052,7 @@ class Graduacao extends GraduacaoReplicado
                 -- Carga de atividades complementares
                 COALESCE(ac.carga_complementar, 0) AS carga_complementar,
             
-                -- Carga de atividades extensionistas (AEXINSCRICAO + disciplinas do histórico com cgahoratvext)
+                -- Carga de atividades extensionistas
                 COALESCE(aex.carga_aex_horas, 0) +
                 SUM(
                     CASE 
@@ -1059,55 +1086,47 @@ class Graduacao extends GraduacaoReplicado
                             THEN 0 ELSE 1 END ASC, d2.dtaatvdis DESC
                 )
             LEFT JOIN EMAILPESSOA em ON em.codpes = v.codpes AND em.stamtr = 'S'
+            
             LEFT JOIN (
-                SELECT codpes, SUM(ISNULL(cgahorapr, 0)) AS carga_complementar FROM ATIVIDADEALUNOGR WHERE codpes = :codpes GROUP BY codpes
+                SELECT codpes, SUM(ISNULL(cgahorapr, 0)) AS carga_complementar 
+                FROM ATIVIDADEALUNOGR 
+                GROUP BY codpes
             ) ac ON ac.codpes = v.codpes
+            
             LEFT JOIN (
-                SELECT codpes, SUM(cgahorrlzaex) / 60.0 AS carga_aex_horas FROM AEXINSCRICAO WHERE codpes = :codpes GROUP BY codpes
+                SELECT codpes, SUM(cgahorrlzaex) / 60.0 AS carga_aex_horas 
+                FROM AEXINSCRICAO 
+                GROUP BY codpes
             ) aex ON aex.codpes = v.codpes
             
-            WHERE v.codpes = :codpes
-                AND v.codcurgrd = :codcur
-                AND YEAR(v.dtainivin) = :ano_ingresso
-                AND v.tipvin = 'ALUNOGR'
-                AND v.sitatl = 'A'
-                AND h.rstfim IS NOT NULL 
-                AND h.rstfim NOT IN ('RA', 'RF', 'RN', 'T') 
-                AND h.stamtr NOT IN ('E', 'R') 
-                AND h.discrl IN ('O', 'L', 'C')
-                AND (ISNULL(h.dtavalfim, h.dtacrihst) >= v.dtainivin OR h.rstfim = 'D')
+            WHERE {$whereClause}
                 AND NOT EXISTS (
                     SELECT 1 FROM REQUERHISTESC r INNER JOIN EQUIVEXTERNAGR eq ON eq.codrqm = r.codrqm AND eq.codpes = r.codpes
                     WHERE r.codpes = h.codpes AND r.coddis = h.coddis
                 )
-                -- Exceção: disciplinas mapeadas em HABILTURMA para múltiplas habilitações
-                -- mas que, na prática curricular, contam apenas para a habilitação 0
                 AND NOT (
                     hh.codhab IN (100, 200)
                     AND h.coddis IN ('1800040', 'IAU0955')
                 )
                 AND (
-                    -- Caso 1: existe registro em HABILTURMA para essa disciplina/turma e essa habilitação
                     EXISTS (
                         SELECT 1 FROM HABILTURMA ht
                         WHERE ht.coddis = h.coddis
-                          AND ht.verdis = h.verdis
-                          AND ht.codtur = h.codtur
-                          AND ISNULL(ht.numseqtur, 0) = ISNULL(h.numseqtur, 0)
-                          AND ht.codcur = v.codcurgrd
-                          AND ht.codhab = hh.codhab
+                        AND ht.verdis = h.verdis
+                        AND ht.codtur = h.codtur
+                        AND ISNULL(ht.numseqtur, 0) = ISNULL(h.numseqtur, 0)
+                        AND ht.codcur = v.codcurgrd
+                        AND ht.codhab = hh.codhab
                     )
                     OR
-                    -- Caso 2: fallback - disciplina não está cadastrada em HABILTURMA para NENHUMA habilitação deste curso
-                    -- nesse caso, classifica pelo prefixo do código da disciplina (IAU = Arquitetura/hab.200, demais = hab.0)
                     (
                         NOT EXISTS (
                             SELECT 1 FROM HABILTURMA ht
                             WHERE ht.coddis = h.coddis
-                              AND ht.verdis = h.verdis
-                              AND ht.codtur = h.codtur
-                              AND ISNULL(ht.numseqtur, 0) = ISNULL(h.numseqtur, 0)
-                              AND ht.codcur = v.codcurgrd
+                            AND ht.verdis = h.verdis
+                            AND ht.codtur = h.codtur
+                            AND ISNULL(ht.numseqtur, 0) = ISNULL(h.numseqtur, 0)
+                            AND ht.codcur = v.codcurgrd
                         )
                         AND (
                             (hh.codhab = 0   AND h.coddis NOT LIKE 'IAU%')
@@ -1127,12 +1146,6 @@ class Graduacao extends GraduacaoReplicado
                 YEAR(v.dtainivin), 
                 ac.carga_complementar, 
                 aex.carga_aex_horas";
-
-        $param = [
-            'codpes' => $codpes,
-            'codcur' => $codcur,
-            'ano_ingresso' => $ano_ingresso
-        ];
 
         return DB::fetchAll($query, $param); 
     }

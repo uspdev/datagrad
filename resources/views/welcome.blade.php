@@ -60,7 +60,7 @@
       Outras funcionalidades:<br>
       - <b>Relatório de carga didática</b>: mostra a carga didática de docentes em determinado período;<br>
       - <b>Relatório grade horária</b>: mostra a grade horária corrente para a lista de alunos informada;<br>
-      - <b>Relatório carga horária acumulada</b>: mostra a carga horária acumulada em carga obrigatória, optativa, estágio, AAC e AEX cumprida por cada aluno informado na lista com filtros de curso e ano de ingresso;<br>
+      - <b>Relatório carga horária acumulada</b>: mostra a carga horária acumulada em carga obrigatória, optativa, estágio, AAC e AEX cumprida por cada aluno de um determinado curso e ano de ingresso selecionado ou informado na lista;<br>
       - <b>Relatório de evasão</b>: mostra gráfico e tabela de evasão por curso e por ano de ingresso;<br>
       - <b>Alteração de ementas de disicplinas</b>: Ferramenta que facilita a atualização das ementas das disciplinas.<br>
     </div>

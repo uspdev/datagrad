@@ -2,8 +2,8 @@
 
 @section('content')
     <h4>Relatório de Carga Horária Acumulada</h4>
-    <div class="mb-3 text-muted">
-        Lista o detalhamento das cargas horárias acumuladas (Obrigatória, Optativa, Estágio, Complementar e Extensionista) por aluno com base no curso e ano de ingresso selecionados.
+    <div class="mb-3">
+        Lista o detalhamento das cargas horárias acumuladas (Obrigatória, Optativa, Estágio, Complementar e Extensionista). <br> Selecione o curso e ano de ingresso OU uma lista que contenha nomes ou números USP.
     </div>
 
     <form method="POST" action="{{ route('graduacao.relatorio.carga-acumulada.post') }}">
@@ -24,8 +24,19 @@
             
             <div class="col-md-3 form-group">
                 <label for="anoInput"><b>Ano de Ingresso:</b></label>
-                <input type="number" name="ano_ingresso" id="anoInput" class="form-control" value="{{ old('ano_ingresso', date('Y')) }}" required>
+                <select name="ano_ingresso" id="anoInput" class="form-control">
+                    <option value="">Selecione o Ano</option>
+                    @foreach (range(date('Y'), 2015) as $ano)
+                        <option value="{{ $ano }}" {{ old('ano_ingresso') == $ano ? 'selected' : '' }}>
+                            {{ $ano }}
+                        </option>
+                    @endforeach
+                </select>
             </div>
+        </div>
+
+        <div class="mb-3">
+           <b>OU</b>
         </div>
 
         <div class="row mt-2">
@@ -68,8 +79,8 @@
                         <th>Obrigatória</th>
                         <th>Optativa</th>
                         <th>Estágio</th>
-                        <th>Complementar</th>
-                        <th>Extensionista</th>
+                        <th>AAC</th>
+                        <th>AEX</th>
                         <th class="table-primary text-dark">Total Acumulado</th>
                     </tr>
                 </thead>
@@ -78,7 +89,7 @@
                         <tr>
                             <td>{{ $r['codpes'] }}</td>
                             <td class="text-left">{{ $r['nompes'] }}</td>
-                            <td class="text-left"><small>{{ $r['email'] ?? 'N/C' }}</small></td>
+                            <td class="text-left">{{ $r['email'] ?? 'N/C' }}</td>
                             
                             <td>{{ $r['codcur'] }}</td>
                             <td>{{ $r['codhab'] }}</td>
