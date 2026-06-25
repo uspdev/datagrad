@@ -978,147 +978,175 @@ class Graduacao extends GraduacaoReplicado
         $ret = DB::fetchAll($query, $param);
         return $ret;
     }
-
+    
     /**
-     * Método para listar a carga horária total extensionista de alunos
-     * de um determinado curso e ano de ingresso.
+     * Método para obter o detalhamento da carga horária acumulada de alunos.
      *
-     * @param Int $codcur
-     * @param Int $anoIngresso
-     * @return Array Lista com ano, codpes, nome, email e carga total de extensão
-     * @author Vinicius Rafael do Vale, em 27/04/2026
+     * @param int|null $codpes
+     * @param int|null $codcur
+     * @param int|null $ano_ingresso
+     * @return Array Lista com dados dos alunos
+     * @author Vinicius Rafael do Vale, em 16/06/2026
      */
-    public static function listarCargaHorariaExtensionista($codcur, $anoIngresso)
+    public static function obterCargaHorariaAcumuladaAluno($codpes = null, $codcur = null, $ano_ingresso = null)
     {
-        $query = "SELECT
-                YEAR(V.dtainivin) AS ano_ingresso,
-                V.codpes,
-                V.nompes,
-                E.codema AS email,
-                COALESCE(AEX.carga_aex_horas, 0) + COALESCE(HIST.carga_hist_horas, 0) AS carga_total_extensao_horas
-            FROM VINCULOPESSOAUSP V
-            LEFT JOIN EMAILPESSOA E ON E.codpes = V.codpes AND E.stamtr = 'S'
-            LEFT JOIN (
-                SELECT codpes, SUM(cgahorrlzaex) / 60.0 AS carga_aex_horas
-                FROM AEXINSCRICAO
-                GROUP BY codpes
-            ) AS AEX ON AEX.codpes = V.codpes
-            LEFT JOIN (
-                SELECT H.codpes, SUM(D.cgahoratvext) AS carga_hist_horas
-                FROM HISTESCOLARGR H
-                INNER JOIN DISCIPLINAGR D ON H.coddis = D.coddis AND H.verdis = D.verdis
-                WHERE H.rstfim = 'A' AND D.cgahoratvext IS NOT NULL
-                GROUP BY H.codpes
-            ) AS HIST ON HIST.codpes = V.codpes
-            WHERE V.codcurgrd = :codcur
-            AND YEAR(V.dtainivin) = :ano
-            ORDER BY V.nompes ";
-
-        $params = [
-            'codcur' => $codcur,
-            'ano' => $anoIngresso,
+        $whereConditions = [
+            "v.tipvin = 'ALUNOGR'",
+            "v.sitatl = 'A'",
+            "h.rstfim IS NOT NULL",
+            "h.rstfim NOT IN ('RA', 'RF', 'RN', 'T')",
+            "h.stamtr NOT IN ('E', 'R')",
+            "h.discrl IN ('O', 'L', 'C')",
+            "(ISNULL(h.dtavalfim, h.dtacrihst) >= v.dtainivin OR h.rstfim = 'D')"
         ];
 
-        $ret = DB::fetchAll($query, $params);
-        return $ret;
-    }
+        $param = [];
 
-    /**
-     * Método para obter os dados acadêmicos e a carga horária total
-     * cumprida em disciplinas por um aluno.
-     *
-     * @param Int $codpes
-     * @return Array Lista com codpes, nome, email, cod_curso, cod_habilitação, ano_ingresso, carga_horaria_total_cumprida ou false se não encontrado.
-     * @author Vinicius Rafael do Vale, em 15/05/2026
-     */
-    public static function obterCargaHorariaCumpridaAluno($codpes)
-    {
-        $query = "
-            SELECT
+        if (!empty($codpes)) {
+            $whereConditions[] = "v.codpes = :codpes";
+            $param['codpes'] = $codpes;
+        }
+        if (!empty($codcur)) {
+            $whereConditions[] = "v.codcurgrd = :codcur";
+            $param['codcur'] = $codcur;
+        }
+        if (!empty($ano_ingresso)) {
+            $whereConditions[] = "YEAR(v.dtainivin) = :ano_ingresso";
+            $param['ano_ingresso'] = $ano_ingresso;
+        }
+
+        $whereClause = implode(" AND ", $whereConditions);
+
+        $query = "SELECT
                 v.codpes,
                 v.nompes,
                 em.codema AS email,
                 v.codcurgrd AS codcur,
-                v.codhab AS codhab,
+                hh.codhab,
                 YEAR(v.dtainivin) AS ano_ingresso,
+            
+                -- Carga de disciplinas obrigatórias
                 SUM(
-                    (ISNULL(d.creaul, 0) * 15) +
-                    (ISNULL(d.cretrb, 0) * 30)
-                ) AS carga_horaria_total_cumprida
+                    CASE WHEN h.discrl = 'O' THEN
+                        (ISNULL(d.creaul, 0) * 15) + (ISNULL(d.cretrb, 0) * 30)
+                    ELSE 0 END
+                ) AS carga_obrigatoria,
+            
+                -- Carga de disciplinas optativas (L ou C)
+                SUM(
+                    CASE WHEN h.discrl IN ('L', 'C') THEN
+                        (ISNULL(d.creaul, 0) * 15) + (ISNULL(d.cretrb, 0) * 30)
+                    ELSE 0 END
+                ) AS carga_optativa,
+            
+                -- Carga de estágio
+                SUM(
+                    CASE 
+                        WHEN ISNULL(d.cgahoreto, 0) > 0 THEN d.cgahoreto
+                        WHEN d.nomdis COLLATE Latin1_General_CI_AI LIKE '%estagio%' THEN
+                            (ISNULL(d.creaul, 0) * 15) + (ISNULL(d.cretrb, 0) * 30)
+                        ELSE 0
+                    END
+                ) AS carga_estagio,
+            
+                -- Carga de atividades complementares
+                COALESCE(ac.carga_complementar, 0) AS carga_complementar,
+            
+                -- Carga de atividades extensionistas
+                COALESCE(aex.carga_aex_horas, 0) +
+                SUM(
+                    CASE 
+                        WHEN h.rstfim IN ('A', 'D') AND d.cgahoratvext IS NOT NULL THEN d.cgahoratvext 
+                        ELSE 0 
+                    END
+                ) AS carga_extensionista
+            
             FROM VINCULOPESSOAUSP v
             INNER JOIN HISTESCOLARGR h ON h.codpes = v.codpes
-
-            -- Subquery para garantir a versão correta da disciplina
+            INNER JOIN HABILPROGGR hh ON hh.codpes = v.codpes AND hh.codcur = v.codcurgrd
             LEFT JOIN DISCIPLINAGR d 
                 ON  d.coddis    = h.coddis
                 AND d.dtaatvdis = (
                     SELECT TOP 1 d2.dtaatvdis
                     FROM DISCIPLINAGR d2
                     WHERE d2.coddis = h.coddis
-                      AND (
-                          (
-                              d2.dtaatvdis <= ISNULL(h.dtavalfim, h.dtacrihst)
-                              AND (
-                                  d2.dtadtvdis IS NULL
-                                  OR ISNULL(h.dtavalfim, h.dtacrihst) <= d2.dtadtvdis
-                              )
-                          )
-                          OR NOT EXISTS (
-                              SELECT 1
-                              FROM DISCIPLINAGR d3
-                              WHERE d3.coddis    = h.coddis
+                    AND (
+                        (
+                            d2.dtaatvdis <= ISNULL(h.dtavalfim, h.dtacrihst)
+                            AND (d2.dtadtvdis IS NULL OR ISNULL(h.dtavalfim, h.dtacrihst) <= d2.dtadtvdis)
+                        )
+                        OR NOT EXISTS (
+                            SELECT 1 FROM DISCIPLINAGR d3 WHERE d3.coddis = h.coddis
                                 AND d3.dtaatvdis <= ISNULL(h.dtavalfim, h.dtacrihst)
-                                AND (
-                                    d3.dtadtvdis IS NULL
-                                    OR ISNULL(h.dtavalfim, h.dtacrihst) <= d3.dtadtvdis
-                                )
-                          )
-                      )
+                                AND (d3.dtadtvdis IS NULL OR ISNULL(h.dtavalfim, h.dtacrihst) <= d3.dtadtvdis)
+                        )
+                    )
                     ORDER BY
-                        CASE
-                            WHEN d2.dtaatvdis <= ISNULL(h.dtavalfim, h.dtacrihst)
-                                 AND (
-                                     d2.dtadtvdis IS NULL
-                                     OR ISNULL(h.dtavalfim, h.dtacrihst) <= d2.dtadtvdis
-                                 )
-                            THEN 0 ELSE 1
-                        END ASC,
-                        d2.dtaatvdis DESC
+                        CASE WHEN d2.dtaatvdis <= ISNULL(h.dtavalfim, h.dtacrihst) AND (d2.dtadtvdis IS NULL OR ISNULL(h.dtavalfim, h.dtacrihst) <= d2.dtadtvdis)
+                            THEN 0 ELSE 1 END ASC, d2.dtaatvdis DESC
                 )
-
             LEFT JOIN EMAILPESSOA em ON em.codpes = v.codpes AND em.stamtr = 'S'
-
-            WHERE v.codpes = :codpes 
-                AND v.tipvin = 'ALUNOGR'
-                AND v.sitatl = 'A'
-                AND h.rstfim IS NOT NULL
-                AND h.rstfim NOT IN ('RA', 'RF', 'RN', 'T')
-                AND h.stamtr NOT IN ('E', 'R')
-                AND h.discrl IN ('O', 'L', 'C')
-                AND (
-                    ISNULL(h.dtavalfim, h.dtacrihst) >= v.dtainivin
-                    OR h.rstfim = 'D'
-                )
+            
+            LEFT JOIN (
+                SELECT codpes, SUM(ISNULL(cgahorapr, 0)) AS carga_complementar 
+                FROM ATIVIDADEALUNOGR 
+                GROUP BY codpes
+            ) ac ON ac.codpes = v.codpes
+            
+            LEFT JOIN (
+                SELECT codpes, SUM(cgahorrlzaex) / 60.0 AS carga_aex_horas 
+                FROM AEXINSCRICAO 
+                GROUP BY codpes
+            ) aex ON aex.codpes = v.codpes
+            
+            WHERE {$whereClause}
                 AND NOT EXISTS (
-                    SELECT 1
-                    FROM REQUERHISTESC r
-                    INNER JOIN EQUIVEXTERNAGR eq
-                        ON eq.codrqm = r.codrqm
-                       AND eq.codpes = r.codpes
-                    WHERE r.codpes = h.codpes
-                      AND r.coddis = h.coddis
+                    SELECT 1 FROM REQUERHISTESC r INNER JOIN EQUIVEXTERNAGR eq ON eq.codrqm = r.codrqm AND eq.codpes = r.codpes
+                    WHERE r.codpes = h.codpes AND r.coddis = h.coddis
                 )
+                AND NOT (
+                    hh.codhab IN (100, 200)
+                    AND h.coddis IN ('1800040', 'IAU0955')
+                )
+                AND (
+                    EXISTS (
+                        SELECT 1 FROM HABILTURMA ht
+                        WHERE ht.coddis = h.coddis
+                        AND ht.verdis = h.verdis
+                        AND ht.codtur = h.codtur
+                        AND ISNULL(ht.numseqtur, 0) = ISNULL(h.numseqtur, 0)
+                        AND ht.codcur = v.codcurgrd
+                        AND ht.codhab = hh.codhab
+                    )
+                    OR
+                    (
+                        NOT EXISTS (
+                            SELECT 1 FROM HABILTURMA ht
+                            WHERE ht.coddis = h.coddis
+                            AND ht.verdis = h.verdis
+                            AND ht.codtur = h.codtur
+                            AND ISNULL(ht.numseqtur, 0) = ISNULL(h.numseqtur, 0)
+                            AND ht.codcur = v.codcurgrd
+                        )
+                        AND (
+                            (hh.codhab = 0   AND h.coddis NOT LIKE 'IAU%')
+                            OR
+                            (hh.codhab = 100 AND h.coddis LIKE 'IAU%')
+                            OR
+                            (hh.codhab = 200 AND h.coddis LIKE 'IAU%')
+                        )
+                    )
+                )   
+            GROUP BY 
+                v.codpes, 
+                v.nompes, 
+                em.codema, 
+                v.codcurgrd, 
+                hh.codhab,
+                YEAR(v.dtainivin), 
+                ac.carga_complementar, 
+                aex.carga_aex_horas";
 
-            GROUP BY
-                YEAR(v.dtainivin),
-                v.codpes,
-                v.nompes,
-                v.codcurgrd,
-                v.codhab,
-                em.codema
-        ";
-
-        $param = ['codpes' => $codpes];
-        return DB::fetch($query, $param);
+        return DB::fetchAll($query, $param); 
     }
 }

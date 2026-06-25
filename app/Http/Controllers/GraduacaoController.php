@@ -602,114 +602,130 @@ class GraduacaoController extends Controller
         return view('grad.relatorio-turma', ['formRequest' => $formRequest, 'disciplinas' => $disciplinas, 'resultadosTurmas' => $resultadosTurmas]);
     }
 
-    public function relatorioCargaExtensao(Request $request)
-    {
-        $this->authorize('relatorio-cgaext');
-        \UspTheme::activeUrl('graduacao/relatorio/carga-extensao');
-
-        $cursos = Evasao::retornarCodcurNomcur();
-
-        if ($request->isMethod('get')) {
-            return view('grad.relatorio-carga-extensao', ['cursoOpcao' => $cursos]);
-        }
-
-        $request->validate([
-            'curso' => 'required|integer',
-            'ano' => 'required|integer|between:2000,' . date('Y'),
-        ]);
-
-        $alunosCarga = Graduacao::listarCargaHorariaExtensionista($request->curso, $request->ano);
-
-        if (empty($alunosCarga)) {
-            return redirect()->back()
-                ->with('alert-warning', 'Nenhum dado encontrado para os critérios informados.')
-                ->withInput();
-        }
-
-        return view('grad.relatorio-carga-extensao', [
-            'alunosCarga' => $alunosCarga,
-            'cursoOpcao' => $cursos,
-            'params' => $request->all()
-        ]);
-    }
-
-    public function relatorioCargaHorariaCumpridaAluno(Request $request)
+    public function relatorioCargaHorariaAcumulada(Request $request)
     {
         if (!$request->old()) {
             session()->flashInput($request->input());
         }
 
         $this->authorize('relatorio-cgahoralu');
-        \UspTheme::activeUrl('graduacao/relatorio/carga-alunos');
+        \UspTheme::activeUrl('graduacao/relatorio/carga-acumulada');
 
-        $entradas = Tools::limparNomes($request->nusps);
-
-        $codpesParaProcessar = [];
-        $naoEncontrados = [];
+        $cursos = Evasao::retornarCodcurNomcur();
         $resultados = [];
+        $naoEncontrados = [];
 
-        foreach ($entradas as $entrada) {
-            if (is_numeric($entrada)) {
-                $codpesParaProcessar[] = $entrada;
+        if ($request->isMethod('get')) {
+            return view('grad.relatorio-carga-acumulada', compact('cursos', 'resultados', 'naoEncontrados'));
+        }
+
+        $codcur = $request->input('codcur') ? trim($request->input('codcur')) : null;
+        $ano_ingresso = $request->input('ano_ingresso') ? trim($request->input('ano_ingresso')) : null;
+        
+        $limparNusps = $request->nusps ? Tools::limparNomes($request->nusps) : [];
+        $entradas = array_filter($limparNusps); 
+
+        // MODO 1: Busca pelo Curso e Ano de Ingresso (Lista de alunos vazia)
+        if (empty($entradas)) {
+            if (!$codcur || !$ano_ingresso) {
+                return redirect()->back()->withErrors(['Erro' => 'Selecione o Curso E o Ano de ingresso ou preencha a lista de alunos.']);
+            }
+
+            $vincAlunos = Graduacao::obterCargaHorariaAcumuladaAluno(null, $codcur, $ano_ingresso);
+            
+            if (empty($vincAlunos)) {
+                $naoEncontrados[] = "Nenhum aluno ativo localizado para o Curso: {$codcur} e Ano: {$ano_ingresso}.";
             } else {
-                $pessoas = Pessoa::procurarPorNome($entrada);
+                foreach ($vincAlunos as $dadosAluno) {
+                    $totalAcumulado = $dadosAluno['carga_obrigatoria'] + 
+                                    $dadosAluno['carga_optativa'] + 
+                                    $dadosAluno['carga_estagio'] + 
+                                    $dadosAluno['carga_complementar'] + 
+                                    $dadosAluno['carga_extensionista'];
 
-                if (!empty($pessoas)) {
-                    foreach ($pessoas as $pessoa) {
-                        $codpesParaProcessar[] = $pessoa['codpes'];
-                    }
-                } else {
-                    $naoEncontrados[] = $entrada;
+                    $resultados[] = [
+                        'codpes'              => $dadosAluno['codpes'],
+                        'nompes'              => $dadosAluno['nompes'],
+                        'email'               => $dadosAluno['email'],
+                        'codcur'              => $dadosAluno['codcur'],
+                        'codhab'              => $dadosAluno['codhab'],
+                        'ano_ingresso'        => $dadosAluno['ano_ingresso'],
+                        'carga_obrigatoria'   => round($dadosAluno['carga_obrigatoria']),
+                        'carga_optativa'      => round($dadosAluno['carga_optativa']),
+                        'carga_estagio'       => round($dadosAluno['carga_estagio']),
+                        'carga_complementar'  => round($dadosAluno['carga_complementar']),
+                        'carga_extensionista' => round($dadosAluno['carga_extensionista']),
+                        'total_acumulado'     => round($totalAcumulado)
+                    ];
                 }
             }
-        }
+        } 
 
-        $codpesParaProcessar = array_unique($codpesParaProcessar);
+        // MODO 2: Busca com base na Lista de nomes/números USP fornecida
+        else {
+            $codpesParaProcessar = [];
 
-        $nomesEncontrados = [];
-
-        if (!empty($codpesParaProcessar)) {
-            $nomesEncontrados = Pessoa::obterNome($codpesParaProcessar);
-        }
-
-        foreach ($codpesParaProcessar as $codpes) {
-            $nome = $nomesEncontrados[$codpes] ?? null;
-
-            if (!$nome) {
-                $naoEncontrados[] = $codpes . " (Número USP não encontrado na base)";
-                continue;
+            foreach ($entradas as $entrada) {
+                if (is_numeric($entrada)) {
+                    $codpesParaProcessar[] = $entrada;
+                } else {
+                    $pessoas = Pessoa::procurarPorNome($entrada);
+                    if (!empty($pessoas)) {
+                        foreach ($pessoas as $pessoa) {
+                            $codpesParaProcessar[] = $pessoa['codpes'];
+                        }
+                    } else {
+                        $naoEncontrados[] = $entrada . " (Nome não localizado)";
+                    }
+                }
             }
 
-            $dadosAluno = Graduacao::obterCargaHorariaCumpridaAluno($codpes);
+            $codpesParaProcessar = array_unique($codpesParaProcessar);
+            $nomesEncontrados = !empty($codpesParaProcessar) ? Pessoa::obterNome($codpesParaProcessar) : [];
 
-            if (!$dadosAluno) {
-                $naoEncontrados[] = $codpes . " - " . ($nome ?: 'Nº USP inválido') . " (Sem histórico de aprovações)";
-                continue;
+            foreach ($codpesParaProcessar as $codpes) {
+                $nome = $nomesEncontrados[$codpes] ?? null;
+
+                if (!$nome) {
+                    $naoEncontrados[] = $codpes . " (Número USP não encontrado na base)";
+                    continue;
+                }
+
+                $vincAlunos = Graduacao::obterCargaHorariaAcumuladaAluno($codpes, $codcur, $ano_ingresso);
+
+                if (empty($vincAlunos)) {
+                    $naoEncontrados[] = $codpes . " - " . $nome . " (Não corresponde aos filtros selecionados ou sem histórico válido)";
+                    continue;
+                }
+
+                foreach ($vincAlunos as $dadosAluno) {
+                    $totalAcumulado = $dadosAluno['carga_obrigatoria'] + 
+                                    $dadosAluno['carga_optativa'] + 
+                                    $dadosAluno['carga_estagio'] + 
+                                    $dadosAluno['carga_complementar'] + 
+                                    $dadosAluno['carga_extensionista'];
+
+                    $resultados[] = [
+                        'codpes'              => $dadosAluno['codpes'],
+                        'nompes'              => $dadosAluno['nompes'],
+                        'email'               => $dadosAluno['email'],
+                        'codcur'              => $dadosAluno['codcur'],
+                        'codhab'              => $dadosAluno['codhab'],
+                        'ano_ingresso'        => $dadosAluno['ano_ingresso'],
+                        'carga_obrigatoria'   => round($dadosAluno['carga_obrigatoria']),
+                        'carga_optativa'      => round($dadosAluno['carga_optativa']),
+                        'carga_estagio'       => round($dadosAluno['carga_estagio']),
+                        'carga_complementar'  => round($dadosAluno['carga_complementar']),
+                        'carga_extensionista' => round($dadosAluno['carga_extensionista']),
+                        'total_acumulado'     => round($totalAcumulado)
+                    ];
+                }
             }
-
-            $cursoInfo = Graduacao::obterCurso($dadosAluno['codcur'], $dadosAluno['codhab']);
-
-            $cargaExigida = ($cursoInfo['cgahortot'] ?? 0) + ($cursoInfo['cgahorobgaac'] ?? 0);
-            $cumprida = $dadosAluno['carga_horaria_total_cumprida'];
-
-            $porcentagem = ($cargaExigida > 0) ? ($cumprida / $cargaExigida) * 100 : 0;
-
-            $resultados[] = [
-                'codpes' => $dadosAluno['codpes'],
-                'nompes' => $dadosAluno['nompes'],
-                'email'  => $dadosAluno['email'],
-                'curso'  => $dadosAluno['codcur'] . " - " . ($cursoInfo['nomcur'] ?? 'Não encontrado'),
-                'habilitacao' => $dadosAluno['codhab'] . " - " . ($cursoInfo['nomhab'] ?? 'Não encontrada'),
-                'ano'    => $dadosAluno['ano_ingresso'],
-                'exigida' => $cargaExigida,
-                'cumprida' => round($cumprida),
-                'porcentagem' => number_format($porcentagem, 2, ',', '.')
-            ];
         }
 
         $resultados = collect($resultados)->sortBy('nompes')->toArray();
 
         session()->flashInput($request->input());
-        return view('grad.relatorio-carga-alunos', compact('resultados', 'naoEncontrados'));
+        return view('grad.relatorio-carga-acumulada', compact('resultados', 'naoEncontrados', 'cursos'));
     }
 }
