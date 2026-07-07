@@ -148,6 +148,7 @@ $meta = [
     ],
     'dscmtdavl' => [
         'titulo' => 'Método de Avaliação',
+        'grupoDr' => 'avaliacao',
         'ajuda' => 'Descrever com clareza o processo de avaliação de aprendizagem para que o aluno compreenda
             como todos os elementos do plano de ensino se articulam e para que o professor possa realizar a gestão
             da aprendizagem na sua disciplina, com base em evidências do que o aluno aprendeu,
@@ -160,10 +161,12 @@ $meta = [
     ],
     'dscmtdavligl' => [
         'titulo' => 'Evaluation Method',
+        'grupoDr' => 'avaliacao',
         'class' => 'ingles',
     ],
     'crtavl' => [
         'titulo' => 'Critérios de Aprovação',
+        'grupoDr' => 'avaliacao',
         'ajuda' => 'A escolha do instrumento de avaliação deve levar em conta aquele que poderá fornecer
             o maior conjunto de informações sobre a aprendizagem dos estudantes, para que o professor possa
             tomar decisões seguras e precisas sobre como intervir para potencializar a aprendizagem e intervir
@@ -171,23 +174,28 @@ $meta = [
     ],
     'crtavligl' => [
         'titulo' => 'Evaluation Criterion',
+        'grupoDr' => 'avaliacao',
         'class' => 'ingles',
     ],
     'dscnorrcp' => [
         'titulo' => 'Norma de recuperação (da aprendizagem)',
+        'grupoDr' => 'avaliacao',
         'ajuda' => 'Nesse caso, o foco é a recuperação da aprendizagem. Para isso, o estudante deve saber onde
             precisa melhorar, em termos de aprendizagem, e como, quais recursos adicionais ele poderá buscar
             para aprender o que não conseguiu ainda.',
     ],
     'dscnorrcpigl' => [
         'titulo' => 'Recovery standard',
+        'grupoDr' => 'avaliacao',
         'class' => 'ingles',
     ],
     'dscbbgdis' => [
         'titulo' => 'Bibliografia Básica / Bibliography',
+        'grupoDr' => 'bibliografia',
     ],
     'dscbbgdiscpl' => [
         'titulo' => 'Bibliografia Complementar',
+        'grupoDr' => 'bibliografia',
     ],
     'objdslsut' => [
         'titulo' => 'Objetivos de Desenvolvimento Sustentável',

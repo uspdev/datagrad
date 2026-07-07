@@ -137,10 +137,10 @@ class DisciplinaController extends Controller
     {
         $this->authorize('viewAny', Disciplina::class);
 
-        $versao = $request->v ?: null; // vai desativar versões anteriores?
+        $versao = $request->v ?: 'max'; // vai desativar versões anteriores?
         $coddis = strtoupper($coddis);
 
-        if ($dr = Disciplina::obterDisciplinaReplicado($coddis)) {
+        if ($dr = Disciplina::obterDisciplinaReplicado($coddis, $versao)) {
             $dr['meta'] = Disciplina::meta();
         }
         $disc = Disciplina::where('coddis', $coddis)->first() ?? Disciplina::novo($dr);
@@ -257,7 +257,6 @@ class DisciplinaController extends Controller
     public function previewHtml($coddis)
     {
         $this->authorize('viewAny', Disciplina::class);
-        // $disc = Disciplina::where('coddis', strtoupper($coddis))->first();
         $disc = Disciplina::primeiroOuNovo(strtoupper($coddis));
         $this->authorize('update', $disc);
 

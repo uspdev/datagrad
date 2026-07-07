@@ -3,7 +3,13 @@
 @section('content')
   @include('disciplinas.partials.index-navbar')
   <div class="alert alert-info">
-    Se AA → BB: AA é o valor do Júpiter e BB é o valor proposto.
+    Se em um campo houver <b>AA <span class="text-danger">→ BB</span></b>, <b>AA</b> é o valor do Júpiter e <b><span
+        class="text-danger">BB</span></b> é o valor proposto.<br>
+    Os dados aqui apresentados correspondem às versões <b>vigentes</b> das diciplinas.<br>
+    Ao clicar no nome da disciplina e acessar os detalhes, será mostrado a versão <b>mais recente</b>, que pode ser
+    diferente da versão vigente.
+    Nesse caso a versão vigente pode ser consultada no <b>Júpiter Web</b>.
+
   </div>
   <table class="table table-sm table-bordered datatable-simples dt-fixed-header dt-buttons dt-state-save">
     <thead>
@@ -18,13 +24,13 @@
         <th style="min-width: 20px;" title="Habilidades e competências">H&C</th>
         <th>Situação</th>
         <th>Versão</th>
-        <th>Data versão</th>
+        <th>Data ativação</th>
+        <th>Data últ. alteração</th>
         <th>Responsáveis</th>
       </tr>
     </thead>
     <tbody>
       @foreach ($discs as $disc)
-        {{-- @if ($disc->coddis == 'STT0404') @dd($disc) @endif --}}
         <tr>
           <td>
             {{ $disc->coddis }}
@@ -66,6 +72,9 @@
           </td>
           <td data-order={{ $disc->dr['dtaatvdis'] ?? '' }}>
             @date($disc->dr['dtaatvdis'] ?? 'n/a')
+          </td>
+          <td data-order={{ $disc->dr['dtaultalt'] ?? '' }}>
+            @date($disc->dr['dtaultalt'] ?? 'n/a')
           </td>
           <td>
             {{ $disc->retornarResponsaveisDr() }}

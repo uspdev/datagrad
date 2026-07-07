@@ -12,7 +12,8 @@ class Diff
         $dmp = new DiffMatchPatch();
 
         foreach ($disc::meta() as $campo => $valor) {
-            $valorDr = $disc->dr[$campo] ?? '';
+            $campoDr = $disc::campoDr($campo);
+            $valorDr = $disc->dr[$campoDr] ?? '';
             if (is_array($valorDr)) {
                 $valorDr = implode('', $valorDr);
             }
@@ -24,6 +25,7 @@ class Diff
 
             $diff = $dmp->diff_main((string)$valorDr, (string)$valorCampo, false);
             $diffs[$campo] = $dmp->diff_prettyHtml($diff);
+            $diffs[$campoDr] = $diffs[$campo];
         }
 
         return $diffs;

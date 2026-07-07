@@ -7,4 +7,7 @@
 @endif
 @if ($dr['dtadtvdis'] ?? null)
   até <b>@date($dr['dtadtvdis'])</b>
+  @if($dr['dtadtvdis'] < now())
+    <span class="text-danger">(não vigente)</span>
+  @endif
 @endif

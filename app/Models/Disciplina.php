@@ -85,6 +85,41 @@ class Disciplina extends Model
         return config('datagrad.meta');
     }
 
+    /**
+     * Retorna o nome do campo correspondente do replicado
+     *
+     * Avaliação é bibliografia possuem prefixo nos dados que vem do replicado.
+     */
+    public static function campoDr(string $campo): string
+    {
+        if (str_contains($campo, '.')) {
+            return $campo;
+        }
+        $grupoDr = self::meta()[$campo]['grupoDr'] ?? null;
+        return $grupoDr ? "{$grupoDr}.{$campo}" : $campo;
+    }
+
+    /**
+     * Remove o prefixo das chaves em notação por ponto.
+     *
+     * Ex.: "avaliacao.campo" => "campo".
+     *
+     * @param array $dados Dados replicados.
+     * @return array Dados com chaves no formato local.
+     */
+    public static function dadosReplicadoParaLocal(array $dados): array
+    {
+        foreach ($dados as $campoDr => $valor) {
+            if (str_contains($campoDr, '.')) {
+                $campo = substr(strrchr($campoDr, '.'), 1);
+                $dados[$campo] = $valor;
+                unset($dados[$campoDr]);
+            }
+        }
+
+        return $dados;
+    }
+
     // protected function pdf(): Attribute
     // {
     //     return Attribute::make(
@@ -103,7 +138,7 @@ class Disciplina extends Model
     {
         $dr = Graduacao::obterDisciplina($coddis, $verdis);
         if ($dr) {
-            $dr['responsaveis'] = Graduacao::listarResponsaveisDisciplina($coddis);
+            // $dr['responsaveis'] = Graduacao::listarResponsaveisDisciplina($coddis); // foi para dentro do obterDisciplina
             $dr['cursos'] = Graduacao::listarCursosDisciplina($coddis);
             return $dr;
         }
@@ -182,7 +217,7 @@ class Disciplina extends Model
 
         if ($dr) {
             // precisa remover elementos do replicado que são array e não estão no BD
-            $disc->fill(array_diff_key($dr, array_flip(['responsaveis', 'cursos'])));
+            $disc->fill(self::dadosReplicadoParaLocal(array_diff_key($dr, array_flip(['responsaveis', 'cursos']))));
 
             $disc->atividade_extensionista = $dr['cgahoratvext'] ? true : false;
 
@@ -355,7 +390,7 @@ class Disciplina extends Model
         // adiciona apenas replicados restantes
         foreach ($replicados as $replicado) {
             $disc = new self();
-            $disc->fill($replicado);
+            $disc->fill(self::dadosReplicadoParaLocal($replicado));
             $disc->origem = 'replicado';
             $disc->dr = $replicado;
             $resultado[] = $disc;

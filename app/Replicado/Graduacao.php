@@ -157,8 +157,8 @@ class Graduacao extends GraduacaoReplicado
             # EESC: Colocado aqui para remover os cursos de dupla formação com IAU.
             $condicaoCodhab = 'H.codhab = ' . $codhabs[0];
         } else {
-        # ECA: Colocado aqui para considerar outras habilitações.
-        $condicoes = array_map(fn($c) => "RIGHT(H.codhab, 1) = $c", $codhabs);
+            # ECA: Colocado aqui para considerar outras habilitações.
+            $condicoes = array_map(fn($c) => "RIGHT(H.codhab, 1) = $c", $codhabs);
             $condicaoCodhab = implode(' OR ', $condicoes);
         }
 
@@ -574,7 +574,8 @@ class Graduacao extends GraduacaoReplicado
      */
     public static function obterDisciplina($coddis, $verdis = null)
     {
-        $query = "SELECT verdis, dtaatvdis, dtadtvdis
+        // $verdis=1;
+        $query = "SELECT *
             FROM DISCIPLINAGR
             WHERE coddis = :coddis
             ORDER BY verdis DESC
@@ -585,35 +586,83 @@ class Graduacao extends GraduacaoReplicado
         }
         $maxverdis = $dis[0]['verdis'];
 
+        $disciplina = null;
         if ($verdis == 'max') {
             $verdis = $maxverdis;
-        }
-        if ($verdis == null) {
+            $disciplina = $dis[0];
+        } elseif ($verdis == null) {
+            // versão vigente da disciplina
             foreach ($dis as $d) {
-                if ($d['dtaatvdis'] && date_create($d['dtaatvdis']) < date_create() && (!$d['dtadtvdis'] || date_create($d['dtadtvdis']) > date_create())) {
-                    // versão vigente da disciplina
+                if (
+                    $d['dtaatvdis']
+                    && date_create($d['dtaatvdis']) < date_create()
+                    && (!$d['dtadtvdis']
+                        || date_create($d['dtadtvdis']) > date_create()
+                    )
+                ) {
                     $verdis = $d['verdis'];
+                    $disciplina = $d;
+                    break;
+                }
+            }
+        } elseif (is_numeric($verdis)) {
+            // versão específica da disciplina
+            foreach ($dis as $d) {
+                if ($d['verdis'] == $verdis) {
+                    $disciplina = $d;
+                    break;
                 }
             }
         }
 
-        $query = " SELECT D.*, DA.*, DB.* FROM DISCIPLINAGR D
-            INNER JOIN DISCIPGRAVALIACAO DA ON DA.coddis = D.coddis AND (DA.dtafimifmavl IS NULL OR DA.dtafimifmavl >=GETDATE()) -- avaliação
-            INNER JOIN DISCIPGRBIBLIOG DB ON DB.coddis = D.coddis AND (DB.dtafimbbg IS NULL OR DB.dtafimbbg >= GETDATE()) -- bibliografia
-            WHERE D.coddis = :coddis
-            AND D.verdis = CONVERT(INT, :verdis)
-        ";
-        $params['verdis'] = $verdis;
-        $params['coddis'] = $coddis;
-
-        $ret = DB::fetch($query, $params);
-        if ($ret) {
-            $ret['maxverdis'] = $maxverdis;
-            $ret['sitdistxt'] = self::$sitdis[$ret['sitdis']] ?? '';
-            $ret['codlinegrtxt'] = self::$codlinegr[$ret['codlinegr']] ?? '-';
+        // nao achou disciplina que atende os critérios
+        if (!$disciplina) {
+            return null;
         }
 
-        return $ret;
+        // Injeta os metadados e os textos das estáticas
+        $disciplina['maxverdis'] = $maxverdis;
+        $disciplina['sitdistxt'] = self::$sitdis[$disciplina['sitdis'] ?? ''] ?? '';
+        $disciplina['codlinegrtxt'] = self::$codlinegr[$disciplina['codlinegr'] ?? ''] ?? '-';
+
+        // Seleciona a versão correspondente de avaliação, bibliografia e responsáveis:
+        $params = ['coddis' => $coddis];
+        if (is_null($disciplina['dtaatvdis']) && is_null($disciplina['dtadtvdis'])) {
+            // Em elaboração: registro com dtafim... IS NULL;
+            $filtroAvaliacao = "AND dtafimifmavl IS NULL";
+            $filtroBibliografia = "AND dtafimbbg IS NULL";
+            $filtroResponsaveis = "AND D.dtafimrsp IS NULL";
+        } elseif (is_null($disciplina['dtadtvdis'])) {
+            // Vigente: registro vigente em dtaatvdis;
+            $filtroAvaliacao = "AND dtainiifmavl <= :dataRef AND (dtafimifmavl IS NULL OR dtafimifmavl >= :dataRef)";
+            $filtroBibliografia = "AND dtainibbg <= :dataRef AND (dtafimbbg IS NULL OR dtafimbbg >= :dataRef)";
+            $filtroResponsaveis = "AND D.dtainirsp <= :dataRef AND (D.dtafimrsp IS NULL OR D.dtafimrsp >= :dataRef)";
+            $params['dataRef'] = $disciplina['dtaatvdis'];
+        } else {
+            // Encerrada: registro vigente em dtadtvdis.
+            $filtroAvaliacao = "AND dtainiifmavl <= :dataFim AND dtafimifmavl >= :dataFim";
+            $filtroBibliografia = "AND dtainibbg <= :dataFim AND dtafimbbg >= :dataFim";
+            $filtroResponsaveis = "AND D.dtainirsp <= :dataFim AND (D.dtafimrsp IS NULL OR D.dtafimrsp >= :dataFim)";
+            $params['dataFim'] = $disciplina['dtadtvdis'];
+        }
+
+        $queryAvaliacao = "SELECT * FROM DISCIPGRAVALIACAO
+                           WHERE coddis = :coddis {$filtroAvaliacao}";
+        $avaliacao = DB::fetch($queryAvaliacao, $params);
+        $disciplina += array_combine(array_map(fn($k) => "avaliacao.$k", array_keys($avaliacao)), $avaliacao);
+
+        $queryBibliografia = "SELECT * FROM DISCIPGRBIBLIOG
+                              WHERE coddis = :coddis {$filtroBibliografia}";
+        $bibliografia = DB::fetch($queryBibliografia, $params);
+        $disciplina += array_combine(array_map(fn($k) => "bibliografia.$k", array_keys($bibliografia)), $bibliografia);
+
+        $queryResponsaveis = "SELECT P.nompesttd, D.* FROM DISCIPGRRESP D
+                              LEFT JOIN PESSOA P ON P.codpes = D.codpes
+                              WHERE D.coddis = :coddis {$filtroResponsaveis}";
+        $disciplina['responsaveis'] = DB::fetchAll($queryResponsaveis, $params) ?: [];
+
+        // dd($dataFim, $disciplina, $bibliografia, $queryBibliografia, $verdis);
+        return $disciplina;
     }
 
     /**
@@ -858,16 +907,27 @@ class Graduacao extends GraduacaoReplicado
     {
         $query = "SELECT DGR.*
             FROM DISCIPLINAGR AS DGR
-            WHERE DGR.verdis = (
-                    SELECT MAX(D2.verdis) FROM DISCIPLINAGR D2
-                    WHERE (D2.coddis = DGR.coddis)
+            WHERE DGR.verdis = COALESCE(
+                (
+                    SELECT MAX(D2.verdis)
+                    FROM DISCIPLINAGR D2
+                    WHERE D2.coddis = DGR.coddis
+                    AND D2.dtadtvdis IS NULL -- não desativas
+                    AND D2.dtaatvdis IS NOT NULL -- e ativadas -> disciplinas vigentes
+                ),
+                (
+                    SELECT MAX(D3.verdis)
+                    FROM DISCIPLINAGR D3
+                    WHERE D3.coddis = DGR.coddis
+                    AND D3.dtadtvdis IS NULL
+                    AND D3.dtaatvdis IS NULL -- nao está ativada mas
+                    AND D3.dtaultalt IS NOT NULL --há data de alteração: parecem ser disciplinas novas
                 )
+            )
                 AND DGR.coddis IN (
                     SELECT coddis FROM DISCIPGRCODIGO
                     WHERE DISCIPGRCODIGO.codclg IN (__codundclgs__)
                 )
-                AND DGR.dtadtvdis IS NULL -- nao foi desativado
-                -- AND DGR.dtaatvdis IS NOT NULL -- foi ativado --11/9/2024
             ORDER BY DGR.nomdis ASC";
 
         $res = DB::fetchAll($query);
@@ -978,7 +1038,7 @@ class Graduacao extends GraduacaoReplicado
         $ret = DB::fetchAll($query, $param);
         return $ret;
     }
-    
+
     /**
      * Método para obter o detalhamento da carga horária acumulada de alunos.
      *
@@ -1024,47 +1084,47 @@ class Graduacao extends GraduacaoReplicado
                 v.codcurgrd AS codcur,
                 hh.codhab,
                 YEAR(v.dtainivin) AS ano_ingresso,
-            
+
                 -- Carga de disciplinas obrigatórias
                 SUM(
                     CASE WHEN h.discrl = 'O' THEN
                         (ISNULL(d.creaul, 0) * 15) + (ISNULL(d.cretrb, 0) * 30)
                     ELSE 0 END
                 ) AS carga_obrigatoria,
-            
+
                 -- Carga de disciplinas optativas (L ou C)
                 SUM(
                     CASE WHEN h.discrl IN ('L', 'C') THEN
                         (ISNULL(d.creaul, 0) * 15) + (ISNULL(d.cretrb, 0) * 30)
                     ELSE 0 END
                 ) AS carga_optativa,
-            
+
                 -- Carga de estágio
                 SUM(
-                    CASE 
+                    CASE
                         WHEN ISNULL(d.cgahoreto, 0) > 0 THEN d.cgahoreto
                         WHEN d.nomdis COLLATE Latin1_General_CI_AI LIKE '%estagio%' THEN
                             (ISNULL(d.creaul, 0) * 15) + (ISNULL(d.cretrb, 0) * 30)
                         ELSE 0
                     END
                 ) AS carga_estagio,
-            
+
                 -- Carga de atividades complementares
                 COALESCE(ac.carga_complementar, 0) AS carga_complementar,
-            
+
                 -- Carga de atividades extensionistas
                 COALESCE(aex.carga_aex_horas, 0) +
                 SUM(
-                    CASE 
-                        WHEN h.rstfim IN ('A', 'D') AND d.cgahoratvext IS NOT NULL THEN d.cgahoratvext 
-                        ELSE 0 
+                    CASE
+                        WHEN h.rstfim IN ('A', 'D') AND d.cgahoratvext IS NOT NULL THEN d.cgahoratvext
+                        ELSE 0
                     END
                 ) AS carga_extensionista
-            
+
             FROM VINCULOPESSOAUSP v
             INNER JOIN HISTESCOLARGR h ON h.codpes = v.codpes
             INNER JOIN HABILPROGGR hh ON hh.codpes = v.codpes AND hh.codcur = v.codcurgrd
-            LEFT JOIN DISCIPLINAGR d 
+            LEFT JOIN DISCIPLINAGR d
                 ON  d.coddis    = h.coddis
                 AND d.dtaatvdis = (
                     SELECT TOP 1 d2.dtaatvdis
@@ -1086,19 +1146,19 @@ class Graduacao extends GraduacaoReplicado
                             THEN 0 ELSE 1 END ASC, d2.dtaatvdis DESC
                 )
             LEFT JOIN EMAILPESSOA em ON em.codpes = v.codpes AND em.stamtr = 'S'
-            
+
             LEFT JOIN (
-                SELECT codpes, SUM(ISNULL(cgahorapr, 0)) AS carga_complementar 
-                FROM ATIVIDADEALUNOGR 
+                SELECT codpes, SUM(ISNULL(cgahorapr, 0)) AS carga_complementar
+                FROM ATIVIDADEALUNOGR
                 GROUP BY codpes
             ) ac ON ac.codpes = v.codpes
-            
+
             LEFT JOIN (
-                SELECT codpes, SUM(cgahorrlzaex) / 60.0 AS carga_aex_horas 
-                FROM AEXINSCRICAO 
+                SELECT codpes, SUM(cgahorrlzaex) / 60.0 AS carga_aex_horas
+                FROM AEXINSCRICAO
                 GROUP BY codpes
             ) aex ON aex.codpes = v.codpes
-            
+
             WHERE {$whereClause}
                 AND NOT EXISTS (
                     SELECT 1 FROM REQUERHISTESC r INNER JOIN EQUIVEXTERNAGR eq ON eq.codrqm = r.codrqm AND eq.codpes = r.codpes
@@ -1136,17 +1196,17 @@ class Graduacao extends GraduacaoReplicado
                             (hh.codhab = 200 AND h.coddis LIKE 'IAU%')
                         )
                     )
-                )   
-            GROUP BY 
-                v.codpes, 
-                v.nompes, 
-                em.codema, 
-                v.codcurgrd, 
+                )
+            GROUP BY
+                v.codpes,
+                v.nompes,
+                em.codema,
+                v.codcurgrd,
                 hh.codhab,
-                YEAR(v.dtainivin), 
-                ac.carga_complementar, 
+                YEAR(v.dtainivin),
+                ac.carga_complementar,
                 aex.carga_aex_horas";
 
-        return DB::fetchAll($query, $param); 
+        return DB::fetchAll($query, $param);
     }
 }

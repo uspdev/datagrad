@@ -13,19 +13,19 @@
   <div class="card-header">
     Bibliografia / Bibliography
     <span class="badge badge-info">
-      a partir de @date($dr['dtainibbg'])
-      @if ($dr['dtafimbbg'] ?? null)
-        até @date($dr['dtafimbbg'])
+      a partir de @date($dr['bibliografia.dtainibbg'])
+      @if ($dr['bibliografia.dtafimbbg'] ?? null)
+        até @date($dr['bibliografia.dtafimbbg'])
       @endif
     </span>
   </div>
   <div class="card-body">
-    <b>Bibliografia Básica / Bibliography</b>
+    <b>{{ $dr['meta']['dscbbgdis']['titulo'] }}</b>
 
-    <textarea class="form-control autoexpand" disabled>{!! htmlspecialchars_decode($dr['dscbbgdis']) !!}</textarea>
+    <textarea class="form-control autoexpand" disabled>{!! htmlspecialchars_decode($dr['bibliografia.dscbbgdis']) !!}</textarea>
 
-    <div class="mt-3 font-weight-bold">Bibliografia Complementar</div>
-    <textarea class="form-control autoexpand" disabled>{!! htmlspecialchars_decode($dr['dscbbgdiscpl']) !!}</textarea>
+    <div class="mt-3 font-weight-bold">{{ $dr['meta']['dscbbgdiscpl']['titulo'] }}</div>
+    <textarea class="form-control autoexpand" disabled>{!! htmlspecialchars_decode($dr['bibliografia.dscbbgdiscpl']) !!}</textarea>
 
   </div>
 </div>

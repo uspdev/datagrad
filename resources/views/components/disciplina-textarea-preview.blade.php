@@ -6,6 +6,7 @@
 ])
 
 @php
+  $nameDr = $model::campoDr($name);
   $italico_igl = isset($model::meta()[$name]['class']) && $model::meta()[$name]['class'] == 'ingles' ? 'font-italic' : '';
   $width = $model->dr ? '50%' : '100%';
   $colspan = $model->dr ? 2 : 1;
@@ -21,12 +22,12 @@
   <tr>
     @if ($model->dr)
       <td class="d-none diff px-3" style="width: {{ $width }};">
-        {!! str_replace("\n", '&para;<br>', $model->dr[$name] ?? null) !!}
+        {!! str_replace("\n", '&para;<br>', $model->dr[$nameDr] ?? null) !!}
       </td>
     @endif
     <td class="px-3" style="width: {{ $width }};">
       {{-- o proximo div precisa ficar todo na mesma linha para não quebrar o diff --}}
-      <div class="textarea {{ $italico_igl }} }}" data-original="{!! $model->dr[$name] ?? '' !!}">{!! str_replace("\n", '&para;<br>', htmlspecialchars_decode($model[$name])) !!}</div>
+      <div class="textarea {{ $italico_igl }}" data-original="{!! $model->dr[$nameDr] ?? '' !!}">{!! str_replace("\n", '&para;<br>', htmlspecialchars_decode($model[$name])) !!}</div>
     </td>
   </tr>
 </table>

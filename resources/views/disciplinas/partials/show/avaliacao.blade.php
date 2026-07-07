@@ -12,9 +12,9 @@
   <div class="card-header">
     Instrumentos e critérios de avaliação
     <span class="badge badge-info">
-      a partir de @date($dr['dtainiifmavl'])
-      @if ($dr['dtafimifmavl'] ?? null)
-        até @date($dr['dtafimifmavl'])
+      a partir de @date($dr['avaliacao.dtainiifmavl'])
+      @if ($dr['avaliacao.dtafimifmavl'] ?? null)
+        até @date($dr['avaliacao.dtafimifmavl'])
       @endif
     </span>
   </div>

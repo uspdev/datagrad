@@ -46,7 +46,13 @@
           </b>
         </div>
         <hr />
-        <div>Última versão: <b>{{ $dr['maxverdis'] ?? '-' }}</b></div>
+
+        <div>
+          Versão: <b>{{ $dr['verdis'] ?? '-' }}</b>
+          @if ($dr['maxverdis'] != $dr['verdis'])
+            (Última versão: <b>{{ $dr['maxverdis'] ?? '-' }}</b>)
+          @endif
+        </div>
         <div>Vigência: @include('disciplinas.partials.vigencia')</div>
         <div>Data da última alteração: <b>@datetime($dr['dtaultalt'])</b></div>
         <div>Situação: <b>@include('disciplinas.partials.show.situacao-disciplina-badge')</b></div>
