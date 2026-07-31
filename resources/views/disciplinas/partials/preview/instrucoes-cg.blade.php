@@ -7,8 +7,14 @@
       </div>
     </div>
     <div class="px-3 py-2">
+      <p>
+        O PDF gerado tem objetivo de facilitar a análise da proposta de alteração/criação da disciplina pelos colegiados.<br>
+        Para a transcrição no sistema Júpiter utilize esta página do Datagrad que possui um botão de copiar
+        <span class="btn btn-secondary py-0"><i class="fas fa-copy"></i></span> ao lado de cada campo, facilitando a
+        transcrição dos dados.
+      </p>
       <p class="mb-3">
-        Após cadastrar a disciplina no <b>Júpiter</b>, finalize este formulário de alteração.
+        Após cadastrar a disciplina no <b>Júpiter</b>, finalize este formulário de alteração para liberar alterações futuras.
       </p>
 
       @if ($disc->estado == 'Em aprovação')

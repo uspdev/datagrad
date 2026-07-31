@@ -4,6 +4,10 @@
     'model' => '',
 ])
 
+@php
+  $nameDr = $model::campoDr($name);
+@endphp
+
 @foreach (explode('__quebrar__', $model->{$name}) as $name_dividido)
   <table>
     <tr>
@@ -14,7 +18,7 @@
     </tr>
     <tr>
       {{-- <td></td> --}}
-      <td>{!! str_replace("\n", '&para;<br>', $model->diffs[$name]) !!}</td>
+      <td>{!! str_replace("\n", '&para;<br>', $model->diffs[$nameDr]) !!}</td>
       <td> {!! str_replace("\n", '&para;<br>', $name_dividido) !!}</td>
     </tr>
   </table>

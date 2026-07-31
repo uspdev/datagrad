@@ -7,7 +7,7 @@ use App\Models\Disciplina;
 use App\Replicado\Graduacao;
 use App\Replicado\Pessoa;
 use App\Services\Diff;
-use App\Services\Pdf;
+use Spatie\LaravelPdf\Facades\Pdf;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -256,9 +256,9 @@ class DisciplinaController extends Controller
      */
     public function previewHtml($coddis)
     {
-        $this->authorize('viewAny', Disciplina::class);
+        // $this->authorize('viewAny', Disciplina::class);
         $disc = Disciplina::primeiroOuNovo(strtoupper($coddis));
-        $this->authorize('update', $disc);
+        // $this->authorize('update', $disc);
 
         if (! $disc) {
             return back()
@@ -284,6 +284,44 @@ class DisciplinaController extends Controller
         $disc->cursos = $cursos;
 
         return view('disciplinas.preview-html', compact('disc'));
+    }
+
+    /**
+     * Realiza o download do PDF da disciplina em alteração/criação
+     */
+    public function downloadPdf($coddis)
+    {
+        $disc = Disciplina::primeiroOuNovo(strtoupper($coddis));
+        // $this->authorize('update', $disc);
+
+        if (! $disc) {
+            return back()
+                ->with('alert-danger', 'Disciplina não encontrada!');
+        }
+
+        $disc->mesclarResponsaveisReplicado();
+
+        // disciplina-replicado -> cursos da unidade que aparece a disciplina
+        $cursos = [];
+        foreach ($disc->dr['cursos'] ?? [] as $curso_dr) {
+            if (stripos(config('replicado.codundclgs'), $curso_dr['codclg']) !== false) {
+                // é curso da unidade
+                $curso = Curso::where('codcur', $curso_dr['codcur'])->first();
+                if (! $curso) {
+                    $curso = new Curso;
+                    $curso->codcur = $curso_dr['codcur'];
+                    $curso->dr = $curso_dr;
+                }
+                $cursos[] = $curso;
+            }
+        }
+        $disc->cursos = $cursos;
+
+        $filename = 'alteracao-' . $coddis . '.pdf';
+        return Pdf::view('disciplinas.preview-html', compact('disc'))
+            ->format('a4')
+            ->orientation('portrait')
+            ->download($filename);
     }
 
     /**

@@ -3,6 +3,12 @@
 @section('styles')
   @parent
   <style>
+    @media print {
+      #skin_login_bar {
+        display: none !important;
+      }
+    }
+
     .card {
       margin-top: 18px;
     }

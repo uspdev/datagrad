@@ -51,6 +51,7 @@ Route::post('graduacao/cursos/{codcur}/{codhab}/turmas', [GraduacaoController::c
 Route::get('disciplinas/ajuda', [DisciplinaController::class, 'ajuda'])->name('disciplinas.ajuda');
 // Route::get('disciplinas/{coddis}/preview', [DisciplinaController::class, 'preview'])->name('disciplinas.preview');
 Route::get('disciplinas/{coddis}/preview-html', [DisciplinaController::class, 'previewHtml'])->name('disciplinas.preview-html');
+Route::get('disciplinas/{coddis}/download', [DisciplinaController::class, 'downloadPdf'])->name('disciplinas.pdf');
 Route::resource('disciplinas', DisciplinaController::class)->parameters(['disciplinas' => 'coddis']);
 
 Route::get('arquivos/download', [ArquivoController::class, 'download'])->name('arquivos.download');
