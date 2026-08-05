@@ -19,8 +19,8 @@
   <form action="{{ route('disciplinas.update', $disc->coddis) }}" method="POST" id="disciplinas-edit-form">
     @csrf
     @method('put')
-    <input type="hidden" name="id" value={{ $disc->id }}>
-    <input type="hidden" name="coddis" value={{ $disc->coddis }}>
+    <input type="hidden" name="id" value="{{ $disc->id }}">
+    <input type="hidden" name="coddis" value="{{ $disc->coddis }}">
 
     @php
       // as várias abas são incluídas com base no id

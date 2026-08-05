@@ -197,8 +197,17 @@ class DisciplinaController extends Controller
         $disc = Disciplina::primeiroOuNovo($coddis);
         $this->authorize('update', $disc);
 
+        // dd($request->all());
+        $action = $request->action ?? null;
+
+        if ($action == 'estado_undo') {
+            $disc->atualizarEstado($request->estado);
+            $disc->save();
+            return redirect()->to($request->next);
+        }
+
         // para aprovação, finaliza a edição do pdf
-        if ($request->estado == 'Em aprovação') {
+        if ($action == 'mudar_em_aprovacao') {
             $disc->atualizarEstado('Em aprovação');
             $disc->save();
             Disciplina::renovarCacheAfterResponse();
@@ -206,6 +215,11 @@ class DisciplinaController extends Controller
             return redirect()
                 ->route('disciplinas.preview-html', $disc->coddis)
                 ->with('alert-success', 'Disciplina enviada para aprovação com sucesso!');
+        }
+
+        // inicio de edição
+        if ($disc->estado == 'Propor alteração') {
+            $disc->atualizarEstado('Em edição');
         }
 
         $disc->atualizado_por_id = Auth::id();
@@ -218,7 +232,8 @@ class DisciplinaController extends Controller
             $disc->removerResponsavel($rem);
         }
 
-        $disc->fill($request->all());
+        $fill = $request->except('estado', 'codpes_add', 'codpes_rem', 'action', 'next');
+        $disc->fill($fill);
         if ($disc->isDirty()) {
             $disc->save();
             Disciplina::renovarCacheAfterResponse();
@@ -256,9 +271,9 @@ class DisciplinaController extends Controller
      */
     public function previewHtml($coddis)
     {
-        // $this->authorize('viewAny', Disciplina::class);
+        $this->authorize('viewAny', Disciplina::class);
         $disc = Disciplina::primeiroOuNovo(strtoupper($coddis));
-        // $this->authorize('update', $disc);
+        $this->authorize('update', $disc);
 
         if (! $disc) {
             return back()
@@ -292,7 +307,7 @@ class DisciplinaController extends Controller
     public function downloadPdf($coddis)
     {
         $disc = Disciplina::primeiroOuNovo(strtoupper($coddis));
-        // $this->authorize('update', $disc);
+        $this->authorize('update', $disc);
 
         if (! $disc) {
             return back()
@@ -317,7 +332,7 @@ class DisciplinaController extends Controller
         }
         $disc->cursos = $cursos;
 
-        $filename = 'alteracao-' . $coddis . '.pdf';
+        $filename = 'alteracao-disciplina-' . $coddis . '-vigencia-' . $disc->ano . $disc->semestre . '.pdf';
         return Pdf::view('disciplinas.preview-html', compact('disc'))
             ->format('a4')
             ->orientation('portrait')

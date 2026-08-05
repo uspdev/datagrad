@@ -566,15 +566,18 @@ class Graduacao extends GraduacaoReplicado
      *
      * Inclui também 'maxverdis' que corresponde ao maior verdis da disciplina.
      *   - Usado para paginar as versões em datatagrad.
+     *   - inclui informações de avaliação, bibliografia e responsáveis, se houver.
+     *      - avaliacao e bibliografia são prefixados. Ex.: bibliografia.dtainibbg
+     *      - responsáveis é um array de registros, cada um com nompesttd, codpes, dtainirsp e dtafimrsp
      *
      * @param string $coddis
      * @param int|null $verdis
      * @return array|null
      * @author Masaki K Neto em 25/3/2024
+     * @author Masaki K Neto em 07/07/2026, modificando retorno de avaliacao, bibliografia e responsáveis
      */
     public static function obterDisciplina($coddis, $verdis = null)
     {
-        // $verdis=1;
         $query = "SELECT *
             FROM DISCIPLINAGR
             WHERE coddis = :coddis

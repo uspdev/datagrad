@@ -10,6 +10,7 @@
         @method('put')
         <input type="hidden" name="id" value={{ $disc->id }}>
         <input type="hidden" name="coddis" value={{ $disc->coddis }}>
+        <input type="hidden" name="action" value="estado_undo">
         <input type="hidden" name="estado" value="{{ $disc->dr ? 'Em edição' : 'Criar' }}">
         <input type="hidden" name="next" value="{{ url()->current() }}">
 

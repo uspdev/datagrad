@@ -14,7 +14,7 @@
       @method('put')
       <input type="hidden" name="id" value={{ $disc->id }}>
       <input type="hidden" name="coddis" value={{ $disc->coddis }}>
-      <input type="hidden" name="estado" value="Em aprovação">
+      <input type="hidden" name="action" value="mudar_em_aprovacao">
 
       <button type="submit" class="btn btn-sm btn-danger">Mudar para "Em aprovação"</button>
     </form>
