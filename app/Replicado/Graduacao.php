@@ -644,7 +644,7 @@ class Graduacao extends GraduacaoReplicado
         } else {
             // Encerrada: registro vigente em dtadtvdis.
             $filtroAvaliacao = "AND dtainiifmavl <= :dataFim AND dtafimifmavl >= :dataFim";
-            $filtroBibliografia = "AND dtainibbg <= :dataFim AND dtafimbbg >= :dataFim";
+            $filtroBibliografia = "AND dtainibbg <= :dataFim AND (dtafimbbg IS NULL OR dtafimbbg >= :dataFim)";
             $filtroResponsaveis = "AND D.dtainirsp <= :dataFim AND (D.dtafimrsp IS NULL OR D.dtafimrsp >= :dataFim)";
             $params['dataFim'] = $disciplina['dtadtvdis'];
         }
@@ -664,7 +664,6 @@ class Graduacao extends GraduacaoReplicado
                               WHERE D.coddis = :coddis {$filtroResponsaveis}";
         $disciplina['responsaveis'] = DB::fetchAll($queryResponsaveis, $params) ?: [];
 
-        // dd($dataFim, $disciplina, $bibliografia, $queryBibliografia, $verdis);
         return $disciplina;
     }
 
