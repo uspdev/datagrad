@@ -143,7 +143,7 @@ class DisciplinaController extends Controller
         if ($dr = Disciplina::obterDisciplinaReplicado($coddis, $versao)) {
             $dr['meta'] = Disciplina::meta();
         }
-        $disc = Disciplina::where('coddis', $coddis)->first() ?? Disciplina::novo($dr);
+        $disc = Disciplina::where('coddis', $coddis)->naoFinalizado()->first() ?? Disciplina::novo($dr);
         $disc->dr = $dr;
 
         return view('disciplinas.show', compact('dr', 'coddis', 'disc'));
@@ -215,6 +215,16 @@ class DisciplinaController extends Controller
             return redirect()
                 ->route('disciplinas.preview-html', $disc->coddis)
                 ->with('alert-success', 'Disciplina enviada para aprovação com sucesso!');
+        }
+
+        if ($action == 'mudar_finalizado') {
+            $disc->atualizarEstado('Finalizado');
+            $disc->save();
+            Disciplina::renovarCacheAfterResponse();
+
+            return redirect()
+                ->route('disciplinas.preview-html', $disc->coddis)
+                ->with('alert-success', 'Disciplina finalizada com sucesso!');
         }
 
         // inicio de edição

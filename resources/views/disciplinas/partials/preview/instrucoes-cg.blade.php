@@ -29,7 +29,7 @@
             @method('put')
             <input type="hidden" name="id" value="{{ $disc->id }}">
             <input type="hidden" name="coddis" value="{{ $disc->coddis }}">
-            <input type="hidden" name="estado" value="Finalizado">
+            <input type="hidden" name="action" value="mudar_finalizado">
             <input type="hidden" name="next" value="{{ url()->current() }}">
 
             <button type="submit" class="btn btn-outline-danger btn-sm">
