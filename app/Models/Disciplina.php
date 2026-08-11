@@ -631,7 +631,7 @@ class Disciplina extends Model
      * @param string|null $codlinegr Código da língua (ISO639-3), por exemplo "ENG", "POR".
      * @return string Nome da língua correspondente ou "-" se não encontrado.
      */
-    public function codlinegr($codlinegr)
+    public function codlinegr($codlinegr = null)
     {
         return Graduacao::$codlinegr[$codlinegr] ?? '-';
     }
