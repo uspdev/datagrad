@@ -25,7 +25,7 @@
     <select name="{{ $name }}" class='form-control'>
       <option value="">-- Selecione --</option>
       @foreach ($options as $value => $label)
-        <option value="{{ $value }}" @selected($model->{$name} == $value)>
+        <option value="{{ $value }}" @selected(($model->getAttributes()[$name] ?? null) == $value)>
           {{ $label }}
         </option>
       @endforeach
