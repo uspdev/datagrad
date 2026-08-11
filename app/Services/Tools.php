@@ -109,7 +109,20 @@ class Tools
      */
     public static function semestres()
     {
-        $semestres = ['20261', '20252', '20251', '20242', '20241', '20232', '20231', '20222', '20221', '20212', '20211', '20202', '20201', '20192', '20191', '20182', '20181'];
-        return $semestres;
+        $anoAtual = (int) date('Y');
+        $mesAtual = (int) date('n');
+
+        $semestres = [];
+        $anoInicial = 2018;
+
+        for ($ano = $anoInicial; $ano <= $anoAtual; $ano++) {
+            $semestres[] = $ano . '1';
+            
+            if ($ano < $anoAtual || $mesAtual > 6) {
+                $semestres[] = $ano . '2';
+            }
+        }
+
+        return array_reverse($semestres);
     }
 }
