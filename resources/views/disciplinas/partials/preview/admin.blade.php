@@ -3,28 +3,32 @@
     @include('disciplinas.partials.form-historico')
     Versão de referência: {{ $disc->verdis }}
 
-    @if ($disc->estado == 'Em aprovação' || $disc->estado == 'Finalizado')
-      <form action="{{ route('disciplinas.update', $disc->coddis) }}" method="POST" id="disciplinas-edit-form"
-        onsubmit="return confirm('Tem certeza que deseja voltar para edição?');">
-        @csrf
-        @method('put')
-        <input type="hidden" name="id" value={{ $disc->id }}>
-        <input type="hidden" name="coddis" value={{ $disc->coddis }}>
-        <input type="hidden" name="action" value="estado_undo">
-        <input type="hidden" name="estado" value="{{ $disc->dr ? 'Em edição' : 'Criar' }}">
-        <input type="hidden" name="next" value="{{ url()->current() }}">
+    <form action="{{ route('disciplinas.update', $disc->coddis) }}" method="POST" id="disciplinas-edit-form"
+      onsubmit="return confirm('Tem certeza que deseja executar ação?');">
+      @csrf
+      @method('put')
+      <input type="hidden" name="id" value={{ $disc->id }}>
+      <input type="hidden" name="coddis" value={{ $disc->coddis }}>
+      <input type="hidden" name="estado" value="{{ $disc->dr ? 'Em edição' : 'Criar' }}">
+      <input type="hidden" name="next" value="{{ url()->current() }}">
 
-        @if ($disc->dr)
-          <button type="submit" class="btn btn-sm btn-outline-danger">
-            <span class="badge badge-pill badge-danger">Admin</span> Voltar para edição
-          </button>
-        @else
-          <button type="submit" class="btn btn-sm btn-outline-danger">
-            <span class="badge badge-pill badge-danger">Admin</span> Voltar para criação
-          </button>
-        @endif
+      @if ($disc->estado == 'Em aprovação' || $disc->estado == 'Finalizado')
+        <button type="submit" name="action" value="estado_undo" class="btn btn-sm btn-outline-warning mr-4">
+          <span class="badge badge-pill badge-danger">Admin</span>
+          @if ($disc->dr)
+            Voltar para edição
+          @else
+            Voltar para criação
+          @endif
+        </button>
+      @endif
 
-      </form>
-    @endif
+      <button type="submit" name="action" value="excluir" class="btn btn-sm btn-outline-danger">
+        <span class="badge badge-pill badge-danger">Admin</span>
+        Excluir alteração
+      </button>
+
+
+    </form>
   </div>
 @endcan

@@ -197,14 +197,23 @@ class DisciplinaController extends Controller
         $disc = Disciplina::primeiroOuNovo($coddis);
         $this->authorize('update', $disc);
 
-        // dd($request->all());
         $action = $request->action ?? null;
 
         if ($action == 'estado_undo') {
+            Gate::authorize('admin');
             $disc->atualizarEstado($request->estado);
             $disc->save();
             return redirect()->to($request->next);
         }
+
+        if ($action === 'excluir') {
+            Gate::authorize('admin');
+            $disc->delete();
+            return redirect()
+                ->route('disciplinas.show', $disc->coddis)
+                ->with('alert-success', 'Disciplina excluída com sucesso!');
+        }
+
 
         // para aprovação, finaliza a edição do pdf
         if ($action == 'mudar_em_aprovacao') {
@@ -213,7 +222,7 @@ class DisciplinaController extends Controller
             Disciplina::renovarCacheAfterResponse();
 
             return redirect()
-                ->route('disciplinas.preview-html', $disc->coddis)
+                ->route('disciplinas.preview', $disc->coddis)
                 ->with('alert-success', 'Disciplina enviada para aprovação com sucesso!');
         }
 
@@ -223,7 +232,7 @@ class DisciplinaController extends Controller
             Disciplina::renovarCacheAfterResponse();
 
             return redirect()
-                ->route('disciplinas.preview-html', $disc->coddis)
+                ->route('disciplinas.preview', $disc->coddis)
                 ->with('alert-success', 'Disciplina finalizada com sucesso!');
         }
 
@@ -251,8 +260,8 @@ class DisciplinaController extends Controller
 
         $request->session()->flash('alert-info', 'Dados salvo com sucesso!');
 
-        if ($request->action == 'preview-html') {
-            return redirect()->route('disciplinas.preview-html', $disc->coddis);
+        if ($request->action == 'preview') {
+            return redirect()->route('disciplinas.preview', $disc->coddis);
         }
         if ($request->next) {
             return redirect()->to($request->next);
@@ -262,33 +271,26 @@ class DisciplinaController extends Controller
     }
 
     /**
-     * Realiza o preview do PDF da disciplina em alteração/criação
-     *
-     * @param  string  $disc
-     */
-    // public function preview($coddis)
-    // {
-    //     $disc = Disciplina::where('coddis', $coddis)->first();
-    //     $url = Storage::temporaryUrl('disciplinas/disciplina-' . $coddis . '.pdf', now()->addMinutes(10), ['ResponseContentDisposition' => 'attachment; filename=file2.pdf']);
-
-    //     return view('disciplinas.preview', compact('disc', 'url'));
-    // }
-
-    /**
      * Realiza o preview em HTML da disciplina em alteração/criação
      *
      * @param  string  $coddis
      */
-    public function previewHtml($coddis)
+    public function preview($coddis)
     {
         $this->authorize('viewAny', Disciplina::class);
-        $disc = Disciplina::primeiroOuNovo(strtoupper($coddis));
-        $this->authorize('update', $disc);
+        // $disc = Disciplina::primeiroOuNovo(strtoupper($coddis));
+        $disc = Disciplina::where('coddis', strtoupper($coddis))->naoFinalizado()->first();
 
         if (! $disc) {
-            return back()
-                ->with('alert-danger', 'Disciplina não encontrada!');
+            if ($dr = Disciplina::obterDisciplinaReplicado($coddis)) {
+                $dr['meta'] = Disciplina::meta();
+            }
+            $disc = Disciplina::where('coddis', $coddis)->naoFinalizado()->first() ?? Disciplina::novo($dr);
+            $disc->dr = $dr;
+            return view('disciplinas.preview-negado', compact('dr', 'disc', 'coddis'));
         }
+
+        $this->authorize('update', $disc);
 
         $disc->mesclarResponsaveisReplicado();
 
@@ -308,7 +310,7 @@ class DisciplinaController extends Controller
         }
         $disc->cursos = $cursos;
 
-        return view('disciplinas.preview-html', compact('disc'));
+        return view('disciplinas.preview', compact('disc'));
     }
 
     /**
@@ -343,7 +345,7 @@ class DisciplinaController extends Controller
         $disc->cursos = $cursos;
 
         $filename = 'alteracao-disciplina-' . $coddis . '-vigencia-' . $disc->ano . $disc->semestre . '.pdf';
-        return Pdf::view('disciplinas.preview-html', compact('disc'))
+        return Pdf::view('disciplinas.preview', compact('disc'))
             ->format('a4')
             ->orientation('portrait')
             ->download($filename);
