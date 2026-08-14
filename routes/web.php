@@ -49,8 +49,13 @@ Route::get('graduacao/cursos/{codcur}/{codhab}/turmas', [GraduacaoController::cl
 Route::post('graduacao/cursos/{codcur}/{codhab}/turmas', [GraduacaoController::class, 'turmas'])->name('graduacao.turmas.post');
 
 Route::get('disciplinas/ajuda', [DisciplinaController::class, 'ajuda'])->name('disciplinas.ajuda');
-// Route::get('disciplinas/{coddis}/preview', [DisciplinaController::class, 'preview'])->name('disciplinas.preview');
-Route::get('disciplinas/{coddis}/preview-html', [DisciplinaController::class, 'previewHtml'])->name('disciplinas.preview-html');
+
+Route::get('disciplinas/{coddis}/preview-html', function ($coddis) {
+    // vamos manter para compatibilidade retroativa
+    return redirect()->route('disciplinas.preview', ['coddis' => $coddis]);
+});
+Route::get('disciplinas/{coddis}/preview', [DisciplinaController::class, 'preview'])->name('disciplinas.preview');
+
 Route::get('disciplinas/{coddis}/download', [DisciplinaController::class, 'downloadPdf'])->name('disciplinas.pdf');
 Route::resource('disciplinas', DisciplinaController::class)->parameters(['disciplinas' => 'coddis']);
 

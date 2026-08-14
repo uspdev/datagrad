@@ -596,7 +596,7 @@ class Disciplina extends Model
                 'order' => '2 ' . $this->updated_at->format('Y-m-d H:i:s'),
             ],
             'Em aprovação' => [
-                'route' => 'disciplinas.preview-html',
+                'route' => 'disciplinas.preview',
                 'class' => 'btn-outline-danger',
                 'label' => 'Aprovação | ' . $this->updated_at->format('d/m/Y'),
                 'order' => '3 ' . $this->updated_at->format('Y-m-d H:i:s'),

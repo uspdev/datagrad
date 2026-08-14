@@ -1,39 +1,261 @@
 @extends('layouts.app')
 
-{{-- @section('menu')
-@endsection --}}
-
-@section('skin_footer')
-@endsection
-
 @section('styles')
   @parent
   <style>
-    .pdf {
-      width: 100%;
-      /* aspect-ratio: 4 / 3; */
+    @media print {
+      #skin_login_bar {
+        display: none !important;
+      }
+    }
+
+    .card {
+      margin-top: 18px;
+    }
+
+    .card-header {
+      font-size: 20px;
+      padding-top: 6px;
+      padding-bottom: 6px;
+    }
+
+    /* ----------------- */
+    #card-basico {
+      border: 1px solid Bisque;
+      border-top: 3px solid Bisque;
+    }
+
+    /* Atividades extensionistas ficarão em um card com cor diferenciada */
+    #card-extensao {
+      border: 1px solid brown !important;
+      border-top: 3px solid brown;
+    }
+
+    #card-extensao .card-header {
+      text-align: center;
+      font-weight: bold;
+      background-color: bisque;
+    }
+
+    #card-extensao .titulo {
+      background-color: bisque !important;
+    }
+
+    #card-avaliacao {
+      border: 1px solid rosybrown;
+      border-top: 3px solid rosybrown;
+    }
+
+    #card-avaliacao .card-header {
+      text-align: center;
+      font-weight: bold;
+      background-color: beige;
+    }
+
+    #card-avaliacao .titulo {
+      background-color: beige !important;
+    }
+
+    #card-viagem-didatica {
+      border: 1px solid rosybrown;
+      border-top: 3px solid rosybrown;
+    }
+
+    #card-viagem-didatica .card-header {
+      text-align: center;
+      font-weight: bold;
+      background-color: beige;
+    }
+
+    #card-viagem-didatica .titulo {
+      background-color: beige !important;
     }
   </style>
 @endsection
 
 @section('content')
-  @include('disciplinas.partials.navbar-preview')
+  @include('disciplinas.partials.preview.navbar')
+
+  <div class="h4 text-center my-3">
+    {{ $disc->dr ? 'Alteração' : 'Criação' }} da disciplina: <b>{{ $disc->coddis }} - {{ $disc->nomdis }}</b>
+  </div>
+
+  @include('disciplinas.partials.preview.em-aprovacao-msg')
+  @include('disciplinas.partials.preview.em-aprovacao-btn')
+  @include('disciplinas.partials.preview.admin')
+  @include('disciplinas.partials.preview.validacao')
+  @include('disciplinas.partials.preview.instrucoes-cg')
+
+  <div class="my-2">
+    <b>Unidade</b>: {{ \Uspdev\Replicado\Estrutura::obterUnidade(config('datagrad.codundclgs')[0])['sglund'] }}
+  </div>
+
+  <div class="my-2">
+    <b>Departamento</b>: {{ \App\Replicado\Pessoa::retornarSetorFormatado($disc->atualizadoPor->codpes) }}
+  </div>
+
+  <div class="my-2">
+    <b>{{ $disc->dr ? 'Alteração' : 'Criação' }} para o ano/semestre</b>
+    <span class="border rounded px-2 py-1">
+      {{ $disc->ano }} / {{ $disc->semestre }}
+    </span>
+  </div>
+
+  <div class="my-3">
+    <x-disciplina-justificativa-preview name="justificativa" :model="$disc"></x-disciplina-justificativa-preview>
+  </div>
+
+  <div>&nbsp;</div>
+
+  <div class="mt-3">
+    Data: {{ $disc->updated_at->format('d/m/Y') }}<br>
+    {{ $disc->atualizadoPor->name }}
+  </div>
+
+  <hr class="my-3" />
+
+  <div class="">
+    Documento original:
+    <a href="{{ url()->current() }}">{{ url()->current() }}</a>
+  </div>
+
+  <div>
+    Estado: @include('disciplinas.partials.badge-estado')
+  </div>
+
+  <div>
+    Versão de referência: {{ $disc->verdis }}
+  </div>
+
+  <div class="{{ $disc->estado == 'Em aprovação' ? 'd-print-none' : '' }} my-2">
+
+
+
+
+
+
+    {{-- @includeWhen($disc->estado == 'Em edição', 'disciplinas.partials.print-btn') --}}
+  </div>
+
+  <hr class="my-3" />
 
   <div class="row">
-    <div class="col-12">
-      <embed src="{{ $url }}" type="application/pdf" width="100%" height="800px">
-      <a href="{{ $url }}" target="_blank">Abrir PDF</a>
-      {{-- <object class="pdf" type="application/pdf" data="{{ $url }}" height="800">
-      Alt: <a href="disciplina.pdf">disciplina.pdf</a>
-      </object> --}}
-
-      {{-- veio do mercurioweb --}}
-      {{-- <object data="blob:https://portalservicos.usp.br/db028cea-e3fe-48d9-b3b2-1f7bb311968b" type="application/pdf"
-        class="w-100 h-100" style="min-height: 500px;">
-        <p>Não foi possível exibir o documento. Utilize o botão abaixo para fazer download:</p>
-        <p class="text-center"><a href="blob:https://portalservicos.usp.br/db028cea-e3fe-48d9-b3b2-1f7bb311968b"
-            download="documento.pdf" class="btn btn-sm btn-primary"> Download do documento </a></p>
-      </object> --}}
+    <div class="col-7">
+      <x-disciplina-numero-preview name="creaul" :model="$disc"></x-disciplina-numero-preview>
+      <x-disciplina-numero-preview name="cretrb" :model="$disc"></x-disciplina-numero-preview>
+      <x-disciplina-select-preview name="tipdis" :model="$disc"></x-disciplina-select-preview>
+      <x-disciplina-numero-preview name="numvagdis" :model="$disc"></x-disciplina-numero-preview>
+      <x-disciplina-select-preview name="codlinegr" :model="$disc"></x-disciplina-select-preview>
+      <x-disciplina-select-preview name="atividade_extensionista" :model="$disc"></x-disciplina-select-preview>
+      <x-disciplina-sim-nao-preview name="stavgmdid" :model="$disc"></x-disciplina-sim-nao-preview>
+      <x-disciplina-sim-nao-preview name="stapsuatvani" :model="$disc"></x-disciplina-sim-nao-preview>
+    </div>
+    <div class="col-5">
+      <div class=" font-weight-bold">Responsáveis/Professors</div>
+      <div class="ml-2">
+        @foreach ($disc->responsaveis as $r)
+          @if ($r['status'] == 'mesmo')
+            <div class="my-1">{{ $r['codpes'] }} - {{ $r['nompesttd'] }}</div>
+          @elseif($r['status'] == 'novo')
+            <div class="ins my-1">{{ $r['codpes'] }} - {{ $r['nompesttd'] }}</div>
+          @elseif($r['status'] == 'removido')
+            <div class="del my-1">{{ $r['codpes'] }} - {{ $r['nompesttd'] }}</div>
+          @endif
+        @endforeach
+      </div>
     </div>
   </div>
+
+  <div class="my-1">&nbsp;</div>
+
+  <x-disciplina-text-preview name="nomdis" :model="$disc"></x-disciplina-text-preview>
+  <x-disciplina-text-preview name="nomdisigl" :model="$disc"></x-disciplina-text-preview>
+
+  <div class="my-1">&nbsp;</div>
+
+  <x-disciplina-textarea-preview name="pgmrsudis" :model="$disc"></x-disciplina-textarea-preview>
+  <x-disciplina-textarea-preview name="pgmrsudisigl" :model="$disc"></x-disciplina-textarea-preview>
+
+  <x-disciplina-textarea-preview name="objdis" :model="$disc"></x-disciplina-textarea-preview>
+  <x-disciplina-textarea-preview name="objdisigl" :model="$disc"></x-disciplina-textarea-preview>
+
+  <x-disciplina-textarea-preview name="pgmdis" :model="$disc"></x-disciplina-textarea-preview>
+  <x-disciplina-textarea-preview name="pgmdisigl" :model="$disc"></x-disciplina-textarea-preview>
+
+  <x-disciplina-checkbox-preview name="mtdens" :model="$disc"></x-disciplina-checkbox-preview>
+  <x-disciplina-checkbox-preview name="mtdensigl" :model="$disc"></x-disciplina-checkbox-preview>
+
+  <div class="card mb-3" id="card-avaliacao">
+    <div class="card-header">Instrumentos e critérios de avaliação</div>
+    <div class="card-body p-1">
+      <x-disciplina-textarea-preview name="dscmtdavl" :model="$disc"></x-disciplina-textarea-preview>
+      <x-disciplina-textarea-preview name="dscmtdavligl" :model="$disc"></x-disciplina-textarea-preview>
+
+      <x-disciplina-textarea-preview name="crtavl" :model="$disc"></x-disciplina-textarea-preview>
+      <x-disciplina-textarea-preview name="crtavligl" :model="$disc"></x-disciplina-textarea-preview>
+
+      <x-disciplina-textarea-preview name="dscnorrcp" :model="$disc"></x-disciplina-textarea-preview>
+      <x-disciplina-textarea-preview name="dscnorrcpigl" :model="$disc"></x-disciplina-textarea-preview>
+    </div>
+  </div>
+
+  <x-disciplina-textarea-preview name="dscbbgdis" :model="$disc"></x-disciplina-textarea-preview>
+  <x-disciplina-textarea-preview name="dscbbgdiscpl" :model="$disc"></x-disciplina-textarea-preview>
+
+  <x-disciplina-checkbox-preview name="objdslsut" :model="$disc" :options="['diff' => false]"></x-disciplina-checkbox-preview>
+
+  {{-- viagem didatica --}}
+  @if ($disc->stavgmdid == 'S')
+    <div class="card viagem-didatica" id="card-viagem-didatica">
+      <div class="card-header">Viagem didática</div>
+      <div class="card-body p-1">
+        <div class="d-flex flex-column align-items-center pb-2">
+          <x-disciplina-sim-nao-preview name="staetr" :model="$disc"></x-disciplina-sim-nao-preview>
+        </div>
+        <x-disciplina-textarea-preview name="dscatvpvs" :model="$disc"></x-disciplina-textarea-preview>
+      </div>
+    </div>
+  @endif
+
+  {{-- atividade-extensionista --}}
+  @if ($disc->atividade_extensionista)
+    <div class="card atividade-extensionista" id="card-extensao">
+      <div class="card-header">Atividade extensionista</div>
+      <div class="card-body p-1">
+        <div class="d-flex flex-column align-items-center pb-2">
+          <x-disciplina-numero-preview name="cgahoratvext" :model="$disc"></x-disciplina-numero-preview>
+        </div>
+        <x-disciplina-textarea-preview name="grpavoatvext" :model="$disc"></x-disciplina-textarea-preview>
+        <x-disciplina-textarea-preview name="grpavoatvextigl" :model="$disc"></x-disciplina-textarea-preview>
+
+        <x-disciplina-textarea-preview name="objatvext" :model="$disc"></x-disciplina-textarea-preview>
+        <x-disciplina-textarea-preview name="objatvextigl" :model="$disc"></x-disciplina-textarea-preview>
+
+        <x-disciplina-textarea-preview name="dscatvext" :model="$disc"></x-disciplina-textarea-preview>
+        <x-disciplina-textarea-preview name="dscatvextigl" :model="$disc"></x-disciplina-textarea-preview>
+
+        <x-disciplina-textarea-preview name="idcavlatvext" :model="$disc"></x-disciplina-textarea-preview>
+        <x-disciplina-textarea-preview name="idcavlatvextigl" :model="$disc"></x-disciplina-textarea-preview>
+      </div>
+    </div>
+  @endif
+
+  {{-- pratica animais --}}
+  @if ($disc->stapsuatvani == 'S')
+    <div class="card animais" id="card-animais">
+      <div class="card-header text-center font-weight-bold">
+        Prática com animais e/ou materiais biológicos
+      </div>
+      <div class="card-body p-1">
+        <x-disciplina-text-preview name="ptccmseiaani" :model="$disc"></x-disciplina-text-preview>
+        <x-disciplina-data-preview name="dtainivalprp" :model="$disc"></x-disciplina-data-preview>
+        <x-disciplina-data-preview name="dtafimvalprp" :model="$disc"></x-disciplina-data-preview>
+      </div>
+    </div>
+  @endif
+
+  {{-- habilidades e competencias --}}
+  @include('disciplinas.partials.preview.cursos')
+
+  @include('disciplinas.partials.preview.em-aprovacao-btn')
 @endsection

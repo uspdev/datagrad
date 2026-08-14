@@ -584,12 +584,14 @@ class Graduacao extends GraduacaoReplicado
             ORDER BY verdis DESC
         ";
         $dis = DB::fetchAll($query, ['coddis' => $coddis]);
+
         if (!$dis) {
             return false;
         }
-        $maxverdis = $dis[0]['verdis'];
 
+        $maxverdis = $dis[0]['verdis'];
         $disciplina = null;
+
         if ($verdis == 'max') {
             $verdis = $maxverdis;
             $disciplina = $dis[0];
@@ -598,10 +600,8 @@ class Graduacao extends GraduacaoReplicado
             foreach ($dis as $d) {
                 if (
                     $d['dtaatvdis']
-                    && date_create($d['dtaatvdis']) < date_create()
-                    && (!$d['dtadtvdis']
-                        || date_create($d['dtadtvdis']) > date_create()
-                    )
+                    && date_create($d['dtaatvdis']) <= date_create()
+                    && (!$d['dtadtvdis'] || date_create($d['dtadtvdis']) > date_create())
                 ) {
                     $verdis = $d['verdis'];
                     $disciplina = $d;

@@ -31,7 +31,7 @@
 
       @can('update', $disc)
         @if ($disc->estado == 'Em aprovação')
-          <a href="{{ route('disciplinas.preview-html', $dr['coddis']) }}" class="btn btn-sm btn-danger ml-2"
+          <a href="{{ route('disciplinas.preview', $dr['coddis']) }}" class="btn btn-sm btn-danger ml-2"
             type="submit">
             Em aprovação <i class="fas fa-sm fa-chevron-right"></i> Visualizar HTML
           </a>

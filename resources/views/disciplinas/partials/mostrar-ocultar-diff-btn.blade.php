@@ -6,7 +6,7 @@ se estado == criar nunca vai mostrar botão de diff
 se está no preview, forca sempre diff=true
 --}}
 
-@if (!request()->routeIs('disciplinas.preview-html') && $disc->estado !== 'Criar')
+@if (!request()->routeIs('disciplinas.preview') && $disc->estado !== 'Criar')
   <button id="mostrar-ocultar-diff" type="button" class="btn btn-sm btn-outline-danger ml-2"
     style="background-color: lightsalmon;">
     Mostrar/ocultar diferenças
@@ -46,10 +46,10 @@ se está no preview, forca sempre diff=true
   <script>
     $(function() {
       const isPreviewHtml =
-        @json(request()->routeIs('disciplinas.preview-html'));
+        @json(request()->routeIs('disciplinas.preview'));
 
       // recupera estado do diff do sessionStorage ou padrão true
-      // preview-html sempre mostra diff
+      // preview sempre mostra diff
       let mostrarDiff = isPreviewHtml ?
         true :
         sessionStorage.getItem('mostrarDiff') !== 'nao';

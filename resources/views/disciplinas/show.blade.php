@@ -44,7 +44,7 @@
     <div>❌ A disciplina <b>{{ $coddis }}</b> não foi encontrada no Jupiter.</div>
     @if ($disc && !empty($disc->coddis))
       ✅ A disciplina <b>{{ $disc->coddis }}</b> foi encontrada no BD no estado {{ $disc->estado }}.
-      Ver a <a href="{{ route('disciplinas.preview-html', $disc->coddis) }}">disciplina</a>.
+      Ver a <a href="{{ route('disciplinas.preview', $disc->coddis) }}">disciplina</a>.
     @else
       ❌ A disciplina <b>{{ $coddis }}</b> não foi encontrada no BD local.
     @endif
