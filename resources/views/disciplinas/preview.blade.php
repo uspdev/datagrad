@@ -116,7 +116,7 @@
 
   <div class="">
     Documento original:
-    <a href="{{ url()->current() }}">{{ url()->current() }}</a>
+    <a href="{{ route('disciplinas.preview', $disc->coddis) }}">{{ route('disciplinas.preview', $disc->coddis) }}</a>
   </div>
 
   <div>
