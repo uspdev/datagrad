@@ -7,13 +7,14 @@ use App\Models\Disciplina;
 use App\Replicado\Graduacao;
 use App\Replicado\Pessoa;
 use App\Services\Diff;
-use Spatie\LaravelPdf\Facades\Pdf;
+use App\Services\TratamentoBibliografico;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
+use Spatie\LaravelPdf\Facades\Pdf;
 use Uspdev\UspTheme\Facades\UspTheme;
 
 class DisciplinaController extends Controller
@@ -270,6 +271,39 @@ class DisciplinaController extends Controller
         return redirect()->route('disciplinas.edit', $disc->coddis);
     }
 
+    private function prepararPreview($coddis)
+    {
+        $coddis = strtoupper($coddis);
+        $dr = Disciplina::obterDisciplinaReplicado($coddis);
+        $disc = Disciplina::where('coddis', $coddis)
+            ->naoFinalizado()
+            ->first();
+
+        if (! $disc) {
+            if ($dr) {
+                $dr['meta'] = Disciplina::meta();
+            }
+
+            $disc = Disciplina::novo($dr);
+            $disc->dr = $dr;
+            return [
+                'disc' => $disc,
+                'dr' => $dr,
+                'negado' => true,
+            ];
+        }
+
+        $disc->dr = $dr;
+        $this->authorize('update', $disc);
+        $disc->mesclarResponsaveisReplicado();
+        $disc->cursos = $disc->obterCursosDaUnidade($disc);
+        return [
+            'disc' => $disc,
+            'dr' => $dr,
+            'negado' => false,
+        ];
+    }
+
     /**
      * Realiza o preview em HTML da disciplina em alteração/criação
      *
@@ -278,39 +312,14 @@ class DisciplinaController extends Controller
     public function preview($coddis)
     {
         $this->authorize('viewAny', Disciplina::class);
-        // $disc = Disciplina::primeiroOuNovo(strtoupper($coddis));
-        $disc = Disciplina::where('coddis', strtoupper($coddis))->naoFinalizado()->first();
 
-        if (! $disc) {
-            if ($dr = Disciplina::obterDisciplinaReplicado($coddis)) {
-                $dr['meta'] = Disciplina::meta();
-            }
-            $disc = Disciplina::where('coddis', $coddis)->naoFinalizado()->first() ?? Disciplina::novo($dr);
-            $disc->dr = $dr;
-            return view('disciplinas.preview-negado', compact('dr', 'disc', 'coddis'));
+        $data = $this->prepararPreview($coddis);
+
+        if ($data['negado']) {
+            return view('disciplinas.preview-negado', $data);
         }
 
-        $this->authorize('update', $disc);
-
-        $disc->mesclarResponsaveisReplicado();
-
-        // disciplina-replicado -> cursos da unidade que aparece a disciplina
-        $cursos = [];
-        foreach ($disc->dr['cursos'] ?? [] as $curso_dr) {
-            if (stripos(config('replicado.codundclgs'), $curso_dr['codclg']) !== false) {
-                // é curso da unidade
-                $curso = Curso::where('codcur', $curso_dr['codcur'])->first();
-                if (! $curso) {
-                    $curso = new Curso;
-                    $curso->codcur = $curso_dr['codcur'];
-                    $curso->dr = $curso_dr;
-                }
-                $cursos[] = $curso;
-            }
-        }
-        $disc->cursos = $cursos;
-
-        return view('disciplinas.preview', compact('disc'));
+        return view('disciplinas.preview', ['disc' => $data['disc']]);
     }
 
     /**
@@ -318,33 +327,18 @@ class DisciplinaController extends Controller
      */
     public function downloadPdf($coddis)
     {
-        $disc = Disciplina::primeiroOuNovo(strtoupper($coddis));
-        $this->authorize('update', $disc);
+        $this->authorize('viewAny', Disciplina::class);
 
-        if (! $disc) {
-            return back()
-                ->with('alert-danger', 'Disciplina não encontrada!');
+        $data = $this->prepararPreview($coddis);
+
+        if ($data['negado']) {
+            return view('disciplinas.preview-negado', $data);
         }
 
-        $disc->mesclarResponsaveisReplicado();
-
-        // disciplina-replicado -> cursos da unidade que aparece a disciplina
-        $cursos = [];
-        foreach ($disc->dr['cursos'] ?? [] as $curso_dr) {
-            if (stripos(config('replicado.codundclgs'), $curso_dr['codclg']) !== false) {
-                // é curso da unidade
-                $curso = Curso::where('codcur', $curso_dr['codcur'])->first();
-                if (! $curso) {
-                    $curso = new Curso;
-                    $curso->codcur = $curso_dr['codcur'];
-                    $curso->dr = $curso_dr;
-                }
-                $cursos[] = $curso;
-            }
-        }
-        $disc->cursos = $cursos;
+        $disc = $data['disc'];
 
         $filename = 'alteracao-disciplina-' . $coddis . '-vigencia-' . $disc->ano . $disc->semestre . '.pdf';
+
         return Pdf::view('disciplinas.preview', compact('disc'))
             ->format('a4')
             ->orientation('portrait')
@@ -366,5 +360,12 @@ class DisciplinaController extends Controller
     {
         $md = file_get_contents(base_path('docs/disciplinas.md'));
         return view('disciplinas.ajuda', compact('md'));
+    }
+
+    public function bibliografia()
+    {
+        $bbg = TratamentoBibliografico::listarBibliografiasDaUnidadePorPeriodo();
+        return view('disciplinas.bibliografia', compact('bbg'));
+        return json_encode($bbg, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
     }
 }

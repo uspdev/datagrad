@@ -671,6 +671,25 @@ class Disciplina extends Model
         return Graduacao::$codlinegr[$codlinegr] ?? '-';
     }
 
+    public function obterCursosDaUnidade()
+    {
+        $cursos = [];
+        foreach ($this->dr['cursos'] ?? [] as $cursoDr) {
+            if (stripos(config('replicado.codundclgs'), $cursoDr['codclg']) === false) {
+                continue;
+            }
+
+            $curso = Curso::where('codcur', $cursoDr['codcur'])->first();
+            if (! $curso) {
+                $curso = new Curso();
+                $curso->codcur = $cursoDr['codcur'];
+                $curso->dr = $cursoDr;
+            }
+            $cursos[] = $curso;
+        }
+        return $cursos;
+    }
+
 
     // ESCOPOS *********************************
 
