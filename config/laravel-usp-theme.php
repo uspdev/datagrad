@@ -28,7 +28,7 @@ $menu = [
     ],
     [
         'text' => 'Relatório carga horária acumulada',
-        'url'  => 'graduacao/relatorio/carga-acumulada', 
+        'url'  => 'graduacao/relatorio/carga-acumulada',
         'can'  => 'relatorio-cgahoralu',
     ],
     [
@@ -52,7 +52,7 @@ $right_menu = [
     [
         'text' => '<span class="text-danger"><i class="fas fa-user-tag"></i> Funções</span>',
         'url' => 'roles',
-        'can' => 'disciplina-cg',
+        'can' => 'roles',
     ],
     [
         // menu utilizado para views da biblioteca senhaunica-socialite.
