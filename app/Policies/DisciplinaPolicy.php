@@ -25,8 +25,10 @@ class DisciplinaPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->canAny(['senhaunica.docente', 'senhaunica.admin']) ||
-            $user->canAny(['disciplina-cg', 'disciplina-cc', 'disciplina-chefe']);
+        return $user->canAny(['senhaunica.docente', 'senhaunica.admin'])
+            || $user->canAny(['disciplina-cg', 'disciplina-cc', 'disciplina-chefe'])
+            || $user->canAny(['disciplina-biblioteca'])
+            ;
 
         // servidores, estagiários e docentes
         // return Gate::check('senhaunica.servidor') || Gate::check('senhaunica.estagiario') || Gate::check('senhaunica.docente');
@@ -92,5 +94,13 @@ class DisciplinaPolicy
     public function forceDelete(User $user, Disciplina $disciplina): bool
     {
         //
+    }
+
+    /**
+     * Determine whether the user can access biblioteca.
+     */
+    public function biblioteca(User $user): bool
+    {
+        return $user->can('disciplina-biblioteca');
     }
 }
