@@ -504,12 +504,15 @@ class Disciplina extends Model
     {
         $rules = [];
         $attributes = [];
+        $messages = [
+            'required' => 'O campo :attribute está em branco.',
+        ];
         foreach (self::meta() as $campo => $config) {
             $rules[$campo] = $config['rules'] ?? 'required';
             $attributes[$campo] = $config['titulo'] ?? $campo;
         }
 
-        $validator = Validator::make($this->toArray(), $rules, [], $attributes);
+        $validator = Validator::make($this->toArray(), $rules, $messages, $attributes);
         if ($validator->fails()) {
             return $validator->errors()->all();
         }
