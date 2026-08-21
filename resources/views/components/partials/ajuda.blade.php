@@ -1,6 +1,6 @@
 @if (isset($model::meta()[$name]['ajuda']))
-  <span class="text-primary d-print-none">
-    <i class="fas fa-question-circle" data-toggle="popover" data-trigger="hover"
-      data-content="{{ $model::meta()[$name]['ajuda'] }}"></i>
+  <br>
+  <span class="d-print-none text-muted font-weight-normal pb-0" style="display:inline-block; width: 80%; font-size: 0.9rem;">
+    {{ $model::meta()[$name]['ajuda'] }}
   </span>
 @endif
