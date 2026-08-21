@@ -2,6 +2,7 @@
 
 @section('content')
   @include('disciplinas.partials.index-navbar')
+
   <div class="alert alert-info">
     Se em um campo houver <b>AA <span class="text-danger">→ BB</span></b>, <b>AA</b> é o valor do Júpiter e <b><span
         class="text-danger">BB</span></b> é o valor proposto.<br>
@@ -9,8 +10,8 @@
     Ao clicar no nome da disciplina e acessar os detalhes, será mostrado a versão <b>mais recente</b>, que pode ser
     diferente da versão vigente.
     Nesse caso a versão vigente pode ser consultada no <b>Júpiter Web</b>.
-
   </div>
+
   <table class="table table-sm table-bordered datatable-simples dt-fixed-header dt-buttons dt-state-save">
     <thead>
       <tr>
