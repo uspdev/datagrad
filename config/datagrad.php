@@ -108,6 +108,7 @@ $meta = [
     'pgmrsudisigl' => [
         'titulo' => 'Course Description',
         'class' => 'ingles',
+        'ajuda' => 'No Jupiterweb, a versão em inglês aparece em itálico logo abaixo da versão em português.'
     ],
     'objdis' => [
         'titulo' => 'Objetivos',
@@ -122,11 +123,10 @@ $meta = [
     'pgmdis' => [
         'titulo' => 'Conteúdo Programático',
         'ajuda' => 'Indica os conteúdos que permitirão o alcance dos objetivos definidos.
-             Nesse sentido, os conteúdos de ensino são meios para a realização dos objetivos,
-             e não os objetivos em si. Conteúdos são conhecimentos que se considera essencial
-             que sejam apreendidos e reelaborados pelos estudantes para que os objetivos sejam alcançados.
-             Conteúdo é o conjunto de conhecimentos, habilidades, atitudes e valores que serão
-             desenvolvidos ao longo da disciplina.',
+           Nesse sentido, os conteúdos de ensino são meios para a realização dos objetivos,
+           e não os objetivos em si. São conhecimentos, habilidades, atitudes e valores que se
+           considera essenciais para serem apreendidos e reelaborados pelos estudantes ao longo da disciplina.
+           No Jupiterweb, este campo preserva a formatação do texto, incluindo espaços e quebras de linha (<pre>).',
     ],
     'pgmdisigl' => [
         'titulo' => 'Full Program',
@@ -138,7 +138,7 @@ $meta = [
         'ajuda' => 'Descreve como os conteúdos serão desenvolvidos para que os objetivos possam ser alcançados:
                     considerar tempos, espaços e recursos que possam contribuir para a aprendizagem.
                     São os procedimentos de ensino, as ações e atividades que serão propostas ao longo da disciplina,
-                    em função dos objetivos previstos. Apresenta as estratégias de ensino que orientarão a prática educativa',
+                    em função dos objetivos previstos. Apresenta as estratégias de ensino que orientarão a prática educativa.',
         'options' => $mtdens,
     ],
     'mtdensigl' => [
@@ -192,6 +192,9 @@ $meta = [
     'dscbbgdis' => [
         'titulo' => 'Bibliografia Básica / Bibliography',
         'grupoDr' => 'bibliografia',
+        'ajuda' => 'Cada referência deve ser cadastrada em uma linha, preferencialmente seguindo as normas da ABNT.
+            Evite utilizar numeração, marcadores, hífens ou outros elementos de lista, bem como tags HTML
+            ou recursos de formatação.',
     ],
     'dscbbgdiscpl' => [
         'titulo' => 'Bibliografia Complementar',
