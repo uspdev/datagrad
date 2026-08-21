@@ -25,3 +25,10 @@
     Disciplinas finalizadas
   </a>
 @endcan
+
+@can('disciplina-biblioteca')
+  <a href="{{ route('disciplinas.bibliografia') }}"
+    class="btn btn-sm {{ $visao == 'biblioteca' ? 'btn-primary' : 'btn-outline-primary' }}">
+    Visão Biblioteca
+  </a>
+@endcan
