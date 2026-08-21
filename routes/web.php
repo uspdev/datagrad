@@ -56,6 +56,9 @@ Route::get('disciplinas/{coddis}/preview-html', function ($coddis) {
 });
 Route::get('disciplinas/{coddis}/preview', [DisciplinaController::class, 'preview'])->name('disciplinas.preview');
 
+Route::match(['get', 'post'], 'disciplinas/bibliografia', [DisciplinaController::class, 'bibliografia'])
+    ->name('disciplinas.bibliografia');
+
 Route::get('disciplinas/{coddis}/download', [DisciplinaController::class, 'downloadPdf'])->name('disciplinas.pdf');
 Route::resource('disciplinas', DisciplinaController::class)->parameters(['disciplinas' => 'coddis']);
 
