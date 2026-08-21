@@ -18,6 +18,6 @@
   </div>
   <div class="col-6">
     <b>{{ $dr['meta'][$nameIgl]['titulo'] }}</b>
-    <textarea class="form-control autoexpand">{!! htmlspecialchars_decode($contentIgl) !!}</textarea>
+    <textarea class="form-control autoexpand font-italic">{!! htmlspecialchars_decode($contentIgl) !!}</textarea>
   </div>
 </div>
