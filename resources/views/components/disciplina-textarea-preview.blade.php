@@ -21,7 +21,7 @@
   </tr>
   <tr>
     @if ($model->dr)
-      <td class="d-none diff px-3" style="width: {{ $width }};">
+      <td class="{{ $italico_igl }} d-none diff px-3" style="width: {{ $width }};">
         {!! str_replace("\n", '&para;<br>', $model->dr[$nameDr] ?? null) !!}
       </td>
     @endif
