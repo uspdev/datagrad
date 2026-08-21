@@ -6,14 +6,12 @@ use App\Models\Curso;
 use App\Models\Disciplina;
 use App\Replicado\Graduacao;
 use App\Replicado\Pessoa;
-use App\Services\Diff;
 use App\Services\TratamentoBibliografico;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Storage;
 use Spatie\LaravelPdf\Facades\Pdf;
 use Uspdev\UspTheme\Facades\UspTheme;
 
@@ -362,10 +360,51 @@ class DisciplinaController extends Controller
         return view('disciplinas.ajuda', compact('md'));
     }
 
-    public function bibliografia()
+    /**
+     * Exibe a consulta de bibliografias das disciplinas.
+     *
+     * Permite consultar as bibliografias vigentes por semestre de referência
+     * e carregar, via AJAX, a bibliografia de uma disciplina específica.
+     *
+     * @param  Request  $request
+     * @return \Illuminate\View\View|string
+     *
+     * @requestParam string|null $semestre Semestre de referência no formato AAAAS
+     * ou "next" para o próximo semestre.
+     * @requestParam string|null $coddis Código da disciplina para consulta via AJAX.
+     */
+    public function bibliografia(Request $request)
     {
-        $bbg = TratamentoBibliografico::listarBibliografiasDaUnidadePorPeriodo();
-        return view('disciplinas.bibliografia', compact('bbg'));
-        return json_encode($bbg, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+        $this->authorize('biblioteca', Disciplina::class);
+
+        $request->validate([
+            'semestre' => ['nullable', 'regex:/^(next|\d{4}[12])$/'],
+            'coddis' => ['nullable', 'string', 'max:7'], // ajax para abrir modal de disciplina
+        ]);
+
+        if ($request->coddis) { // ajax para abrir modal de disciplina
+            $coddis = strtoupper($request->coddis);
+            $dtainibbg = $request->dtainibbg;
+            $dtafimbbg = $request->dtafimbbg;
+            $bbg = TratamentoBibliografico::obterBibliografia($coddis, $dtainibbg, $dtafimbbg);
+            return view('disciplinas.partials.bibliografia-detalhes', [
+                'bbg' => $bbg,
+                'dtainibbg' => $dtainibbg,
+                'dtafimbbg' => $dtafimbbg,
+            ]);
+        }
+
+        // trata semestre
+        if ($request->semestre === 'next') {
+            $data = now()->addMonths(6);
+            $semestre = $data->year . ($data->month <= 6 ? 1 : 2);
+        } else {
+            $semestre = $request->semestre ?: now()->year . (now()->month <= 6 ? 1 : 2);
+        }
+
+        $visao = 'biblioteca'; // para o menu
+        $bbg = TratamentoBibliografico::listarBibliografiasDaUnidadePorPeriodo($semestre);
+
+        return view('disciplinas.bibliografia', compact('bbg', 'visao', 'semestre'));
     }
 }
