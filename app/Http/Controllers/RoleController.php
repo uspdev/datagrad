@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Disciplina;
 use App\Models\User;
 use App\Replicado\Graduacao;
 use Closure;
@@ -24,10 +23,13 @@ class RoleController extends Controller
      */
     public function index()
     {
+        $this->authorize('roles');
+
         $roles = Role::where('name', 'not like', 'disciplinas%')->get();
 
         $roleCG = Role::where('name', 'CG')->first();
         $roleCC = Role::where('name', 'CC')->first();
+        $roleBiblioteca = Role::where('name', 'Biblioteca')->first();
         $departamentos = [];
 
         // cria as permissions referentes aos departamentos no formato disciplinas_xxx,
@@ -38,7 +40,7 @@ class RoleController extends Controller
             $departamentos[] = Role::firstOrCreate(['name' => 'disciplinas_' . $prefixo]);
         }
 
-        return view('roles.index', compact('roles', 'departamentos', 'roleCG', 'roleCC'));
+        return view('roles.index', compact('roles', 'departamentos', 'roleCG', 'roleCC', 'roleBiblioteca'));
     }
 
     /**
@@ -80,6 +82,8 @@ class RoleController extends Controller
      */
     public function update(Request $request, string $role_name)
     {
+        $this->authorize('roles');
+
         if ($add = $request->codpes_add) {
             $user = User::findOrCreateFromReplicado($add);
             if ($user) {
