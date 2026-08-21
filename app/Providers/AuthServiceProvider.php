@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Models\User;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Gate;
+use Spatie\Permission\Models\Role;
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -43,5 +44,12 @@ class AuthServiceProvider extends ServiceProvider
         // relatorio de carga extensionista
         Gate::define('relatorio-cgaext', fn(User $user) => $user->hasAnyRole(['CG', 'CC']));
 
+        // autoriza acesso à rota roles
+        Gate::define('roles', function (User $user) {
+            return $user->hasAnyRole(['CG', 'CC', 'biblioteca'])
+                || $user->getRoleNames()->contains(
+                    fn($role) => str_starts_with($role, 'disciplinas')
+                );
+        });
     }
 }
