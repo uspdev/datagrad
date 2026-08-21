@@ -105,7 +105,9 @@ class Tools
     }
 
     /**
-     * Retorna lista de semestres
+     * Retorna array de semestres do semestre atual até 2018
+     *
+     * no formato 20271, 20262, 20261, etc
      */
     public static function semestres()
     {
@@ -117,7 +119,7 @@ class Tools
 
         for ($ano = $anoInicial; $ano <= $anoAtual; $ano++) {
             $semestres[] = $ano . '1';
-            
+
             if ($ano < $anoAtual || $mesAtual > 6) {
                 $semestres[] = $ano . '2';
             }
