@@ -69,7 +69,7 @@
             value: codpes
           }).appendTo(form)
 
-          document.getElementById(formId).submit()
+          form[0].requestSubmit()
         })
 
         senhaunicaUserModal.on('shown.bs.modal', function() {
