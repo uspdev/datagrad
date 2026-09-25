@@ -1048,7 +1048,7 @@ class Graduacao extends GraduacaoReplicado
      * @param int|null $codcur
      * @param int|null $ano_ingresso
      * @return Array Lista com dados dos alunos
-     * @author Vinicius Rafael do Vale, em 16/06/2026
+     * @author Vinicius Rafael, em 16/06/2026
      */
     public static function obterCargaHorariaAcumuladaAluno($codpes = null, $codcur = null, $ano_ingresso = null)
     {
@@ -1210,5 +1210,47 @@ class Graduacao extends GraduacaoReplicado
                 aex.carga_aex_horas";
 
         return DB::fetchAll($query, $param);
+    }
+    
+    /**
+     * Método para obter a ocupação e horários a partir de uma lista de pares [coddis, codtur].
+     *
+     * @param array $turmasCurso Array de arrays contendo ['coddis' => ..., 'codtur' => ...]
+     * @return array
+     * @author Vinicius Rafael, em 25/09/2026
+     */
+    public static function obterHorariosOcupacaoTurmas(array $turmasCurso)
+    {
+        if (empty($turmasCurso)) {
+            return [];
+        }
+
+        $whereClauses = [];
+        $params = [];
+
+        // Monta clausulas do tipo: (o.coddis = :coddis0 AND o.codtur = :codtur0)
+        foreach (array_values($turmasCurso) as $index => $turma) {
+            $keyDis = 'coddis' . $index;
+            $keyTur = 'codtur' . $index;
+
+            $whereClauses[] = "(o.coddis = :{$keyDis} AND o.codtur = :{$keyTur})";
+
+            $params[$keyDis] = $turma['coddis'];
+            $params[$keyTur] = $turma['codtur'];
+        }
+
+        $whereClause = implode(' OR ', $whereClauses);
+
+        $query = "SELECT 
+                    o.coddis, 
+                    o.codtur, 
+                    o.diasmnocp, 
+                    p.horent, 
+                    p.horsai 
+                FROM OCUPTURMA o 
+                JOIN PERIODOHORARIO p ON o.codperhor = p.codperhor 
+                WHERE {$whereClause}";
+
+        return DB::fetchAll($query, $params);
     }
 }

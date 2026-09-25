@@ -728,4 +728,271 @@ class GraduacaoController extends Controller
         session()->flashInput($request->input());
         return view('grad.relatorio-carga-acumulada', compact('resultados', 'naoEncontrados', 'cursos'));
     }
+
+    public function gradeHorarios(Request $request)
+    {
+        $this->authorize('datagrad');
+        \UspTheme::activeUrl('graduacao/horarios');
+
+        $cursosHabilitacoes = Graduacao::listarCursosHabilitacoes();
+
+        $cursosHabilitacoes[] = [
+            'codcur' => 'DUPLA_CIVIL',
+            'codhab' => '0',
+            'nomcur' => 'Engenharia Civil - Dupla Formação',
+            'nomhab' => 'Dupla Formação'
+        ];
+
+        $semestreSelect = Tools::semestres();
+        $cursoHab = $request->input('curso_hab');
+        $codcur = null;
+        $codhab = null;
+
+        if (!empty($cursoHab) && str_contains($cursoHab, '-')) {
+            [$codcur, $codhab] = explode('-', $cursoHab);
+        }
+
+        $semestre = $request->input('semestre', '20262');
+
+        $gradePorPeriodo = [];
+        $turmasCurso = [];
+        $ocupacoes = [];
+
+        if (!is_null($codcur) && !is_null($codhab) && $codcur !== '' && $codhab !== '' && $semestre) {
+            $numSemestre = (int) substr($semestre, -1);
+            
+            // Mapeamento manual para Engenharia Civil - Dupla Formação
+            if ($codcur === 'DUPLA_CIVIL') {
+                $codcurConsulta = 18023; // Busca como Engenharia Civil tradicional
+                $codhabConsulta = 0;
+
+                // Restringe aos 4 periodos
+                $periodosAlvo = ($numSemestre === 2) ? [2, 4] : [1, 3];
+
+                // Tabela de disciplinas e seus periodos definidos manualmente
+                $gradeDuplaFormacao = [
+                    // 1º Periodo
+                    'SHS0409' => 1, 'SHS0406' => 1, 'SHS0411' => 1,
+                    'SET0403' => 1, 'SET0413' => 1, 'SET0610' => 1,
+                    'SMA0353' => 1, 'SMA0300' => 1, 'STT0408' => 1,
+                    'STT0625' => 1, '1800107' => 1,
+
+                    // 2º Periodo
+                    'SHS0410' => 2, 'SHS0412' => 2, 'SET0400' => 2,
+                    'SET0414' => 2, 'STT0410' => 2, 'SGS0405' => 2,
+                    'SEP0587' => 2,
+
+                    // 3º Periodo
+                    'SEP0175' => 3, 'SET0415' => 3, 'SET0417' => 3,
+                    'SET0409' => 3, 'SET0406' => 3, 'SHS0413' => 3,
+                    'SHS0408' => 3, 'STT0406' => 3, 'STT0612' => 3,
+                    'SGS0407' => 3, 'SGS0406' => 3,
+
+                    // 4º Periodo
+                    'SHS0414' => 4, 'STT0405' => 4, 'SGS0408' => 4,
+                    'SGS0404' => 4,
+                ];
+            } else {
+                $codcurConsulta = (int) $codcur;
+                $codhabConsulta = (int) $codhab;
+                $periodosAlvo = ($numSemestre === 2) ? [2, 4, 6, 8, 10] : [1, 3, 5, 7, 9];
+                $gradeDuplaFormacao = null;
+            }
+
+            // Grade curricular para mapeamento de semestre padrão (se não for dupla formação)
+            $mapaSemestreIdeal = [];
+            if (!$gradeDuplaFormacao) {
+                $gradeCurricular = Graduacao::listarGradeCurricular($codcurConsulta, $codhabConsulta);
+                $mapaSemestreIdeal = collect($gradeCurricular)
+                    ->pluck('numsemidl', 'coddis')
+                    ->map(fn($item) => (int) $item)
+                    ->toArray();
+            }
+
+            $turmasCompletas = Graduacao::listarTurmasMinistrantes($codcurConsulta, $codhabConsulta, $semestre);
+
+            if (!empty($turmasCompletas)) {
+                $turmasCurso = collect($turmasCompletas)
+                    ->filter(function ($item) use ($gradeDuplaFormacao) {
+                        // Se for dupla formação mantem apenas as disciplinas cadastradas manualmente
+                        if ($gradeDuplaFormacao) {
+                            return isset($gradeDuplaFormacao[trim($item['coddis'])]);
+                        }
+                        return true;
+                    })
+                    ->map(function ($item) use ($gradeDuplaFormacao, $mapaSemestreIdeal) {
+                        $coddis = trim((string) ($item['coddis'] ?? ''));
+
+                        // Define o periodo
+                        if ($gradeDuplaFormacao) {
+                            $numper = $gradeDuplaFormacao[$coddis] ?? 0;
+                        } else {
+                            $numper = isset($item['numper']) && !is_null($item['numper'])
+                                ? (int) $item['numper']
+                                : ($mapaSemestreIdeal[$coddis] ?? 0);
+                        }
+
+                        return [
+                            'coddis' => $coddis,
+                            'codtur' => trim((string) ($item['codtur'] ?? '')),
+                            'nomdis' => $item['nomdis'] ?? '',
+                            'numper' => $numper,
+                        ];
+                    })
+                    ->values()
+                    ->toArray();
+
+                if (!empty($turmasCurso)) {
+                    $ocupacoes = Graduacao::obterHorariosOcupacaoTurmas($turmasCurso);
+                    $gradePorPeriodo = $this->montarGridHorarios($turmasCurso, $ocupacoes, $periodosAlvo);
+                }
+            }
+        }
+
+        return view('grad.horarios', compact(
+            'cursosHabilitacoes',
+            'semestreSelect',
+            'codcur',
+            'codhab',
+            'semestre',
+            'gradePorPeriodo',
+            'turmasCurso',
+            'ocupacoes'
+        ));
+    }
+
+    private function montarGridHorarios(array $turmasCurso, array $ocupacoes, array $periodosAlvo): array
+    {
+        $mapeamentoSlots = [
+            '07:20' => 1, '0720' => 1, '7:20' => 1,
+            '08:10' => 2, '0810' => 2, '8:10' => 2, '08:20' => 2, '08:00' => 2,
+            '09:20' => 3, '0920' => 3, '9:20' => 3,
+            '10:10' => 4, '1010' => 4, '10:00' => 4,
+            '11:10' => 5, '1110' => 5,
+            '13:00' => 6, '13:20' => 6, '1320' => 6, '13:30' => 6,
+            '14:00' => 7, '14:20' => 7, '1420' => 7,
+            '15:10' => 8, '1510' => 8,
+            '16:00' => 9, '16:20' => 9, '1620' => 9,
+            '17:10' => 10, '1710' => 10,
+        ];
+
+        $diasNomes = [
+            'seg' => 'Segunda-feira',
+            'ter' => 'Terça-feira',
+            'qua' => 'Quarta-feira',
+            'qui' => 'Quinta-feira',
+            'sex' => 'Sexta-feira',
+            'sab' => 'Sábado',
+            'sáb' => 'Sábado',
+        ];
+
+        $periodosAlvoInt = array_map('intval', $periodosAlvo);
+        $gradePorPeriodo = [];
+
+        foreach ($periodosAlvoInt as $periodo) {
+            foreach ($diasNomes as $nomeDia) {
+                for ($s = 1; $s <= 10; $s++) {
+                    $gradePorPeriodo[$periodo][$nomeDia][$s] = [];
+                }
+            }
+        }
+
+        $turmasIndexadas = [];
+        foreach ($turmasCurso as $turma) {
+            $coddis = strtoupper(trim((string) ($turma['coddis'] ?? '')));
+            $codtur = strtoupper(trim((string) ($turma['codtur'] ?? '')));
+            $chave = $coddis . '_' . $codtur;
+
+            $turmasIndexadas[$chave] = [
+                'coddis' => $coddis,
+                'codtur' => $codtur,
+                'nomdis' => $turma['nomdis'] ?? '',
+                'numper' => (int) ($turma['numper'] ?? 0),
+            ];
+        }
+
+        foreach ($ocupacoes as $ocup) {
+            $coddis = strtoupper(trim((string) ($ocup['coddis'] ?? '')));
+            $codtur = strtoupper(trim((string) ($ocup['codtur'] ?? '')));
+            $chave = $coddis . '_' . $codtur;
+
+            if (isset($turmasIndexadas[$chave])) {
+                $turmaInfo = $turmasIndexadas[$chave];
+                $periodo = $turmaInfo['numper'];
+
+                if (in_array($periodo, $periodosAlvoInt, true)) {
+                    $rawDia = strtolower(trim((string) ($ocup['diasmnocp'] ?? '')));
+                    $siglaDia = substr($rawDia, 0, 3);
+                    $nomeDia = $diasNomes[$siglaDia] ?? null;
+
+                    if ($nomeDia) {
+                        $rawHraini = $ocup['horent'] ?? $ocup['hraini'] ?? '';
+                        $hraini = trim((string) $rawHraini);
+                        if (strlen($hraini) > 5 && strpos($hraini, ':') !== false) {
+                            $hraini = substr($hraini, 0, 5);
+                        }
+
+                        $rawHrafim = $ocup['horsai'] ?? $ocup['hrafim'] ?? '';
+                        $hrafim = trim((string) $rawHrafim);
+                        if (strlen($hrafim) > 5 && strpos($hrafim, ':') !== false) {
+                            $hrafim = substr($hrafim, 0, 5);
+                        }
+
+                        if (isset($mapeamentoSlots[$hraini])) {
+                            $slotInicio = $mapeamentoSlots[$hraini];
+                            $colspan = 1;
+                            if (!empty($hrafim)) {
+                                if (isset($mapeamentoSlots[$hrafim])) {
+                                    $slotFim = $mapeamentoSlots[$hrafim];
+                                    if ($slotFim > $slotInicio) {
+                                        $colspan = $slotFim - $slotInicio;
+                                    }
+                                } else {
+                                    $iniMin = (int) substr($hraini, 0, 2) * 60 + (int) substr($hraini, 3, 2);
+                                    $fimMin = (int) substr($hrafim, 0, 2) * 60 + (int) substr($hrafim, 3, 2);
+                                    $duracaoHoras = ($fimMin - $iniMin) / 60;
+                                    if ($duracaoHoras > 1) {
+                                        $colspan = (int) round($duracaoHoras);
+                                    }
+                                }
+                            }
+
+                            if (!is_array($gradePorPeriodo[$periodo][$nomeDia][$slotInicio])) {
+                                $gradePorPeriodo[$periodo][$nomeDia][$slotInicio] = [];
+                            }
+
+                            $jaExiste = false;
+                            foreach ($gradePorPeriodo[$periodo][$nomeDia][$slotInicio] as $item) {
+                                if (($item['coddis'] ?? '') === $turmaInfo['coddis'] && ($item['codtur'] ?? '') === $turmaInfo['codtur']) {
+                                    $jaExiste = true;
+                                    break;
+                                }
+                            }
+
+                            if (!$jaExiste) {
+                                $gradePorPeriodo[$periodo][$nomeDia][$slotInicio][] = [
+                                    'coddis'  => $turmaInfo['coddis'],
+                                    'nomdis'  => $turmaInfo['nomdis'],
+                                    'codtur'  => $turmaInfo['codtur'],
+                                    'sala'    => $ocup['saloce'] ?? '',
+                                    'colspan' => $colspan,
+                                ];
+                            }
+
+                            for ($i = 1; $i < $colspan; $i++) {
+                                $slotOcupado = $slotInicio + $i;
+                                if ($slotOcupado <= 10) {
+                                    if (empty($gradePorPeriodo[$periodo][$nomeDia][$slotOcupado])) {
+                                        $gradePorPeriodo[$periodo][$nomeDia][$slotOcupado] = 'OCUPADO';
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return $gradePorPeriodo;
+    }
 }

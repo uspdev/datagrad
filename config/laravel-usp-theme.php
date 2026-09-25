@@ -42,6 +42,11 @@ $menu = [
         'can' => 'datagrad',
     ],
     [
+        'text' => 'Horário de Aulas',
+        'url' => 'graduacao/horarios',
+        'can' => 'datagrad',
+    ],
+    [
         'text' => 'Disciplinas',
         'url' => 'disciplinas',
         'can' => 'disciplinas',
