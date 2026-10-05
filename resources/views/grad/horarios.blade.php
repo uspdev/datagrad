@@ -8,7 +8,6 @@
 
     <form method="POST" action="{{ route('graduacao.horarios') }}">
         @csrf
-
         <div class="form-row align-items-end">
             <div class="col-md-7 form-group mb-3">
                 <label for="select_curso_hab"><b>Curso / Habilitação:</b></label>
@@ -20,11 +19,7 @@
                             $selected = (isset($codcur) && isset($codhab) && $codcur == $ch['codcur'] && $codhab == $ch['codhab']) ? 'selected' : '';
                         @endphp
                         <option value="{{ $val }}" {{ $selected }}>
-                            @if($ch['codcur'] === 'DUPLA_CIVIL')
-                                {{ $ch['nomcur'] }}
-                            @else
-                                {{ $ch['codcur'] }} / {{ $ch['codhab'] }} - {{ $ch['nomcur'] }} ({{ $ch['nomhab'] }})
-                            @endif
+                            {{ $ch['codcur'] }} / {{ $ch['codhab'] }} - {{ $ch['nomcur'] }} ({{ $ch['nomhab'] }})
                         </option>
                     @endforeach
                 </select>
@@ -34,9 +29,7 @@
                 <label for="semestreInput"><b>Ano/Semestre:</b></label>
                 <select name="semestre" id="semestreInput" class="form-control" required>
                     @foreach($semestreSelect as $key => $val)
-                        @php 
-                            $semestreValor = is_numeric($key) ? $val : $key; 
-                        @endphp
+                        @php $semestreValor = is_numeric($key) ? $val : $key; @endphp
                         <option value="{{ $semestreValor }}" {{ (isset($semestre) && $semestre == $semestreValor) ? 'selected' : '' }}>
                             {{ $semestreValor }}
                         </option>
@@ -77,7 +70,8 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach($dias as $dia => $slots)
+                        @php $indexDia = 0; @endphp
+                        @foreach($dias as $dia => $turnos)
                             @php
                                 $diasAbreviados = [
                                     'Segunda-feira' => 'SEG',
@@ -85,114 +79,134 @@
                                     'Quarta-feira'  => 'QUA',
                                     'Quinta-feira'  => 'QUI',
                                     'Sexta-feira'   => 'SEX',
-                                    'Sábado'        => 'SAB',
-                                    'Sabado'        => 'SAB',
+                                    'Sábado'        => 'SÁB',
+                                    'Sabado'        => 'SÁB',
                                 ];
                                 $nomeDiaCurto = $diasAbreviados[$dia] ?? $dia;
+
+                                $linhasManha = $turnos['manha'] ?? [];
+                                $linhasTarde = $turnos['tarde'] ?? [];
+                                $totalLinhas = max(count($linhasManha), count($linhasTarde), 1);
+
+                                $bgClass = ($indexDia % 2 === 0) ? 'style="background-color: #f8f9fa;"' : 'style="background-color: #ffffff;"';
+                                $indexDia++;
                             @endphp
-                            <tr>
-                                <th class="align-middle thead-light font-weight-bold">{{ $nomeDiaCurto }}</th>
 
-                                {{-- PERÍODO DA MANHÃ (Slots 1 a 5) --}}
-                                @php $s = 1; @endphp
-                                @while($s <= 5)
-                                    @php
-                                        $slotContent = $slots[$s] ?? null;
-                                        $aulas = [];
-                                        if (is_array($slotContent)) {
-                                            $aulas = isset($slotContent[0]) ? $slotContent : [$slotContent];
-                                        }
-                                    @endphp
-
-                                    @if(count($aulas) > 0)
-                                        @php
-                                            $maxColspan = max(array_column($aulas, 'colspan') ?: [1]);
-                                            if ($s + $maxColspan - 1 > 5) {
-                                                $maxColspan = 5 - $s + 1;
-                                            }
-                                        @endphp
-                                        <td colspan="{{ $maxColspan }}" class="align-middle p-1 bg-white">
-                                            @foreach($aulas as $index => $item)
-                                                @if($index > 0)
-                                                    <hr class="my-1">
-                                                @endif
-                                                <div class="text-left px-1">
-                                                    <strong class="d-block text-dark" style="font-size: 0.92rem; font-weight: 700;">{{ $item['coddis'] ?? '' }}</strong>
-                                                    <span class="d-block text-secondary text-truncate mb-1" title="{{ $item['nomdis'] ?? '' }}" style="font-size: 0.80rem; line-height: 1.25;">
-                                                        {{ $item['nomdis'] ?? '' }}
-                                                    </span>
-                                                    @if(!empty($item['codtur']))
-                                                        <span class="badge badge-light border text-dark" style="font-size: 0.72rem;">
-                                                            Turma {{ $item['codtur'] }}
-                                                        </span>
-                                                    @endif
-                                                    @if(!empty($item['sala']))
-                                                        <span class="badge badge-light border text-muted" style="font-size: 0.72rem;">
-                                                            {{ $item['sala'] }}
-                                                        </span>
-                                                    @endif
-                                                </div>
-                                            @endforeach
-                                        </td>
-                                        @php $s += $maxColspan; @endphp
-                                    @else
-                                        <td class="align-middle p-1 bg-white"></td>
-                                        @php $s++; @endphp
+                            @for($row = 0; $row < $totalLinhas; $row++)
+                                <tr {!! $bgClass !!}>
+                                    @if($row === 0)
+                                        <th rowspan="{{ $totalLinhas }}" class="align-middle font-weight-bold" style="background-color: rgba(0,0,0,0.03);">
+                                            {{ $nomeDiaCurto }}
+                                        </th>
                                     @endif
-                                @endwhile
 
-                                {{-- DIVISOR DE ALMOÇO --}}
-                                <td style="background-color: #dee2e6; padding: 0;"></td>
-
-                                {{-- PERÍODO DA TARDE (Slots 6 a 10) --}}
-                                @php $s = 6; @endphp
-                                @while($s <= 10)
-                                    @php
-                                        $slotContent = $slots[$s] ?? null;
-                                        $aulas = [];
-                                        if (is_array($slotContent)) {
-                                            $aulas = isset($slotContent[0]) ? $slotContent : [$slotContent];
-                                        }
+                                    {{-- PERÍODO DA MANHÃ (Slots 1 a 5) --}}
+                                    @php 
+                                        $linhaManha = $linhasManha[$row] ?? null;
                                     @endphp
-
-                                    @if(count($aulas) > 0)
-                                        @php
-                                            $maxColspan = max(array_column($aulas, 'colspan') ?: [1]);
-                                            if ($s + $maxColspan - 1 > 10) {
-                                                $maxColspan = 10 - $s + 1;
-                                            }
-                                        @endphp
-                                        <td colspan="{{ $maxColspan }}" class="align-middle p-1 bg-white">
-                                            @foreach($aulas as $index => $item)
-                                                @if($index > 0)
-                                                    <hr class="my-1">
-                                                @endif
-                                                <div class="text-left px-1">
-                                                    <strong class="d-block text-dark" style="font-size: 0.92rem; font-weight: 700;">{{ $item['coddis'] ?? '' }}</strong>
-                                                    <span class="d-block text-secondary text-truncate mb-1" title="{{ $item['nomdis'] ?? '' }}" style="font-size: 0.80rem; line-height: 1.25;">
-                                                        {{ $item['nomdis'] ?? '' }}
-                                                    </span>
-                                                    @if(!empty($item['codtur']))
-                                                        <span class="badge badge-light border text-dark" style="font-size: 0.72rem;">
-                                                            Turma {{ $item['codtur'] }}
-                                                        </span>
-                                                    @endif
-                                                    @if(!empty($item['sala']))
-                                                        <span class="badge badge-light border text-muted" style="font-size: 0.72rem;">
-                                                            {{ $item['sala'] }}
-                                                        </span>
-                                                    @endif
-                                                </div>
-                                            @endforeach
-                                        </td>
-                                        @php $s += $maxColspan; @endphp
+                                    @if(!$linhaManha && $row > 0 && count($linhasManha) > 0)
+                                        <td colspan="5"></td>
                                     @else
-                                        <td class="align-middle p-1 bg-white"></td>
-                                        @php $s++; @endphp
-                                    @endif
-                                @endwhile
+                                        @php $s = 1; @endphp
+                                        @while($s <= 5)
+                                            @php $cell = $linhaManha[$s] ?? null; @endphp
 
-                            </tr>
+                                            @if($cell === 'OCUPADO')
+                                                @php $s++; @endphp
+                                            @elseif(is_array($cell))
+                                                <td colspan="{{ $cell['colspan'] }}" class="align-middle p-1">
+                                                    <div class="text-left px-1">
+                                                        <strong class="d-block text-dark" style="font-size: 0.90rem; font-weight: 700;">{{ $cell['coddis'] }}</strong>
+                                                        <span class="d-block text-secondary text-truncate mb-1" title="{{ $cell['nomdis'] }}" style="font-size: 0.78rem; line-height: 1.2;">
+                                                            {{ $cell['nomdis'] }}
+                                                        </span>
+                                                        
+                                                        @if(!empty($cell['turmas']))
+                                                            <div class="d-flex flex-wrap gap-1">
+                                                                @foreach($cell['turmas'] as $turma)
+                                                                    <span class="badge badge-light border text-dark mr-1 mb-1" style="font-size: 0.70rem;">
+                                                                        Turma {{ $turma }}
+                                                                    </span>
+                                                                @endforeach
+                                                            </div>
+                                                        @endif
+
+                                                        @if(!empty($cell['salas']))
+                                                            <div class="d-block">
+                                                                @foreach($cell['salas'] as $sala)
+                                                                    <span class="badge badge-light border text-muted mr-1" style="font-size: 0.70rem;">
+                                                                        {{ $sala }}
+                                                                    </span>
+                                                                @endforeach
+                                                            </div>
+                                                        @endif
+                                                    </div>
+                                                </td>
+                                                @php $s += $cell['colspan']; @endphp
+                                            @else
+                                                <td class="align-middle p-1"></td>
+                                                @php $s++; @endphp
+                                            @endif
+                                        @endwhile
+                                    @endif
+
+                                    {{-- DIVISOR DE ALMOÇO --}}
+                                    @if($row === 0)
+                                        <td rowspan="{{ $totalLinhas }}" style="background-color: #dee2e6; padding: 0;"></td>
+                                    @endif
+
+                                    {{-- PERÍODO DA TARDE (Slots 6 a 10) --}}
+                                    @php 
+                                        $linhaTarde = $linhasTarde[$row] ?? null;
+                                    @endphp
+                                    @if(!$linhaTarde && $row > 0 && count($linhasTarde) > 0)
+                                        <td colspan="5"></td>
+                                    @else
+                                        @php $s = 6; @endphp
+                                        @while($s <= 10)
+                                            @php $cell = $linhaTarde[$s] ?? null; @endphp
+
+                                            @if($cell === 'OCUPADO')
+                                                @php $s++; @endphp
+                                            @elseif(is_array($cell))
+                                                <td colspan="{{ $cell['colspan'] }}" class="align-middle p-1">
+                                                    <div class="text-left px-1">
+                                                        <strong class="d-block text-dark" style="font-size: 0.90rem; font-weight: 700;">{{ $cell['coddis'] }}</strong>
+                                                        <span class="d-block text-secondary text-truncate mb-1" title="{{ $cell['nomdis'] }}" style="font-size: 0.78rem; line-height: 1.2;">
+                                                            {{ $cell['nomdis'] }}
+                                                        </span>
+
+                                                        @if(!empty($cell['turmas']))
+                                                            <div class="d-flex flex-wrap gap-1">
+                                                                @foreach($cell['turmas'] as $turma)
+                                                                    <span class="badge badge-light border text-dark mr-1 mb-1" style="font-size: 0.70rem;">
+                                                                        Turma {{ $turma }}
+                                                                    </span>
+                                                                @endforeach
+                                                            </div>
+                                                        @endif
+
+                                                        @if(!empty($cell['salas']))
+                                                            <div class="d-block">
+                                                                @foreach($cell['salas'] as $sala)
+                                                                    <span class="badge badge-light border text-muted mr-1" style="font-size: 0.70rem;">
+                                                                        {{ $sala }}
+                                                                    </span>
+                                                                @endforeach
+                                                            </div>
+                                                        @endif
+                                                    </div>
+                                                </td>
+                                                @php $s += $cell['colspan']; @endphp
+                                            @else
+                                                <td class="align-middle p-1"></td>
+                                                @php $s++; @endphp
+                                            @endif
+                                        @endwhile
+                                    @endif
+
+                                </tr>
+                            @endfor
                         @endforeach
                     </tbody>
                 </table>

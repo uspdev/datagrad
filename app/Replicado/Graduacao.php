@@ -1228,29 +1228,57 @@ class Graduacao extends GraduacaoReplicado
         $whereClauses = [];
         $params = [];
 
-        // Monta clausulas do tipo: (o.coddis = :coddis0 AND o.codtur = :codtur0)
         foreach (array_values($turmasCurso) as $index => $turma) {
             $keyDis = 'coddis' . $index;
             $keyTur = 'codtur' . $index;
 
-            $whereClauses[] = "(o.coddis = :{$keyDis} AND o.codtur = :{$keyTur})";
+            $coddis = trim($turma['coddis']);
+            $codtur = trim($turma['codtur']);
 
-            $params[$keyDis] = $turma['coddis'];
-            $params[$keyTur] = $turma['codtur'];
+            $whereClauses[] = "(o.coddis LIKE :{$keyDis} AND o.codtur LIKE :{$keyTur})";
+
+            $params[$keyDis] = $coddis;
+            $params[$keyTur] = $codtur;
         }
 
         $whereClause = implode(' OR ', $whereClauses);
 
-        $query = "SELECT 
-                    o.coddis, 
-                    o.codtur, 
-                    o.diasmnocp, 
-                    p.horent, 
-                    p.horsai 
+        $query = "SELECT DISTINCT
+                    RTRIM(LTRIM(o.coddis)) AS coddis, 
+                    RTRIM(LTRIM(o.codtur)) AS codtur, 
+                    RTRIM(LTRIM(o.diasmnocp)) AS diasmnocp, 
+                    COALESCE(p.horent, '') AS horent, 
+                    COALESCE(p.horsai, '') AS horsai 
                 FROM OCUPTURMA o 
-                JOIN PERIODOHORARIO p ON o.codperhor = p.codperhor 
+                LEFT JOIN PERIODOHORARIO p ON o.codperhor = p.codperhor 
                 WHERE {$whereClause}";
 
         return DB::fetchAll($query, $params);
     }
+
+    /**
+     * Lista os cursos e habilitações da unidade, incluindo dupla formação,
+     * exceto o curso/habilitação 18023/100.
+     *
+     * Refatorado de listarCursosHabilitacoes()
+     *
+     * @return Array
+     * @author Vinicius Rafael, em 29/09/2026
+     */
+    public static function listarTodosCursosHabilitacoes()
+    {
+        $query = " SELECT C.*, H.* FROM CURSOGR C
+            INNER JOIN HABILITACAOGR H ON C.codcur = H.codcur
+            WHERE ( C.codclg IN (__codundclgs__) 
+                    OR (C.codcur = 99002 AND H.codhab = 100)
+                )
+                AND NOT (C.codcur = 18023 AND H.codhab = 100) -- Exclui especificamente o 18023/100
+                AND ( (C.dtaatvcur IS NOT NULL) AND (C.dtadtvcur IS NULL) ) -- curso ativo
+                AND ( (H.dtaatvhab IS NOT NULL) AND (H.dtadtvhab IS NULL) ) -- habilitação ativa
+            ORDER BY C.nomcur, H.nomhab ASC";
+
+        $ret = DB::fetchAll($query);
+        return $ret;
+    }
+
 }
