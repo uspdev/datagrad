@@ -1048,7 +1048,7 @@ class Graduacao extends GraduacaoReplicado
      * @param int|null $codcur
      * @param int|null $ano_ingresso
      * @return Array Lista com dados dos alunos
-     * @author Vinicius Rafael do Vale, em 16/06/2026
+     * @author Vinicius Rafael, em 16/06/2026
      */
     public static function obterCargaHorariaAcumuladaAluno($codpes = null, $codcur = null, $ano_ingresso = null)
     {
@@ -1211,4 +1211,74 @@ class Graduacao extends GraduacaoReplicado
 
         return DB::fetchAll($query, $param);
     }
+    
+    /**
+     * Método para obter a ocupação e horários a partir de uma lista de pares [coddis, codtur].
+     *
+     * @param array $turmasCurso Array de arrays contendo ['coddis' => ..., 'codtur' => ...]
+     * @return array
+     * @author Vinicius Rafael, em 25/09/2026
+     */
+    public static function obterHorariosOcupacaoTurmas(array $turmasCurso)
+    {
+        if (empty($turmasCurso)) {
+            return [];
+        }
+
+        $whereClauses = [];
+        $params = [];
+
+        foreach (array_values($turmasCurso) as $index => $turma) {
+            $keyDis = 'coddis' . $index;
+            $keyTur = 'codtur' . $index;
+
+            $coddis = trim($turma['coddis']);
+            $codtur = trim($turma['codtur']);
+
+            $whereClauses[] = "(o.coddis LIKE :{$keyDis} AND o.codtur LIKE :{$keyTur})";
+
+            $params[$keyDis] = $coddis;
+            $params[$keyTur] = $codtur;
+        }
+
+        $whereClause = implode(' OR ', $whereClauses);
+
+        $query = "SELECT DISTINCT
+                    RTRIM(LTRIM(o.coddis)) AS coddis, 
+                    RTRIM(LTRIM(o.codtur)) AS codtur, 
+                    RTRIM(LTRIM(o.diasmnocp)) AS diasmnocp, 
+                    COALESCE(p.horent, '') AS horent, 
+                    COALESCE(p.horsai, '') AS horsai 
+                FROM OCUPTURMA o 
+                LEFT JOIN PERIODOHORARIO p ON o.codperhor = p.codperhor 
+                WHERE {$whereClause}";
+
+        return DB::fetchAll($query, $params);
+    }
+
+    /**
+     * Lista os cursos e habilitações da unidade, incluindo dupla formação,
+     * exceto o curso/habilitação 18023/100.
+     *
+     * Refatorado de listarCursosHabilitacoes()
+     *
+     * @return Array
+     * @author Vinicius Rafael, em 29/09/2026
+     */
+    public static function listarTodosCursosHabilitacoes()
+    {
+        $query = " SELECT C.*, H.* FROM CURSOGR C
+            INNER JOIN HABILITACAOGR H ON C.codcur = H.codcur
+            WHERE ( C.codclg IN (__codundclgs__) 
+                    OR (C.codcur = 99002 AND H.codhab = 100)
+                )
+                AND NOT (C.codcur = 18023 AND H.codhab = 100) -- Exclui especificamente o 18023/100
+                AND ( (C.dtaatvcur IS NOT NULL) AND (C.dtadtvcur IS NULL) ) -- curso ativo
+                AND ( (H.dtaatvhab IS NOT NULL) AND (H.dtadtvhab IS NULL) ) -- habilitação ativa
+            ORDER BY C.nomcur, H.nomhab ASC";
+
+        $ret = DB::fetchAll($query);
+        return $ret;
+    }
+
 }

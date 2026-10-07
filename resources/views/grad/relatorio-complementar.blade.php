@@ -6,14 +6,14 @@
   <form method="POST" action="">
     @csrf
     <div class="form-group">
-      <label for="nomesTextarea">Forneça uma lista de nomes (1 por linha)</label>
+      <label for="nomesTextarea">Forneça uma lista que contenha nomes ou números USP (1 por linha)</label>
       <textarea name="nomes" class="form-control" id="nomesTextarea" rows="4">{{ old('nomes') }}</textarea>
     </div>
     <div class="form-group form-inline mb-0">
       Período de
       <input class="form-control mx-2 col-1" type="number" name="anoIni" value="{{ old('anoIni') ?? date('Y') - 5 }}"
         min="1970" max="{{ date('Y') }}"> a
-      <input class="form-control mx-2 col-1" type="number" name="anoFim" value="{{ old('anoFim') ?? date('Y') - 1 }}"
+      <input class="form-control mx-2 col-1" type="number" name="anoFim" value="{{ old('anoFim') ?? date('Y') }}"
         min="1970" max="{{ date('Y') }}">
     </div>
     <div class="small">Período em anos a ser considerado para contabilizar a produção</div>

@@ -7,45 +7,74 @@ $menu = [
         'can' => 'disciplinas',
     ],
     [
-        'text' => 'Relatório síntese',
-        'url' => 'graduacao/relatorio/sintese',
-        'can' => 'datagrad',
+        'text' => 'Validação de curso',
+        'submenu' => [
+            [
+                'text' => 'Relatório síntese',
+                'url'  => 'graduacao/relatorio/sintese',
+                'can'  => 'datagrad',
+            ],
+            [
+                'text' => 'Relatório complementar',
+                'url'  => 'graduacao/relatorio/complementar',
+                'can'  => 'datagrad',
+            ],
+        ],
+        'can'  => 'datagrad',
     ],
     [
-        'text' => 'Relatório complementar',
-        'url' => 'graduacao/relatorio/complementar',
-        'can' => 'datagrad',
+        'text' => 'Relatórios cursos',
+        'submenu' => [
+            [
+                'text' => 'Relatório carga horária acumulada',
+                'url'  => 'graduacao/relatorio/carga-acumulada',
+                'can'  => 'relatorio-cgahoralu',
+            ],
+            [
+                'text' => 'Quadro horários de aula',
+                'url'  => 'graduacao/horarios',
+                'can'  => 'relatorio-curso',
+            ],
+        ],
+        'can'  => 'relatorio-curso',
+    ],
+    [
+        'text' => 'Relatórios alunos',
+        'submenu' => [
+            [
+                'text' => 'Relatório grade horária',
+                'url'  => 'graduacao/relatorio/gradehoraria',
+                'can'  => 'datagrad',
+            ],
+        ],
+        'can'  => 'datagrad',
+    ],
+    [
+        'text' => 'Estatísticas',
+        'submenu' => [
+            [
+                'text' => 'Relatório de evasão',
+                'url'  => 'graduacao/relatorio/evasao',
+                'can'  => 'evasao',
+            ],
+            [
+                'text' => 'Relatório de turmas',
+                'url'  => 'graduacao/relatorio/turma',
+                'can'  => 'datagrad',
+            ],
+        ],
+        'can'  => 'datagrad',
+    ],
+    [
+        'text' => 'Disciplinas',
+        'url'  => 'disciplinas',
+        'can'  => 'disciplinas',
     ],
     // [
     //     'text' => 'Relatório carga didática',
     //     'url' => 'graduacao/relatorio/cargadidatica',
     //     'can' => 'datagrad',
     // ],
-    [
-        'text' => 'Relatório grade horária',
-        'url' => 'graduacao/relatorio/gradehoraria',
-        'can' => 'datagrad',
-    ],
-    [
-        'text' => 'Relatório carga horária acumulada',
-        'url'  => 'graduacao/relatorio/carga-acumulada',
-        'can'  => 'relatorio-cgahoralu',
-    ],
-    [
-        'text' => 'Relatório de evasão',
-        'url' => 'graduacao/relatorio/evasao',
-        'can' => 'evasao',
-    ],
-    [
-        'text' => 'Relatório de turmas',
-        'url' => 'graduacao/relatorio/turma',
-        'can' => 'datagrad',
-    ],
-    [
-        'text' => 'Disciplinas',
-        'url' => 'disciplinas',
-        'can' => 'disciplinas',
-    ],
 ];
 
 $right_menu = [

@@ -33,26 +33,41 @@ class GraduacaoController extends Controller
         $nomes = Tools::limparNomes($request->nomes);
         $pessoas = [];
         $naoEncontrados = [];
+
         foreach ($nomes as $nome) {
-            // vamos procurar 1o por nome exato e depois por fonetico
-            $pessoaReplicado = Pessoa::procurarServidorPorNome($nome, $fonetico = false) ?? Pessoa::procurarServidorPorNome($nome, $fonetico = true);
+            // Tenta buscar por Número USP ou Nome em uma chamada só
+            $pessoaReplicado = Pessoa::procurarPorCodpesOuNome($nome);
             if (!$pessoaReplicado) {
                 $naoEncontrados[] = $nome;
                 continue;
             }
+
+            if (isset($pessoaReplicado[0]) && is_array($pessoaReplicado[0])) {
+                $pessoaReplicado = $pessoaReplicado[0];
+            }
+
+            $codpes = $pessoaReplicado['codpes'] ?? null;
+            if (!$codpes) {
+                $naoEncontrados[] = $nome;
+                continue;
+            }
+
             $pessoa = [];
-            $pessoa['unidade'] = $pessoaReplicado['sglclgund'];
-            $pessoa['departamento'] = Pessoa::retornarSetor($pessoaReplicado['codpes']);
-            $pessoa['codpes'] = $pessoaReplicado['codpes'];
-            $pessoa['nome'] = $pessoaReplicado['nompesttd'];
-            $pessoa['nomeFuncao'] = $pessoaReplicado['nomfnc'];
-            $pessoa['tipoJornada'] = Pessoa::retornarTipoJornada($pessoa['codpes']);
-            $pessoa['lattes'] = Lattes::id($pessoa['codpes']);
-            $pessoa['dtaultalt'] = Lattes::retornarDataUltimaAtualizacao($pessoa['codpes']);
-            $pessoa['linkOrcid'] = Lattes::retornarLinkOrcid($pessoa['codpes']);
+            $pessoa['unidade'] = $pessoaReplicado['sglclgund'] ?? $pessoaReplicado['sglund'] ?? config('replicado.codundclg');
+            $pessoa['departamento'] = Pessoa::retornarSetor($codpes);
+            $pessoa['codpes'] = $codpes;
+            $pessoa['nome'] = $pessoaReplicado['nompesttd'] ?? $pessoaReplicado['nompes'] ?? '';
+            $pessoa['nomeFuncao'] = $pessoaReplicado['nomfnc'] ?? '';
+            $pessoa['tipoJornada'] = Pessoa::retornarTipoJornada($codpes);
+            $pessoa['lattes'] = Lattes::id($codpes);
+            $pessoa['dtaultalt'] = Lattes::retornarDataUltimaAtualizacao($codpes);
+            $pessoa['linkOrcid'] = Lattes::retornarLinkOrcid($codpes);
             $pessoa['created_at'] = now();
-            $pessoa['idade'] = date('Y') - substr($pessoaReplicado['dtanas'], 0, 4);
-            $pessoa = array_merge($pessoa, Lattes::retornarFormacaoAcademicaFormatado($pessoa['codpes']));
+
+            $dtanas = $pessoaReplicado['dtanas'] ?? null;
+            $pessoa['idade'] = $dtanas ? (date('Y') - substr($dtanas, 0, 4)) : '-';
+
+            $pessoa = array_merge($pessoa, Lattes::retornarFormacaoAcademicaFormatado($codpes));
             $pessoas[] = $pessoa;
         }
 
@@ -84,18 +99,25 @@ class GraduacaoController extends Controller
         $nomes = Tools::limparNomes($request->nomes);
         $pessoas = [];
         $naoEncontrados = [];
+
         foreach ($nomes as $nome) {
-            // vamos procurar 1o por nome exato e depois por fonetico
-            $pessoaReplicado = Pessoa::procurarServidorPorNome($nome, $fonetico = false) ?? Pessoa::procurarServidorPorNome($nome, $fonetico = true);
+            // Tenta buscar por Número USP ou Nome em uma chamada só
+            $pessoaReplicado = Pessoa::procurarPorCodpesOuNome($nome);
             if (!$pessoaReplicado) {
                 $naoEncontrados[] = $nome;
                 continue;
             }
+
+            if (isset($pessoaReplicado[0]) && is_array($pessoaReplicado[0])) {
+                $pessoaReplicado = $pessoaReplicado[0];
+            }
+
             $pessoa = [];
-            $pessoa['unidade'] = $pessoaReplicado['sglclgund'];
+            // Pega sglclgund ou sglund trazidos do JOIN com LOCALIZAPESSOA
+            $pessoa['unidade'] = $pessoaReplicado['sglclgund'] ?? $pessoaReplicado['sglund'] ?? config('replicado.codundclg');
             $pessoa['departamento'] = Pessoa::retornarSetor($pessoaReplicado['codpes']);
             $pessoa['codpes'] = $pessoaReplicado['codpes'];
-            $pessoa['nome'] = $pessoaReplicado['nompesttd'];
+            $pessoa['nome'] = $pessoaReplicado['nompesttd'] ?? $pessoaReplicado['nompes'];
             $pessoa['lattes'] = Lattes::id($pessoa['codpes']);
             $pessoa['dtaultalt'] = Lattes::retornarDataUltimaAtualizacao($pessoa['codpes']);
 
@@ -119,7 +141,6 @@ class GraduacaoController extends Controller
             $pessoa['orientacoesConcluidasIC'] = Lattes::listarOrientacoesConcluidasIC(...$params) ?: [];
             $pessoa['orientacoesEmAndamentoIC'] = Lattes::listarOrientacoesEmAndamentoIC(...$params) ?: [];
             $pessoa['orientacoesConcluidasTccGraduacao'] = Lattes::listarOrientacoesConcluidasTccGraduacao(...$params) ?: [];
-            $pessoa['orientacoesEmAndamentoIC'] = Lattes::listarOrientacoesEmAndamentoIC(...$params) ?: [];
             $pessoa['orientacoesConcluidasMestrado'] = Lattes::listarOrientacoesConcluidasMestrado(...$params) ?: [];
             $pessoa['orientacoesEmAndamentoMestrado'] = Lattes::listarOrientacoesEmAndamentoMestrado(...$params) ?: [];
             $pessoa['orientacoesConcluidasDoutorado'] = Lattes::listarOrientacoesConcluidasDoutorado(...$params) ?: [];
@@ -727,5 +748,302 @@ class GraduacaoController extends Controller
 
         session()->flashInput($request->input());
         return view('grad.relatorio-carga-acumulada', compact('resultados', 'naoEncontrados', 'cursos'));
+    }
+
+    public function gradeHorarios(Request $request)
+    {
+        $this->authorize('relatorio-curso');
+        \UspTheme::activeUrl('graduacao/horarios');
+
+        $cursosHabilitacoes = Graduacao::listarTodosCursosHabilitacoes();
+
+        $semestreSelect = Tools::semestres();
+        $cursoHab = $request->input('curso_hab');
+        $codcur = null;
+        $codhab = null;
+
+        if (!empty($cursoHab) && str_contains($cursoHab, '-')) {
+            [$codcur, $codhab] = explode('-', $cursoHab);
+        }
+
+        $semestrePadrao = !empty($semestreSelect) ? array_key_first($semestreSelect) : '20261';
+        $semestre = $request->input('semestre', $semestrePadrao);
+
+        $gradePorPeriodo = [];
+        $turmasCurso = [];
+        $ocupacoes = [];
+
+        if (!is_null($codcur) && !is_null($codhab) && $codcur !== '' && $codhab !== '' && $semestre) {
+            $numSemestre = (int) substr($semestre, -1);
+            $codcurConsulta = (int) $codcur;
+            $codhabConsulta = (int) $codhab;
+
+            // Identifica se é curso de dupla formação (18023 com hab 200 ou 99002 com hab 100)
+            $cursosDupla = ['18023/200', '99002/100', '18023', '99002'];
+            $chaveCursoHab = $codcurConsulta . '/' . $codhabConsulta;
+            $isDuplaFormacao = in_array($codcurConsulta, [18023, 99002]) || in_array($chaveCursoHab, $cursosDupla);
+
+            if ($isDuplaFormacao) {
+                $periodosAlvo = ($numSemestre === 2) ? [2, 4] : [1, 3];
+            } else {
+                $periodosAlvo = ($numSemestre === 2) ? [2, 4, 6, 8, 10] : [1, 3, 5, 7, 9];
+            }
+
+            $gradeCurricular = Graduacao::listarGradeCurricular($codcurConsulta, $codhabConsulta);
+            $mapaSemestreIdeal = collect($gradeCurricular)
+                ->pluck('numsemidl', 'coddis')
+                ->map(fn($item) => (int) $item)
+                ->toArray();
+
+            $turmasCompletas = Graduacao::listarTurmas($codcurConsulta, $codhabConsulta, $semestre);
+
+            if (!empty($turmasCompletas)) {
+                $turmasCurso = collect($turmasCompletas)
+                    ->map(function ($item) use ($mapaSemestreIdeal) {
+                        $coddis = trim((string) ($item['coddis'] ?? ''));
+
+                        // Define o período com base no Replicado ou na grade ideal
+                        $numper = isset($item['numper']) && !is_null($item['numper']) && (int) $item['numper'] > 0
+                            ? (int) $item['numper']
+                            : ($mapaSemestreIdeal[$coddis] ?? 0);
+
+                        return [
+                            'coddis' => $coddis,
+                            'codtur' => trim((string) ($item['codtur'] ?? '')),
+                            'nomdis' => $item['nomdis'] ?? '',
+                            'numper' => $numper,
+                        ];
+                    })
+                    ->values()
+                    ->toArray();
+
+                if (!empty($turmasCurso)) {
+                    $ocupacoes = Graduacao::obterHorariosOcupacaoTurmas($turmasCurso);
+                    $gradePorPeriodo = $this->montarGridHorarios($turmasCurso, $ocupacoes, $periodosAlvo, $semestre);
+                }
+            }
+        }
+
+        return view('grad.horarios', compact(
+            'cursosHabilitacoes',
+            'semestreSelect',
+            'codcur',
+            'codhab',
+            'semestre',
+            'gradePorPeriodo',
+            'turmasCurso',
+            'ocupacoes'
+        ));
+    }
+
+    private function montarGridHorarios($turmasCurso, $ocupacoes, $periodosAlvo, $semestre = '20261')
+    {
+        $grid = [];
+
+        $mapDias = [
+            'seg' => 'Segunda-feira',
+            'ter' => 'Terça-feira',
+            'qua' => 'Quarta-feira',
+            'qui' => 'Quinta-feira',
+            'sex' => 'Sexta-feira',
+            'sab' => 'Sábado',
+            'sáb' => 'Sábado',
+        ];
+
+        // Mapeamento exato de início de slot
+        $mapSlotsInicio = [
+            '07:00' => 1, '07h00' => 1, '07:10' => 1, '07h10' => 1, '07:20' => 1, '07h20' => 1, '07:30' => 1, '07h30' => 1,
+            '08:00' => 2, '08h00' => 2, '08:10' => 2, '08h10' => 2, '08:20' => 2, '08h20' => 2, '08:30' => 2, '08h30' => 2,
+            '09:00' => 3, '09h00' => 3, '09:10' => 3, '09h10' => 3, '09:20' => 3, '09h20' => 3, '09:30' => 3, '09h30' => 3,
+            '10:00' => 4, '10h00' => 4, '10:10' => 4, '10h10' => 4, '10:20' => 4, '10h20' => 4, '10:30' => 4, '10h30' => 4,
+            '11:00' => 5, '11h00' => 5, '11:10' => 5, '11h10' => 5, '11:20' => 5, '11h20' => 5, '11:30' => 5, '11h30' => 5,
+            '13:00' => 6, '13h00' => 6, '13:10' => 6, '13h10' => 6, '13:20' => 6, '13h20' => 6, '13:30' => 6, '13h30' => 6,
+            '14:00' => 7, '14h00' => 7, '14:10' => 7, '14h10' => 7, '14:20' => 7, '14h20' => 7, '14:30' => 7, '14h30' => 7,
+            '15:00' => 8, '15h00' => 8, '15:10' => 8, '15h10' => 8, '15:20' => 8, '15h20' => 8, '15:30' => 8, '15h30' => 8,
+            '16:00' => 9, '16h00' => 9, '16:10' => 9, '16h10' => 9, '16:20' => 9, '16h20' => 9, '16:30' => 9, '16h30' => 9,
+            '17:00' => 10, '17h00' => 10, '17:10' => 10, '17h10' => 10, '17:20' => 10, '17h20' => 10, '17:30' => 10, '17h30' => 10,
+        ];
+
+        $mapTurmas = collect($turmasCurso)->keyBy(fn($item) => $item['coddis'] . '_' . $item['codtur']);
+        $ocupacoesPorDia = [];
+
+        // Identifica o número máximo de períodos do curso (ex: 4 para dupla formação ou até 10 para os demais)
+        $maxPeriodoCurso = !empty($periodosAlvo) ? max($periodosAlvo) : 10;
+
+        // Identifica se o semestre atual do sistema é ímpar (1º sem) ou par (2º sem)
+        $ultimoDigito = (int) substr($semestre, -1);
+        $isSemestreImpar = ($ultimoDigito % 2 !== 0);
+
+        foreach ($ocupacoes as $ocp) {
+            $key = $ocp['coddis'] . '_' . $ocp['codtur'];
+
+            if (!$mapTurmas->has($key)) {
+                continue;
+            }
+
+            $turma = $mapTurmas->get($key);
+            $coddis = trim($turma['coddis']);
+            $periodo = (int) $turma['numper'];
+
+            // DISCIPLINAS OFERECIDAS NOS DOIS SEMESTRES DO ANO
+            $disciplinasAmbosSemestres = ['SGS0404', 'SET0408', 'SGS0403', 'SEM0550'];
+
+            if (in_array($coddis, $disciplinasAmbosSemestres)) {
+                $isPeriodoImpar = ($periodo % 2 !== 0);
+
+                // No 1º semestre (ímpar), se a matéria tiver período PAR (ex: 2, 4, 6, 8, 10):
+                if ($isSemestreImpar && !$isPeriodoImpar) {
+                    if ($periodo >= $maxPeriodoCurso) {
+                        $periodo -= 1;
+                    } else {
+                        $periodo += 1;
+                    }
+                }
+                // No 2º semestre (par), se a matéria tiver período ÍMPAR (ex: 1, 3, 5, 7, 9):
+                elseif (!$isSemestreImpar && $isPeriodoImpar) {
+                    if ($periodo >= $maxPeriodoCurso) {
+                        $periodo -= 1;
+                    } else {
+                        $periodo += 1;
+                    }
+                }
+            }
+
+            // Se o período (já reajustado) não for um dos períodos exibidos na tela, ignora
+            if (!in_array($periodo, $periodosAlvo)) {
+                continue;
+            }
+
+            $diaStr = strtolower(trim($ocp['diasmnocp'] ?? ''));
+            $diaNome = $mapDias[$diaStr] ?? null;
+
+            $horaInicio = trim($ocp['horent'] ?? '');
+            $horaFim = trim($ocp['horsai'] ?? '');
+
+            $slotInicio = $mapSlotsInicio[$horaInicio] ?? null;
+
+            if ($diaNome && $slotInicio) {
+                // Converte hh:mm para minutos totais do dia para calcular a duração real
+                $pInicio = explode(':', str_replace('h', ':', $horaInicio));
+                $pFim    = explode(':', str_replace('h', ':', $horaFim));
+
+                $minInicio = ((int)($pInicio[0] ?? 0) * 60) + (int)($pInicio[1] ?? 0);
+                $minFim    = ((int)($pFim[0] ?? 0) * 60) + (int)($pFim[1] ?? 0);
+                $duracaoMinutos = $minFim - $minInicio;
+
+                // Mapeamento rigoroso de duração em número de slots (blocos de 50min/aula)
+                if ($duracaoMinutos >= 200) {
+                    $duracaoSlots = 4; // Ex: 08:10 às 12:00 ou 13:20 às 17:00 (4 aulas)
+                } elseif ($duracaoMinutos >= 140) {
+                    $duracaoSlots = 3; // Ex: 07:20 às 10:00 ou 14:20 às 17:00 (3 aulas)
+                } elseif ($duracaoMinutos >= 90) {
+                    $duracaoSlots = 2; // Ex: 08:10 às 10:00 ou 14:20 às 16:00 (2 aulas)
+                } else {
+                    $duracaoSlots = 1; // 1 aula (50min)
+                }
+
+                $coddis = $turma['coddis'];
+                $codtur = $turma['codtur'];
+                $sala = $ocp['salsol'] ?? $ocp['sala'] ?? '';
+
+                if (!isset($ocupacoesPorDia[$periodo][$diaNome])) {
+                    $ocupacoesPorDia[$periodo][$diaNome] = [];
+                }
+
+                $chaveAula = $coddis . '_' . $slotInicio . '_' . $duracaoSlots;
+
+                if (!isset($ocupacoesPorDia[$periodo][$diaNome][$chaveAula])) {
+                    $ocupacoesPorDia[$periodo][$diaNome][$chaveAula] = [
+                        'coddis'      => $coddis,
+                        'nomdis'      => $turma['nomdis'],
+                        'slot_inicio' => $slotInicio,
+                        'duracao'     => $duracaoSlots,
+                        'turmas'      => [],
+                        'salas'       => []
+                    ];
+                }
+
+                if (!in_array($codtur, $ocupacoesPorDia[$periodo][$diaNome][$chaveAula]['turmas'])) {
+                    $ocupacoesPorDia[$periodo][$diaNome][$chaveAula]['turmas'][] = $codtur;
+                }
+                if (!empty($sala) && !in_array($sala, $ocupacoesPorDia[$periodo][$diaNome][$chaveAula]['salas'])) {
+                    $ocupacoesPorDia[$periodo][$diaNome][$chaveAula]['salas'][] = $sala;
+                }
+            }
+        }
+
+        foreach ($periodosAlvo as $p) {
+            foreach (['Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado'] as $dia) {
+                $aulasDoDia = $ocupacoesPorDia[$p][$dia] ?? [];
+
+                $grid[$p][$dia] = [
+                    'manha' => $this->construirLinhasTurno($aulasDoDia, 1, 5),
+                    'tarde' => $this->construirLinhasTurno($aulasDoDia, 6, 10)
+                ];
+            }
+        }
+
+        return $grid;
+    }
+
+    private function construirLinhasTurno($aulasDoDia, $slotInicioTurno, $slotFimTurno)
+    {
+        $aulasTurno = array_filter($aulasDoDia, function($aula) use ($slotInicioTurno, $slotFimTurno) {
+            $fimAula = $aula['slot_inicio'] + $aula['duracao'] - 1;
+            return ($aula['slot_inicio'] <= $slotFimTurno && $fimAula >= $slotInicioTurno);
+        });
+
+        if (empty($aulasTurno)) {
+            return [];
+        }
+
+        usort($aulasTurno, fn($a, $b) => $a['slot_inicio'] <=> $b['slot_inicio']);
+
+        $linhas = [];
+
+        foreach ($aulasTurno as $aula) {
+            $alocado = false;
+
+            foreach ($linhas as &$linha) {
+                $conflito = false;
+                $inicioAula = max($aula['slot_inicio'], $slotInicioTurno);
+                $fimAula = min($aula['slot_inicio'] + $aula['duracao'] - 1, $slotFimTurno);
+
+                for ($s = $inicioAula; $s <= $fimAula; $s++) {
+                    if (isset($linha[$s])) {
+                        $conflito = true;
+                        break;
+                    }
+                }
+
+                if (!$conflito) {
+                    $colspanEfetivo = $fimAula - $inicioAula + 1;
+                    $linha[$inicioAula] = array_merge($aula, ['colspan' => $colspanEfetivo]);
+
+                    for ($s = $inicioAula + 1; $s <= $fimAula; $s++) {
+                        $linha[$s] = 'OCUPADO';
+                    }
+                    $alocado = true;
+                    break;
+                }
+            }
+
+            if (!$alocado) {
+                $novaLinha = [];
+                $inicioAula = max($aula['slot_inicio'], $slotInicioTurno);
+                $fimAula = min($aula['slot_inicio'] + $aula['duracao'] - 1, $slotFimTurno);
+
+                $colspanEfetivo = $fimAula - $inicioAula + 1;
+                $novaLinha[$inicioAula] = array_merge($aula, ['colspan' => $colspanEfetivo]);
+
+                for ($s = $inicioAula + 1; $s <= $fimAula; $s++) {
+                    $novaLinha[$s] = 'OCUPADO';
+                }
+
+                $linhas[] = $novaLinha;
+            }
+        }
+
+        return $linhas;
     }
 }
