@@ -33,26 +33,41 @@ class GraduacaoController extends Controller
         $nomes = Tools::limparNomes($request->nomes);
         $pessoas = [];
         $naoEncontrados = [];
+
         foreach ($nomes as $nome) {
-            // vamos procurar 1o por nome exato e depois por fonetico
-            $pessoaReplicado = Pessoa::procurarServidorPorNome($nome, $fonetico = false) ?? Pessoa::procurarServidorPorNome($nome, $fonetico = true);
+            // Tenta buscar por Número USP ou Nome em uma chamada só
+            $pessoaReplicado = Pessoa::procurarPorCodpesOuNome($nome);
             if (!$pessoaReplicado) {
                 $naoEncontrados[] = $nome;
                 continue;
             }
+
+            if (isset($pessoaReplicado[0]) && is_array($pessoaReplicado[0])) {
+                $pessoaReplicado = $pessoaReplicado[0];
+            }
+
+            $codpes = $pessoaReplicado['codpes'] ?? null;
+            if (!$codpes) {
+                $naoEncontrados[] = $nome;
+                continue;
+            }
+
             $pessoa = [];
-            $pessoa['unidade'] = $pessoaReplicado['sglclgund'];
-            $pessoa['departamento'] = Pessoa::retornarSetor($pessoaReplicado['codpes']);
-            $pessoa['codpes'] = $pessoaReplicado['codpes'];
-            $pessoa['nome'] = $pessoaReplicado['nompesttd'];
-            $pessoa['nomeFuncao'] = $pessoaReplicado['nomfnc'];
-            $pessoa['tipoJornada'] = Pessoa::retornarTipoJornada($pessoa['codpes']);
-            $pessoa['lattes'] = Lattes::id($pessoa['codpes']);
-            $pessoa['dtaultalt'] = Lattes::retornarDataUltimaAtualizacao($pessoa['codpes']);
-            $pessoa['linkOrcid'] = Lattes::retornarLinkOrcid($pessoa['codpes']);
+            $pessoa['unidade'] = $pessoaReplicado['sglclgund'] ?? $pessoaReplicado['sglund'] ?? config('replicado.codundclg');
+            $pessoa['departamento'] = Pessoa::retornarSetor($codpes);
+            $pessoa['codpes'] = $codpes;
+            $pessoa['nome'] = $pessoaReplicado['nompesttd'] ?? $pessoaReplicado['nompes'] ?? '';
+            $pessoa['nomeFuncao'] = $pessoaReplicado['nomfnc'] ?? '';
+            $pessoa['tipoJornada'] = Pessoa::retornarTipoJornada($codpes);
+            $pessoa['lattes'] = Lattes::id($codpes);
+            $pessoa['dtaultalt'] = Lattes::retornarDataUltimaAtualizacao($codpes);
+            $pessoa['linkOrcid'] = Lattes::retornarLinkOrcid($codpes);
             $pessoa['created_at'] = now();
-            $pessoa['idade'] = date('Y') - substr($pessoaReplicado['dtanas'], 0, 4);
-            $pessoa = array_merge($pessoa, Lattes::retornarFormacaoAcademicaFormatado($pessoa['codpes']));
+
+            $dtanas = $pessoaReplicado['dtanas'] ?? null;
+            $pessoa['idade'] = $dtanas ? (date('Y') - substr($dtanas, 0, 4)) : '-';
+
+            $pessoa = array_merge($pessoa, Lattes::retornarFormacaoAcademicaFormatado($codpes));
             $pessoas[] = $pessoa;
         }
 
@@ -84,18 +99,25 @@ class GraduacaoController extends Controller
         $nomes = Tools::limparNomes($request->nomes);
         $pessoas = [];
         $naoEncontrados = [];
+
         foreach ($nomes as $nome) {
-            // vamos procurar 1o por nome exato e depois por fonetico
-            $pessoaReplicado = Pessoa::procurarServidorPorNome($nome, $fonetico = false) ?? Pessoa::procurarServidorPorNome($nome, $fonetico = true);
+            // Tenta buscar por Número USP ou Nome em uma chamada só
+            $pessoaReplicado = Pessoa::procurarPorCodpesOuNome($nome);
             if (!$pessoaReplicado) {
                 $naoEncontrados[] = $nome;
                 continue;
             }
+
+            if (isset($pessoaReplicado[0]) && is_array($pessoaReplicado[0])) {
+                $pessoaReplicado = $pessoaReplicado[0];
+            }
+
             $pessoa = [];
-            $pessoa['unidade'] = $pessoaReplicado['sglclgund'];
+            // Pega sglclgund ou sglund trazidos do JOIN com LOCALIZAPESSOA
+            $pessoa['unidade'] = $pessoaReplicado['sglclgund'] ?? $pessoaReplicado['sglund'] ?? config('replicado.codundclg');
             $pessoa['departamento'] = Pessoa::retornarSetor($pessoaReplicado['codpes']);
             $pessoa['codpes'] = $pessoaReplicado['codpes'];
-            $pessoa['nome'] = $pessoaReplicado['nompesttd'];
+            $pessoa['nome'] = $pessoaReplicado['nompesttd'] ?? $pessoaReplicado['nompes'];
             $pessoa['lattes'] = Lattes::id($pessoa['codpes']);
             $pessoa['dtaultalt'] = Lattes::retornarDataUltimaAtualizacao($pessoa['codpes']);
 
@@ -119,7 +141,6 @@ class GraduacaoController extends Controller
             $pessoa['orientacoesConcluidasIC'] = Lattes::listarOrientacoesConcluidasIC(...$params) ?: [];
             $pessoa['orientacoesEmAndamentoIC'] = Lattes::listarOrientacoesEmAndamentoIC(...$params) ?: [];
             $pessoa['orientacoesConcluidasTccGraduacao'] = Lattes::listarOrientacoesConcluidasTccGraduacao(...$params) ?: [];
-            $pessoa['orientacoesEmAndamentoIC'] = Lattes::listarOrientacoesEmAndamentoIC(...$params) ?: [];
             $pessoa['orientacoesConcluidasMestrado'] = Lattes::listarOrientacoesConcluidasMestrado(...$params) ?: [];
             $pessoa['orientacoesEmAndamentoMestrado'] = Lattes::listarOrientacoesEmAndamentoMestrado(...$params) ?: [];
             $pessoa['orientacoesConcluidasDoutorado'] = Lattes::listarOrientacoesConcluidasDoutorado(...$params) ?: [];

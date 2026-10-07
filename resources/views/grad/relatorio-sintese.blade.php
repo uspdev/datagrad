@@ -6,7 +6,7 @@
   <form method="POST" action="">
     @csrf
     <div class="form-group">
-      <label for="nomesTextarea">Forneça uma lista de nomes (1 por linha)</label>
+      <label for="nomesTextarea">Forneça uma lista que contenha nomes ou números USP (1 por linha)</label>
       <textarea name="nomes" class="form-control" id="nomesTextarea" rows="4">{{ old('nomes') }}</textarea>
     </div>
     <button type="submit" class="btn btn-sm btn-primary spinner">Enviar</button>
