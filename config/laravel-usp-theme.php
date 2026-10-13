@@ -46,6 +46,11 @@ $menu = [
                 'url'  => 'graduacao/relatorio/gradehoraria',
                 'can'  => 'datagrad',
             ],
+            [
+                'text' => 'Relatório alunos PEC-G',
+                'url'  => 'graduacao/relatorio_pecg',
+                'can'  => 'datagrad',
+            ],
         ],
         'can'  => 'datagrad',
     ],

@@ -72,3 +72,6 @@ Route::post('graduacao/relatorio/carga-acumulada', [GraduacaoController::class, 
 
 Route::get('graduacao/horarios', [GraduacaoController::class, 'gradeHorarios'])->name('graduacao.horarios');
 Route::post('graduacao/horarios', [GraduacaoController::class, 'gradeHorarios'])->name('graduacao.horarios.post');
+
+Route::get('graduacao/relatorio_pecg', [GraduacaoController::class, 'relatorioPecg'])->name('graduacao.relatorio_pecg');
+Route::post('graduacao/relatorio_pecg', [GraduacaoController::class, 'relatorioPecg'])->name('graduacao.relatorio_pecg.post');
