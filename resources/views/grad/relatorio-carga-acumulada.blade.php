@@ -82,6 +82,8 @@
                         <th>AAC</th>
                         <th>AEX</th>
                         <th class="table-primary text-dark">Total Acumulado</th>
+                        <th>Exigida</th>
+                        <th></th>
                     </tr>
                 </thead>
                 <tbody class="text-center">
@@ -101,6 +103,26 @@
                             <td>{{ $r['carga_complementar'] }} h</td>
                             <td>{{ $r['carga_extensionista'] }} h</td>
                             <td class="table-primary font-weight-bold text-dark">{{ $r['total_acumulado'] }} h</td>
+                            <td class="table-primary font-weight-bold text-dark">{{ $r['exigida'] }} h</td>
+                            <td style="min-width: 120px; vertical-align: middle;">
+                                @php
+                                    $pctFloat = (float) str_replace(',', '.', $r['porcentagem']);
+                                @endphp
+
+                                <div class="progress position-relative" style="height: 24px; background-color: #003366; font-weight: bold; border-radius: 4px;">
+                                    <div class="progress-bar bg-info" 
+                                        role="progressbar" 
+                                        style="width: {{ min($pctFloat, 100) }}%;" 
+                                        aria-valuenow="{{ $pctFloat }}" 
+                                        aria-valuemin="0" 
+                                        aria-valuemax="100">
+                                    </div>
+                                    <span class="position-absolute w-100 h-100 d-flex align-items-center justify-content-center text-white" 
+                                        style="top: 0; left: 0; pointer-events: none; font-size: 0.85rem; text-shadow: 0px 0px 3px rgba(0,0,0,0.8);">
+                                        {{ $r['porcentagem'] }}%
+                                    </span>
+                                </div>
+                            </td>
                         </tr>
                     @endforeach
                 </tbody>

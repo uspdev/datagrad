@@ -649,7 +649,7 @@ class GraduacaoController extends Controller
         // MODO 1: Busca pelo Curso e Ano de Ingresso (Lista de alunos vazia)
         if (empty($entradas)) {
             if (!$codcur || !$ano_ingresso) {
-                return redirect()->back()->withErrors(['Erro' => 'Selecione o Curso E o Ano de ingresso ou preencha a lista de alunos.']);
+                return redirect()->back()->withErrors(['Erro' => 'Selecione o Curso e o Ano de ingresso ou preencha a lista de alunos.']);
             }
 
             $vincAlunos = Graduacao::obterCargaHorariaAcumuladaAluno(null, $codcur, $ano_ingresso);
@@ -664,6 +664,10 @@ class GraduacaoController extends Controller
                                     $dadosAluno['carga_complementar'] + 
                                     $dadosAluno['carga_extensionista'];
 
+                    $cursoInfo = Graduacao::obterCurso($dadosAluno['codcur'], $dadosAluno['codhab']);
+                    $cargaExigida = ($cursoInfo['cgahortot'] ?? 0) + ($cursoInfo['cgahorobgaac'] ?? 0);
+                    $porcentagem = ($cargaExigida > 0) ? ($totalAcumulado / $cargaExigida) * 100 : 0;
+
                     $resultados[] = [
                         'codpes'              => $dadosAluno['codpes'],
                         'nompes'              => $dadosAluno['nompes'],
@@ -676,7 +680,9 @@ class GraduacaoController extends Controller
                         'carga_estagio'       => round($dadosAluno['carga_estagio']),
                         'carga_complementar'  => round($dadosAluno['carga_complementar']),
                         'carga_extensionista' => round($dadosAluno['carga_extensionista']),
-                        'total_acumulado'     => round($totalAcumulado)
+                        'total_acumulado'     => round($totalAcumulado),
+                        'exigida'             => $cargaExigida,
+                        'porcentagem'         => number_format($porcentagem, 2, ',', '.')
                     ];
                 }
             }
@@ -726,6 +732,10 @@ class GraduacaoController extends Controller
                                     $dadosAluno['carga_complementar'] + 
                                     $dadosAluno['carga_extensionista'];
 
+                    $cursoInfo = Graduacao::obterCurso($dadosAluno['codcur'], $dadosAluno['codhab']);
+                    $cargaExigida = ($cursoInfo['cgahortot'] ?? 0) + ($cursoInfo['cgahorobgaac'] ?? 0);
+                    $porcentagem = ($cargaExigida > 0) ? ($totalAcumulado / $cargaExigida) * 100 : 0;
+
                     $resultados[] = [
                         'codpes'              => $dadosAluno['codpes'],
                         'nompes'              => $dadosAluno['nompes'],
@@ -738,7 +748,9 @@ class GraduacaoController extends Controller
                         'carga_estagio'       => round($dadosAluno['carga_estagio']),
                         'carga_complementar'  => round($dadosAluno['carga_complementar']),
                         'carga_extensionista' => round($dadosAluno['carga_extensionista']),
-                        'total_acumulado'     => round($totalAcumulado)
+                        'total_acumulado'     => round($totalAcumulado),
+                        'exigida'             => $cargaExigida,
+                        'porcentagem'         => number_format($porcentagem, 2, ',', '.')
                     ];
                 }
             }
