@@ -1058,4 +1058,29 @@ class GraduacaoController extends Controller
 
         return $linhas;
     }
+
+    public function relatorioPecg(Request $request)
+    {
+        $anoInicio = $request->input('ano_inicio');
+        $anoFim = $request->input('ano_fim');
+
+        $alunos = [];
+
+        if ($request->isMethod('post')) {
+            $request->validate([
+                'ano_inicio' => 'required|integer|digits:4',
+                'ano_fim'    => 'required|integer|digits:4|gte:ano_inicio',
+            ], [
+                'ano_fim.gte' => 'O ano final deve ser maior ou igual ao ano inicial.',
+            ]);
+
+            $alunos = Graduacao::obterAlunosPecg((int)$anoInicio, (int)$anoFim);
+        }
+
+        return view('grad.relatorio_pecg', [
+            'alunos'    => $alunos,
+            'anoInicio' => $anoInicio,
+            'anoFim'    => $anoFim,
+        ]);
+    }
 }

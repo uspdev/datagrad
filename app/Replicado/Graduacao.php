@@ -1281,4 +1281,68 @@ class Graduacao extends GraduacaoReplicado
         return $ret;
     }
 
+    /**
+     * Retorna os alunos com convênio PEC-G por intervalo de anos.
+     *
+     * @param int $anoInicio
+     * @param int $anoFim
+     * @return array
+     * @author Vinicius Rafael, em 09/10/2026
+     */
+    public static function obterAlunosPecg(int $anoInicio, int $anoFim)
+    {
+        $query = "
+            SELECT DISTINCT
+                YEAR(p.dtaing) AS ano_ingresso,
+                p.codpes AS numero_usp,
+                v_aluno.nompes AS nome_aluno,
+                e.codema AS email_aluno,
+                v_tutor.nompes AS professor_tutor,
+                pais.nompas AS pais,
+                CASE 
+                    WHEN p.stapgm = 'A' THEN 'Ativo'
+                    ELSE p.tipencpgm
+                END AS situacao,
+                c.nomcur AS curso
+            FROM PROGRAMAGR p
+            INNER JOIN VINCULOPESSOAUSP v_aluno 
+                ON p.codpes = v_aluno.codpes 
+                AND v_aluno.tipvin = 'ALUNOGR'
+                AND v_aluno.codclg IN (97, 18)
+            LEFT JOIN (
+                SELECT 
+                    codpes,
+                    MIN(codema) AS codema
+                FROM EMAILPESSOA
+                WHERE stausp = 'S'
+                GROUP BY codpes
+            ) e 
+                ON p.codpes = e.codpes
+            LEFT JOIN HABILPROGGR h 
+                ON p.codpes = h.codpes 
+                AND p.codpgm = h.codpgm
+            LEFT JOIN CURSOGR c 
+                ON h.codcur = c.codcur
+            LEFT JOIN (
+                SELECT DISTINCT codpes, nompes 
+                FROM VINCULOPESSOAUSP
+            ) v_tutor 
+                ON p.codpestut = v_tutor.codpes
+            LEFT JOIN PAIS pais 
+                ON p.codpascvn = pais.codpas
+            WHERE 
+                YEAR(p.dtaing) BETWEEN :ano_inicio AND :ano_fim
+                AND p.tiping LIKE '%PEC-G'
+            ORDER BY 
+                ano_ingresso DESC, 
+                v_aluno.nompes ASC
+        ";
+
+        $param = [
+            'ano_inicio' => $anoInicio,
+            'ano_fim'    => $anoFim,
+        ];
+
+        return DB::fetchAll($query, $param);
+    }
 }
