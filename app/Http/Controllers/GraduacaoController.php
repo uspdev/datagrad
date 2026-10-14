@@ -790,10 +790,9 @@ class GraduacaoController extends Controller
             $codcurConsulta = (int) $codcur;
             $codhabConsulta = (int) $codhab;
 
-            // Identifica se é curso de dupla formação (18023 com hab 200 ou 99002 com hab 100)
-            $cursosDupla = ['18023/200', '99002/100', '18023', '99002'];
+            $cursosDupla = ['18023/200', '99002/100'];
             $chaveCursoHab = $codcurConsulta . '/' . $codhabConsulta;
-            $isDuplaFormacao = in_array($codcurConsulta, [18023, 99002]) || in_array($chaveCursoHab, $cursosDupla);
+            $isDuplaFormacao = in_array($chaveCursoHab, $cursosDupla);
 
             if ($isDuplaFormacao) {
                 $periodosAlvo = ($numSemestre === 2) ? [2, 4] : [1, 3];
