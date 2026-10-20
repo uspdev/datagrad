@@ -217,6 +217,21 @@ class DisciplinaController extends Controller
 
         // para aprovação, finaliza a edição do pdf
         if ($action == 'mudar_em_aprovacao') {
+            $erros = $disc->validarCampos();
+            $pendentes = [];
+
+            if (isset($erros['mtdens'])) {
+                $pendentes[] = '"Método de ensino"';
+            }
+            if (isset($erros['objdslsut'])) {
+                $pendentes[] = '"Objetivos de Desenvolvimento Sustentável"';
+            }
+
+            if (!empty($pendentes)) {
+                $msg = 'Não é possível mudar para "Em aprovação": o(s) campo(s) ' . implode(' e ', $pendentes) . ' deve(m) ser preenchido(s).';
+                return redirect()->back()->with('alert-danger', $msg);
+            }
+
             $disc->atualizarEstado('Em aprovação');
             $disc->save();
             Disciplina::renovarCacheAfterResponse();
