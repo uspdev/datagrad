@@ -514,7 +514,7 @@ class Disciplina extends Model
 
         $validator = Validator::make($this->toArray(), $rules, $messages, $attributes);
         if ($validator->fails()) {
-            return $validator->errors()->all();
+            return $validator->errors()->messages();
         }
 
         return [];

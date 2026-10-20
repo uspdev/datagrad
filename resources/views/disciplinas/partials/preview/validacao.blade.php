@@ -1,6 +1,9 @@
-@if ($msgs = $disc->validarCampos() and ($disc->estado == 'Em edição' || $disc->estado == 'Criar'))
-  <div class="alert alert-warning p-0 d-print-none border border-warning">
+@if ($erros = $disc->validarCampos() and ($disc->estado == 'Em edição' || $disc->estado == 'Criar'))
+  @php
+    $mensagens = Arr::flatten($erros);
+  @endphp
 
+  <div class="alert alert-warning p-0 d-print-none border border-warning">
     {{-- Cabeçalho --}}
     <div class="px-3 py-2" style="background-color: rgba(255, 193, 7, 0.2);">
       <strong>Mensagem informativa</strong>
@@ -14,18 +17,17 @@
     {{-- Corpo --}}
     <div class="px-3 py-2">
       <p class="mb-2">
-        Há {{ count($msgs) }} campos pendentes ou inválidos. Verifique e ajuste se necessário.
+        Há {{ count($mensagens) }} campos pendentes ou inválidos. Verifique e ajuste se necessário.
       </p>
 
       <div id="alertDetalhes" class="collapse show">
         <ul class="mb-0 pl-3">
-          @foreach ($msgs as $msg)
+          @foreach ($mensagens as $msg)
             <li>{{ $msg }}</li>
           @endforeach
         </ul>
       </div>
     </div>
-
   </div>
 @endif
 
