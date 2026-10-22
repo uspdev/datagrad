@@ -13,6 +13,7 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use App\Services\Gotenberg;
+use Illuminate\Validation\Rule;
 use Spatie\LaravelPdf\Facades\Pdf;
 use Uspdev\UspTheme\Facades\UspTheme;
 
@@ -181,8 +182,9 @@ class DisciplinaController extends Controller
         }
         $disc->cursos = $cursos;
         $cursos = Graduacao::listarCursosHabilitacoes();
+        $cursosLocais = Curso::all()->keyBy('codcur');
 
-        return view('disciplinas.edit', compact('disc', 'cursos'));
+        return view('disciplinas.edit', compact('disc', 'cursos', 'cursosLocais'));
     }
 
     /**
@@ -247,7 +249,7 @@ class DisciplinaController extends Controller
             Disciplina::renovarCacheAfterResponse();
 
             return redirect()
-                ->route('disciplinas.preview', $disc->coddis)
+                ->route('disciplinas.index', ['visao' => 'finalizados'])
                 ->with('alert-success', 'Disciplina finalizada com sucesso!');
         }
 
@@ -266,6 +268,12 @@ class DisciplinaController extends Controller
             $disc->removerResponsavel($rem);
         }
 
+        $avisos = [];
+        if ($disc->estado == 'Criar' && $request->boolean('aba_cursos_criar')) {
+            [$dadosCursos, $avisos] = $this->tratarDadosPorCurso($request, $disc);
+            $request->merge($dadosCursos);
+        }
+
         $fill = $request->except('estado', 'codpes_add', 'codpes_rem', 'action', 'next');
         $disc->fill($fill);
         if ($disc->isDirty()) {
@@ -275,6 +283,10 @@ class DisciplinaController extends Controller
 
         $request->session()->flash('alert-info', 'Dados salvo com sucesso!');
 
+        if ($avisos) {
+            $request->session()->flash('alert-warning', implode('<br>', $avisos));
+        }
+
         if ($request->action == 'preview') {
             return redirect()->route('disciplinas.preview', $disc->coddis);
         }
@@ -283,6 +295,72 @@ class DisciplinaController extends Controller
         }
 
         return redirect()->route('disciplinas.edit', $disc->coddis);
+    }
+
+    /**
+     * Normaliza os dados por curso da aba "Cursos" (disciplina em criação).
+     *
+     * Só mantém dados dos cursos marcados. Pré-requisitos inexistentes são descartados
+     * e geram aviso, sem perder o restante do que o usuário preencheu.
+     *
+     * @return array [dados para merge no request, avisos]
+     */
+    private function tratarDadosPorCurso(Request $request, Disciplina $disc): array
+    {
+        $request->validate([
+            'cursos_marcados' => 'nullable|array',
+            'cursos_marcados.*' => 'string|max:10',
+            'cursos_dados.*.tipo' => ['nullable', Rule::in(array_keys(Disciplina::$tiposCurso))],
+            'cursos_dados.*.periodo' => 'nullable|integer|between:1,10',
+            'cursos_dados.*.prerequisitos' => 'nullable|string|max:500',
+            'habilidades.*.*' => 'string',
+            'competencias.*.*' => 'string',
+        ]);
+
+        $marcados = array_values(array_unique(array_filter((array) $request->input('cursos_marcados', []))));
+        $dados = ['cursos_dados' => [], 'habilidades' => [], 'competencias' => []];
+        $avisos = [];
+
+        foreach ($marcados as $codcur) {
+            $dados['habilidades'][$codcur] = array_values((array) $request->input("habilidades.$codcur", []));
+            $dados['competencias'][$codcur] = array_values((array) $request->input("competencias.$codcur", []));
+
+            $validos = [];
+            foreach (Disciplina::separarCodigos($request->input("cursos_dados.$codcur.prerequisitos")) as $cod) {
+                if ($cod === $disc->coddis) {
+                    $avisos[] = "Curso $codcur: a disciplina não pode ser pré-requisito dela mesma.";
+                } elseif (Disciplina::buscarPorCodigo($cod)) {
+                    $validos[] = $cod;
+                } else {
+                    $avisos[] = "Curso $codcur: pré-requisito \"$cod\" não encontrado e não foi salvo.";
+                }
+            }
+
+            $dados['cursos_dados'][$codcur] = [
+                'tipo' => $request->input("cursos_dados.$codcur.tipo") ?: null,
+                'periodo' => $request->filled("cursos_dados.$codcur.periodo")
+                    ? (int) $request->input("cursos_dados.$codcur.periodo")
+                    : null,
+                'prerequisitos' => $validos,
+            ];
+        }
+
+        return [$dados, $avisos];
+    }
+
+    /**
+     * Valida (ajax) se o código de disciplina existe, na base local ou no replicado
+     */
+    public function validarCodigo(Request $request)
+    {
+        $this->authorize('user');
+
+        $disc = Disciplina::buscarPorCodigo((string) $request->coddis);
+
+        return response()->json([
+            'existe' => (bool) $disc,
+            'nome' => $disc['nomdis'] ?? null,
+        ]);
     }
 
     private function prepararPreview($coddis)
@@ -303,6 +381,7 @@ class DisciplinaController extends Controller
             return [
                 'disc' => $disc,
                 'dr' => $dr,
+                'coddis' => $coddis,
                 'negado' => true,
             ];
         }
@@ -314,6 +393,7 @@ class DisciplinaController extends Controller
         return [
             'disc' => $disc,
             'dr' => $dr,
+            'coddis' => $coddis,
             'negado' => false,
         ];
     }
