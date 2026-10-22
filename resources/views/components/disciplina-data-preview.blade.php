@@ -13,10 +13,10 @@
   </tr>
   <tr>
     <td class="col-6 d-none diff px-3">
-      {!! str_replace("\n", '&para;<br>', $model->dr[$name]) !!}
+      {!! str_replace("\n", '&para;<br>', $model->dr[$name] ?? '') !!}
     </td>
     <td class="col-6">
-      <div class="input" data-original="{!! $model->dr[$name] !!}">{{ $model[$name] }}</div>
+      <div class="input" data-original="{{ $model->dr[$name] ?? '' }}">{{ $model[$name] }}</div>
     </td>
   </tr>
 </table>

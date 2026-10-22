@@ -42,6 +42,7 @@ class Disciplina extends Model
         'historico' => AsCollection::class,
         'dtainivalprp' => BrazilianDate::class,
         'dtafimvalprp' => BrazilianDate::class,
+        'cursos_dados' => AlwaysArray::class,
     ];
 
     /**
@@ -62,6 +63,12 @@ class Disciplina extends Model
         'S' => 'Semestral',
         'A' => 'Anual',
         'Q' => 'Quadrimestral',
+    ];
+
+    public static $tiposCurso = [
+        'obrigatoria' => 'Obrigatória',
+        'eletiva' => 'Eletiva',
+        'optativa' => 'Optativa',
     ];
 
     /**
@@ -674,6 +681,38 @@ class Disciplina extends Model
         return Graduacao::$codlinegr[$codlinegr] ?? '-';
     }
 
+    /**
+     * Separa uma string de códigos ("set0199, SMM0100;abc1234") em array único e em maiúsculas
+     */
+    public static function separarCodigos(?string $texto): array
+    {
+        $partes = preg_split('/[\s,;]+/', strtoupper(trim((string) $texto))) ?: [];
+        return array_values(array_unique(array_filter($partes)));
+    }
+
+    /**
+     * Procura uma disciplina pelo código, primeiro na base local e depois no replicado.
+     *
+     * @return array|null ['coddis' => ..., 'nomdis' => ...] ou null se não existir
+     */
+    public static function buscarPorCodigo(string $coddis): ?array
+    {
+        $coddis = strtoupper(trim($coddis));
+        if (! preg_match('/^[A-Z0-9-]{4,12}$/', $coddis)) {
+            return null;
+        }
+
+        if ($local = self::where('coddis', $coddis)->first()) {
+            return ['coddis' => $coddis, 'nomdis' => $local->nomdis];
+        }
+
+        if ($dr = Graduacao::obterDisciplina($coddis, 'max')) {
+            return ['coddis' => $coddis, 'nomdis' => $dr['nomdis'] ?? ''];
+        }
+
+        return null;
+    }
+
     public function obterCursosDaUnidade()
     {
         $cursos = [];
@@ -690,6 +729,15 @@ class Disciplina extends Model
             }
             $cursos[] = $curso;
         }
+
+        if (empty($cursos) && ! empty($this->cursos_dados)) {
+            foreach (array_keys($this->cursos_dados) as $codcur) {
+                if ($curso = Curso::where('codcur', (string) $codcur)->first()) {
+                    $cursos[] = $curso;
+                }
+            }
+        }
+        
         return $cursos;
     }
 

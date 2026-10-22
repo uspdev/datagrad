@@ -1,7 +1,7 @@
 @forelse ($disc->cursos as $curso)
   <div class="card">
     <div class="card-header text-center" style="background-color: azure">
-      Curso: <b>{{ $curso['codcur'] }} - {{ $curso->dr['nomcur'] }}</b>
+          Curso: <b>{{ $curso['codcur'] }} - {{ $curso->dr['nomcur'] ?? $curso->nomcur ?? '' }}</b>
     </div>
     <div class="card-body p-1">
       @php
@@ -76,9 +76,18 @@
         </tr>
       </table>
 
-      {{-- <div class="text-center border rounded p-2" style="background-color: #f8f9fa;">
-        Período ideal: ? | Ciclo: Básico/Profissional | Tipo: Obrigatória/Optativa livre
-      </div> --}}
+      @php
+        $dadosCurso = $disc->cursos_dados[$curso->codcur] ?? null;
+      @endphp
+      @if ($dadosCurso)
+        <div class="text-center border rounded p-2 mt-2" style="background-color: #f8f9fa;">
+          Tipo: <b>{{ \App\Models\Disciplina::$tiposCurso[$dadosCurso['tipo'] ?? ''] ?? '-' }}</b>
+          | Período de oferecimento:
+          <b>{{ !empty($dadosCurso['periodo']) ? $dadosCurso['periodo'] . 'º período' : '-' }}</b>
+          | Pré-requisito(s):
+          <b>{{ !empty($dadosCurso['prerequisitos']) ? implode(', ', $dadosCurso['prerequisitos']) : 'Sem pré-requisito' }}</b>
+        </div>
+      @endif
 
     </div>
   </div>

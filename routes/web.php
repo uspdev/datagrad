@@ -50,6 +50,8 @@ Route::post('graduacao/cursos/{codcur}/{codhab}/turmas', [GraduacaoController::c
 
 Route::get('disciplinas/ajuda', [DisciplinaController::class, 'ajuda'])->name('disciplinas.ajuda');
 
+Route::get('disciplinas/validar-codigo', [DisciplinaController::class, 'validarCodigo'])->name('disciplinas.validar-codigo');
+
 Route::get('disciplinas/{coddis}/preview-html', function ($coddis) {
     // vamos manter para compatibilidade retroativa
     return redirect()->route('disciplinas.preview', ['coddis' => $coddis]);
