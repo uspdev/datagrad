@@ -5,7 +5,7 @@
     O documento está pronto para os trâmites de aprovação.<br>
     Gere o PDF e encaminhe-o para os responsáveis pela aprovação.
     <p>
-      <a href="{{ route('disciplinas.pdf', ['coddis' => $disc->coddis]) }}" class="btn btn-primary mt-2">
+      <a href="{{ route('disciplinas.pdf', ['coddis' => $disc->coddis]) }}" class="btn btn-primary mt-2" target="_blank">
         <i class="fas fa-file-pdf"></i> Gerar PDF</a>
     </p>
   </div>

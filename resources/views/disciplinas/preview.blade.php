@@ -7,6 +7,22 @@
       #skin_login_bar {
         display: none !important;
       }
+
+      .rascunho-watermark {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        text-align: center;
+        color: #dc3545;
+        font-size: 11px;
+        font-weight: bold;
+        letter-spacing: 1px;
+        background-color: rgba(248, 215, 218, 0.7);
+        padding: 4px;
+        border-top: 1px dashed #dc3545;
+        z-index: 9999;
+      }
     }
 
     .card {
@@ -76,10 +92,26 @@
 @section('content')
   @include('disciplinas.partials.preview.navbar')
 
+  @if (!in_array($disc->estado, ['Em aprovação', 'Finalizado']))
+    <div class="alert alert-danger text-center my-3 p-2 text-uppercase border border-danger"
+      style="border: 2px dashed #dc3545 !important; background-color: #f8d7da; color: #721c24;">
+      <span class="h5 font-weight-bold d-block mb-1">
+        <i class="fas fa-exclamation-triangle"></i> Versão Preliminar em Rascunho
+      </span>
+      <span class="small font-weight-bold">
+        Documento gerado para simples conferência — Não possui validade para tramitação de aprovação (Estado: {{ $disc->estado }})
+      </span>
+    </div>
+
+    <div class="rascunho-watermark d-none d-print-block">
+      --- VERSÃO PRELIMINAR EM RASCUNHO — NÃO POSSUI VALIDADE PARA TRAMITAÇÃO ---
+    </div>
+  @endif
+
   <div class="h4 text-center my-3">
     {{ $disc->dr ? 'Alteração' : 'Criação' }} da disciplina: <b>{{ $disc->coddis }} - {{ $disc->nomdis }}</b>
   </div>
-  <div class="row">
+  <div class="row d-print-none">
     <div class="col-md-8">
       @include('disciplinas.partials.preview.em-aprovacao-msg')
       @include('disciplinas.partials.preview.em-aprovacao-btn')
@@ -122,7 +154,7 @@
 
   <div class="">
     Documento original:
-    <a href="{{ route('disciplinas.preview', $disc->coddis) }}">{{ route('disciplinas.preview', $disc->coddis) }}</a>
+    <a href="{{ route('disciplinas.preview', $disc->coddis) }}" target="_blank">{{ route('disciplinas.preview', $disc->coddis) }}</a>
   </div>
 
   <div>

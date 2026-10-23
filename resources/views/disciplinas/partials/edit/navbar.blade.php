@@ -16,13 +16,18 @@
       @endif
 
       @if (in_array($disc->estado, ['Em edição', 'Criar']))
-        <button class="btn btn-sm btn-danger ml-2" type="submit" name="action" value="preview">
+        <button class="btn btn-sm btn-danger ml-2" type="submit" name="action" value="preview" formtarget="_blank">
           Salvar e visualizar HTML
         </button>
+        <a href="{{ route('disciplinas.pdf', $disc->coddis) }}" target="_blank" class="btn btn-sm btn-outline-danger ml-2">
+          <i class="fas fa-file-pdf"></i> PDF
+        </a>
       @else
         @if ($disc->estado != 'Propor alteração')
           <a href="{{ route('disciplinas.preview', $disc->coddis) }}" target="_blank"
             class="btn btn-sm btn-danger ml-2">Visualizar HTML</a>
+          <a href="{{ route('disciplinas.pdf', $disc->coddis) }}" target="_blank"
+            class="btn btn-sm btn-outline-danger ml-2"><i class="fas fa-file-pdf"></i> PDF</a>
         @endif
       @endif
     </span>
