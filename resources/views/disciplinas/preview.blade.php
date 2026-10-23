@@ -95,7 +95,7 @@
   @include('disciplinas.partials.preview.navbar')
 
   @if (!in_array($disc->estado, ['Em aprovação', 'Finalizado']))
-    <div class="alert alert-danger text-center my-3 p-2 text-uppercase border border-danger"
+    <div class="alert alert-danger text-center my-3 p-2 text-uppercase border border-danger {{ ($isPdf ?? request()->routeIs('disciplinas.pdf')) ? '' : 'd-none d-print-block' }}"
       style="border: 2px dashed #dc3545 !important; background-color: #f8d7da; color: #721c24;">
       <span class="h5 font-weight-bold d-block mb-1">
         <i class="fas fa-exclamation-triangle"></i> Versão Preliminar em Rascunho
@@ -105,7 +105,7 @@
       </span>
     </div>
 
-    <div class="rascunho-watermark d-none d-print-block">
+    <div class="rascunho-watermark {{ ($isPdf ?? request()->routeIs('disciplinas.pdf')) ? '' : 'd-none d-print-block' }}">
       --- VERSÃO PRELIMINAR EM RASCUNHO — NÃO POSSUI VALIDADE PARA TRAMITAÇÃO ---
     </div>
   @endif
