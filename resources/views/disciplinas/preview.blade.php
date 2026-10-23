@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.print')
 
 @section('styles')
   @parent
@@ -79,12 +79,18 @@
   <div class="h4 text-center my-3">
     {{ $disc->dr ? 'Alteração' : 'Criação' }} da disciplina: <b>{{ $disc->coddis }} - {{ $disc->nomdis }}</b>
   </div>
-
-  @include('disciplinas.partials.preview.em-aprovacao-msg')
-  @include('disciplinas.partials.preview.em-aprovacao-btn')
-  @include('disciplinas.partials.preview.admin')
-  @include('disciplinas.partials.preview.validacao')
-  @include('disciplinas.partials.preview.instrucoes-cg')
+  <div class="row">
+    <div class="col-md-8">
+      @include('disciplinas.partials.preview.em-aprovacao-msg')
+      @include('disciplinas.partials.preview.em-aprovacao-btn')
+      @include('disciplinas.partials.preview.admin')
+      @include('disciplinas.partials.preview.validacao')
+      @include('disciplinas.partials.preview.instrucoes-cg')
+    </div>
+    <div class="col-md-4">
+      @include('disciplinas.partials.form-historico')
+    </div>
+  </div>
 
   <div class="my-2">
     <b>Unidade</b>: {{ \Uspdev\Replicado\Estrutura::obterUnidade(config('datagrad.codundclgs')[0])['sglund'] }}

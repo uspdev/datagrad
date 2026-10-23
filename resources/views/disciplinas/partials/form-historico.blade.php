@@ -1,4 +1,5 @@
-<div class="alert alert-info mt-3 small">
+<div class="alert alert-info small d-print-none">
+  <div class="h5">Histórico de alterações</div>
   <div>Estado atual:
     <b>{{ $disc->estado }}</b>, por {{ $disc->atualizadoPor?->name }}<br>
     Chave: {{ $disc->hash() }}

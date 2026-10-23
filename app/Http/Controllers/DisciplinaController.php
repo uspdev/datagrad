@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
+use App\Services\Gotenberg;
 use Spatie\LaravelPdf\Facades\Pdf;
 use Uspdev\UspTheme\Facades\UspTheme;
 
@@ -199,7 +200,7 @@ class DisciplinaController extends Controller
         $action = $request->action ?? null;
 
         if ($action == 'estado_undo') {
-            Gate::authorize('admin');
+            Gate::authorize('departamento', $disc);
             $disc->atualizarEstado($request->estado);
             $disc->save();
             return redirect()->to($request->next);
@@ -333,14 +334,20 @@ class DisciplinaController extends Controller
             return view('disciplinas.preview-negado', $data);
         }
 
+        if (config('laravel-pdf.driver') === 'gotenberg' && ! Gotenberg::isAvailable()) {
+            return redirect()
+                ->route('disciplinas.preview', $coddis)
+                ->with('alert-danger', 'Serviço de geração de PDF (Gotenberg) indisponível no momento. Tente novamente mais tarde.');
+        }
+
         $disc = $data['disc'];
-
         $filename = 'alteracao-disciplina-' . $coddis . '-vigencia-' . $disc->ano . $disc->semestre . '.pdf';
-
         return Pdf::view('disciplinas.preview', compact('disc'))
+            ->waitUntilReady(timeout: 30000)
             ->format('a4')
             ->orientation('portrait')
-            ->download($filename);
+            ->name($filename)
+            ->download();
     }
 
     /**
