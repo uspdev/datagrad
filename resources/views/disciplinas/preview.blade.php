@@ -1,10 +1,12 @@
-@extends('layouts.print')
+@extends(($isPdf ?? request()->routeIs('disciplinas.pdf')) ? 'layouts.print' : 'layouts.app')
 
 @section('styles')
   @parent
   <style>
     @media print {
-      #skin_login_bar {
+      #skin_header,
+      #skin_login_bar,
+      #menu {
         display: none !important;
       }
 
@@ -154,7 +156,7 @@
 
   <div class="">
     Documento original:
-    <a href="{{ route('disciplinas.preview', $disc->coddis) }}" target="_blank">{{ route('disciplinas.preview', $disc->coddis) }}</a>
+    <a href="{{ route('disciplinas.preview', $disc->coddis) }}">{{ route('disciplinas.preview', $disc->coddis) }}</a>
   </div>
 
   <div>

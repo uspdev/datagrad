@@ -438,7 +438,7 @@ class DisciplinaController extends Controller
         $disc = $data['disc'];
         $tipo = $disc->dr ? 'alteracao' : 'criacao';
         $filename = $tipo . '-disciplina-' . $coddis . '-vigencia-' . $disc->ano . $disc->semestre . '.pdf';
-        return Pdf::view('disciplinas.preview', compact('disc'))
+        return Pdf::view('disciplinas.preview', ['disc' => $disc, 'isPdf' => true])
             ->waitUntilReady(timeout: 30000)
             ->format('a4')
             ->orientation('portrait')
