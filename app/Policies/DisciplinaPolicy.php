@@ -27,8 +27,7 @@ class DisciplinaPolicy
     {
         return $user->canAny(['senhaunica.docente', 'senhaunica.admin'])
             || $user->canAny(['disciplina-cg', 'disciplina-cc', 'disciplina-chefe'])
-            || $user->canAny(['disciplina-biblioteca'])
-            ;
+            || $user->canAny(['disciplina-biblioteca']);
 
         // servidores, estagiários e docentes
         // return Gate::check('senhaunica.servidor') || Gate::check('senhaunica.estagiario') || Gate::check('senhaunica.docente');
@@ -102,5 +101,14 @@ class DisciplinaPolicy
     public function biblioteca(User $user): bool
     {
         return $user->can('disciplina-biblioteca');
+    }
+
+    /**
+     * Determine whether the user belongs to the department of the discipline.
+     */
+    public function departamento(User $user, Disciplina $disciplina): bool
+    {
+        $prefixo = substr($disciplina->coddis, 0, 3);
+        return $user->hasRole('disciplinas_' . $prefixo);
     }
 }
