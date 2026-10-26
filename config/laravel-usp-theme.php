@@ -84,6 +84,11 @@ $menu = [
 
 $right_menu = [
     [
+        'text' => '<span class="text-danger"><i class="fas fa-cogs"></i> Configurações</span>',
+        'url' => 'configuracoes',
+        'can' => 'admin',
+    ],
+    [
         'text' => '<span class="text-danger"><i class="fas fa-user-tag"></i> Funções</span>',
         'url' => 'roles',
         'can' => 'roles',
