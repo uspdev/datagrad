@@ -269,7 +269,7 @@ class DisciplinaController extends Controller
         }
 
         $avisos = [];
-        if ($disc->estado == 'Criar' && $request->boolean('aba_cursos_criar')) {
+        if ($request->boolean('aba_cursos')) {
             [$dadosCursos, $avisos] = $this->tratarDadosPorCurso($request, $disc);
             $request->merge($dadosCursos);
         }
@@ -298,7 +298,7 @@ class DisciplinaController extends Controller
     }
 
     /**
-     * Normaliza os dados por curso da aba "Cursos" (disciplina em criação).
+     * Normaliza os dados por curso da aba "Cursos".
      *
      * Só mantém dados dos cursos marcados. Pré-requisitos inexistentes são descartados
      * e geram aviso, sem perder o restante do que o usuário preencheu.
