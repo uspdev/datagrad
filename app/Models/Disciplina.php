@@ -716,6 +716,29 @@ class Disciplina extends Model
     public function obterCursosDaUnidade()
     {
         $cursos = [];
+
+        // o que foi salvo no datagrad prevalece
+        if (!empty($this->cursos_dados)) {
+            foreach (array_keys($this->cursos_dados) as $codcur) {
+                $codcur = (string) $codcur;
+                $curso = Curso::where('codcur', $codcur)->first();
+                if (! $curso) {
+                    $curso = new Curso();
+                    $curso->codcur = $codcur;
+                    // reaproveita o nome vindo do replicado, se houver
+                    foreach ($this->dr['cursos'] ?? [] as $cursoDr) {
+                        if ((string) $cursoDr['codcur'] === $codcur) {
+                            $curso->dr = $cursoDr;
+                            break;
+                        }
+                    }
+                }
+                $cursos[] = $curso;
+            }
+            return $cursos;
+        }
+
+        // sem dados salvos: cursos atuais da disciplina no replicado
         foreach ($this->dr['cursos'] ?? [] as $cursoDr) {
             if (stripos(config('replicado.codundclgs'), $cursoDr['codclg']) === false) {
                 continue;
@@ -729,15 +752,6 @@ class Disciplina extends Model
             }
             $cursos[] = $curso;
         }
-
-        if (empty($cursos) && ! empty($this->cursos_dados)) {
-            foreach (array_keys($this->cursos_dados) as $codcur) {
-                if ($curso = Curso::where('codcur', (string) $codcur)->first()) {
-                    $cursos[] = $curso;
-                }
-            }
-        }
-        
         return $cursos;
     }
 

@@ -73,21 +73,6 @@
     #card-avaliacao .titulo {
       background-color: beige !important;
     }
-
-    #card-viagem-didatica {
-      border: 1px solid rosybrown;
-      border-top: 3px solid rosybrown;
-    }
-
-    #card-viagem-didatica .card-header {
-      text-align: center;
-      font-weight: bold;
-      background-color: beige;
-    }
-
-    #card-viagem-didatica .titulo {
-      background-color: beige !important;
-    }
   </style>
 @endsection
 
@@ -188,6 +173,13 @@
       <x-disciplina-select-preview name="codlinegr" :model="$disc"></x-disciplina-select-preview>
       <x-disciplina-select-preview name="atividade_extensionista" :model="$disc"></x-disciplina-select-preview>
       <x-disciplina-sim-nao-preview name="stavgmdid" :model="$disc"></x-disciplina-sim-nao-preview>
+      {{-- viagem didatica (detalhes, logo abaixo dos dados básicos) --}}
+      @if ($disc->stavgmdid == 'S')
+        <div class="ml-2 pl-2 mt-1 border-left border-secondary" id="viagem-didatica">
+          <x-disciplina-sim-nao-preview name="staetr" :model="$disc"></x-disciplina-sim-nao-preview>
+          <x-disciplina-text-preview name="dscatvpvs" :model="$disc"></x-disciplina-textarea-preview>
+        </div>
+      @endif
       <x-disciplina-sim-nao-preview name="stapsuatvani" :model="$disc"></x-disciplina-sim-nao-preview>
     </div>
     <div class="col-5">
@@ -213,17 +205,35 @@
 
   <div class="my-1">&nbsp;</div>
 
-  <x-disciplina-textarea-preview name="pgmrsudis" :model="$disc"></x-disciplina-textarea-preview>
-  <x-disciplina-textarea-preview name="pgmrsudisigl" :model="$disc"></x-disciplina-textarea-preview>
+  <div class="card mb-3 border-info" id="card-cursos">
+    <div class="card-header alert-primary text-center">Cursos</div>
+    <div class="card-body p-1">
+      @include('disciplinas.partials.preview.cursos')
+    </div>
+  </div>
 
-  <x-disciplina-textarea-preview name="objdis" :model="$disc"></x-disciplina-textarea-preview>
-  <x-disciplina-textarea-preview name="objdisigl" :model="$disc"></x-disciplina-textarea-preview>
+  <div class="card mb-3 border-success" id="card-ementa">
+    <div class="card-header alert-success text-center">Ementa</div>
+    <div class="card-body p-1">
 
-  <x-disciplina-textarea-preview name="pgmdis" :model="$disc"></x-disciplina-textarea-preview>
-  <x-disciplina-textarea-preview name="pgmdisigl" :model="$disc"></x-disciplina-textarea-preview>
+      <x-disciplina-textarea-preview name="pgmrsudis" :model="$disc"></x-disciplina-textarea-preview>
+      <x-disciplina-textarea-preview name="pgmrsudisigl" :model="$disc"></x-disciplina-textarea-preview>
 
-  <x-disciplina-checkbox-preview name="mtdens" :model="$disc"></x-disciplina-checkbox-preview>
-  <x-disciplina-checkbox-preview name="mtdensigl" :model="$disc"></x-disciplina-checkbox-preview>
+      <x-disciplina-textarea-preview name="objdis" :model="$disc"></x-disciplina-textarea-preview>
+      <x-disciplina-textarea-preview name="objdisigl" :model="$disc"></x-disciplina-textarea-preview>
+
+      <x-disciplina-textarea-preview name="pgmdis" :model="$disc"></x-disciplina-textarea-preview>
+      <x-disciplina-textarea-preview name="pgmdisigl" :model="$disc"></x-disciplina-textarea-preview>
+    </div>
+  </div>
+
+  <div class="card mb-3 border-primary" id="card-ementa">
+    <div class="card-header alert-primary text-center">Métodos de Ensino</div>
+    <div class="card-body p-1">
+      <x-disciplina-checkbox-preview name="mtdens" :model="$disc"></x-disciplina-checkbox-preview>
+      <x-disciplina-checkbox-preview name="mtdensigl" :model="$disc"></x-disciplina-checkbox-preview>
+    </div>
+  </div>
 
   <div class="card mb-3" id="card-avaliacao">
     <div class="card-header">Instrumentos e critérios de avaliação</div>
@@ -239,23 +249,15 @@
     </div>
   </div>
 
-  <x-disciplina-textarea-preview name="dscbbgdis" :model="$disc"></x-disciplina-textarea-preview>
-  <x-disciplina-textarea-preview name="dscbbgdiscpl" :model="$disc"></x-disciplina-textarea-preview>
+  <div class="card mb-3 border-success" id="card-ementa">
+    <div class="card-header alert-success text-center">Bibliografias</div>
+    <div class="card-body p-1">
+      <x-disciplina-textarea-preview name="dscbbgdis" :model="$disc"></x-disciplina-textarea-preview>
+      <x-disciplina-textarea-preview name="dscbbgdiscpl" :model="$disc"></x-disciplina-textarea-preview>
+    </div>
+  </div>
 
   <x-disciplina-checkbox-preview name="objdslsut" :model="$disc" :options="['diff' => false]"></x-disciplina-checkbox-preview>
-
-  {{-- viagem didatica --}}
-  @if ($disc->stavgmdid == 'S')
-    <div class="card viagem-didatica" id="card-viagem-didatica">
-      <div class="card-header">Viagem didática</div>
-      <div class="card-body p-1">
-        <div class="d-flex flex-column align-items-center pb-2">
-          <x-disciplina-sim-nao-preview name="staetr" :model="$disc"></x-disciplina-sim-nao-preview>
-        </div>
-        <x-disciplina-textarea-preview name="dscatvpvs" :model="$disc"></x-disciplina-textarea-preview>
-      </div>
-    </div>
-  @endif
 
   {{-- atividade-extensionista --}}
   @if ($disc->atividade_extensionista)
@@ -293,9 +295,6 @@
       </div>
     </div>
   @endif
-
-  {{-- habilidades e competencias --}}
-  @include('disciplinas.partials.preview.cursos')
 
   @include('disciplinas.partials.preview.em-aprovacao-btn')
 @endsection

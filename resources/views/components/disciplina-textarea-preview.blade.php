@@ -14,7 +14,7 @@
 
 <table class="table table-bordered table-sm {{ $model::meta()[$name]['class'] ?? '' }}" id="{{ $id }}">
   <tr>
-    <th colspan="{{ $colspan }}" class="titulo text-center {{ $italico_igl }}" style="background-color: aliceBlue">
+    <th colspan="{{ $colspan }}" class="titulo text-center {{ $italico_igl }}" style="background-color: #eef7f0">
       {{ $model::meta()[$name]['titulo'] }}
       @include('components.partials.copiar-btn')
     </th>
