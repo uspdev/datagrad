@@ -6,6 +6,7 @@ use App\Http\Controllers\CursoController;
 use App\Http\Controllers\ArquivoController;
 use App\Http\Controllers\GraduacaoController;
 use App\Http\Controllers\DisciplinaController;
+use App\Http\Controllers\ConfiguracaoController;
 
 /*
 |--------------------------------------------------------------------------
@@ -77,3 +78,8 @@ Route::post('graduacao/horarios', [GraduacaoController::class, 'gradeHorarios'])
 
 Route::get('graduacao/relatorio_pecg', [GraduacaoController::class, 'relatorioPecg'])->name('graduacao.relatorio_pecg');
 Route::post('graduacao/relatorio_pecg', [GraduacaoController::class, 'relatorioPecg'])->name('graduacao.relatorio_pecg.post');
+
+# Configurações do Sistema
+Route::get('configuracoes', [ConfiguracaoController::class, 'index'])->name('configuracoes.index');
+Route::post('configuracoes/gotenberg/teste', [ConfiguracaoController::class, 'testarGotenberg'])->name('configuracoes.gotenberg.teste');
+Route::get('configuracoes/gotenberg/pdf-teste', [ConfiguracaoController::class, 'pdfTeste'])->name('configuracoes.gotenberg.pdf-teste');

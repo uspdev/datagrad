@@ -21,7 +21,7 @@
         </button>
       @else
         @if ($disc->estado != 'Propor alteração')
-          <a href="{{ route('disciplinas.preview', $disc->coddis) }}" target="_blank"
+          <a href="{{ route('disciplinas.preview', $disc->coddis) }}"
             class="btn btn-sm btn-danger ml-2">Visualizar HTML</a>
         @endif
       @endif

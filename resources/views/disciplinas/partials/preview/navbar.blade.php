@@ -16,6 +16,10 @@
         Voltar para disciplina
       </a>
     @endif
+
+    <a href="{{ route('disciplinas.pdf', ['coddis' => $disc->coddis]) }}" class="btn btn-sm btn-danger ml-2" target="_blank">
+      <i class="fas fa-file-pdf"></i> Gerar PDF
+    </a>
   </div>
 
   <div class="">
