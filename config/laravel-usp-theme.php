@@ -33,10 +33,10 @@ $menu = [
             [
                 'text' => 'Quadro horários de aula',
                 'url'  => 'graduacao/horarios',
-                'can'  => 'relatorio-curso',
+                'can'  => 'relatorios',
             ],
         ],
-        'can'  => 'relatorio-curso',
+        'can'  => 'relatorios',
     ],
     [
         'text' => 'Relatórios alunos',
@@ -44,15 +44,20 @@ $menu = [
             [
                 'text' => 'Relatório grade horária',
                 'url'  => 'graduacao/relatorio/gradehoraria',
-                'can'  => 'datagrad',
+                'can'  => 'relatorios',
             ],
             [
                 'text' => 'Relatório alunos PEC-G',
                 'url'  => 'graduacao/relatorio_pecg',
                 'can'  => 'datagrad',
             ],
+            [
+                'text' => 'Relatório encerramentos de matrícula',
+                'url'  => 'graduacao/relatorio/encerramento-matricula',
+                'can'  => 'relatorios',
+            ],
         ],
-        'can'  => 'datagrad',
+        'can'  => 'relatorios',
     ],
     [
         'text' => 'Estatísticas',

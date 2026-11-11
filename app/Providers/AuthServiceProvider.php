@@ -41,7 +41,7 @@ class AuthServiceProvider extends ServiceProvider
         // relatorio de carga horaria cumprida por aluno
         Gate::define('relatorio-cgahoralu', fn(User $user) => $user->hasAnyRole(['CG', 'CC']));
         
-        Gate::define('relatorio-curso', function (User $user) {
+        Gate::define('relatorios', function (User $user) {
             return $user->hasAnyRole(['CG', 'CC'])
                 || $user->getRoleNames()->contains(
                     fn($role) => str_starts_with($role, 'disciplinas')
