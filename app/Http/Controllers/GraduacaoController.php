@@ -372,7 +372,7 @@ class GraduacaoController extends Controller
             session()->flashInput($request->input());
         }
 
-        $this->authorize('datagrad');
+        $this->authorize('relatorios');
         UspTheme::activeUrl('graduacao/relatorio/gradehoraria');
 
         $entradas = Tools::limparNomes($request->nusps);  //limpando os números usp na verdade
@@ -764,7 +764,7 @@ class GraduacaoController extends Controller
 
     public function gradeHorarios(Request $request)
     {
-        $this->authorize('relatorio-curso');
+        $this->authorize('relatorios');
         \UspTheme::activeUrl('graduacao/horarios');
 
         $cursosHabilitacoes = Graduacao::listarTodosCursosHabilitacoes();
@@ -1081,5 +1081,34 @@ class GraduacaoController extends Controller
             'anoInicio' => $anoInicio,
             'anoFim'    => $anoFim,
         ]);
+    }
+
+    public function relatorioEncerramentosDeMatricula(Request $request)
+    {
+        $this->authorize('relatorios');
+        \UspTheme::activeUrl('graduacao/relatorio/encerramento-matricula');
+
+        $cursos = collect(Graduacao::listarCursosHabilitacoes())->unique('codcur')->sortBy('nomcur');
+        $anos = range(now()->year, now()->year - 10);
+        $alunos = null;
+
+        if ($request->isMethod('post')) {
+            $request->validate([
+                'codcur' => 'required|integer',
+                'ano' => 'required|integer|between:2000,' . now()->year,
+            ]);
+            $alunos = Graduacao::listarEncerramentosDeMatricula($request->codcur, $request->ano);
+        }
+
+        $statusPgm = [
+            'A' => 'Ativo',
+            'E' => 'Encerrado',
+            'T' => 'Trancado',
+            'R' => 'Reativado',
+            'S' => 'Suspenso',
+            'P' => 'Pendente',
+        ];
+
+        return view('grad.relatorio-encerramento-matricula', compact('cursos', 'anos', 'alunos', 'statusPgm'));
     }
 }

@@ -73,7 +73,7 @@
             @endcan
 
             {{-- BLOCK: Relatórios cursos --}}
-            @can('relatorio-curso')
+            @can('relatorios')
             <div class="col-md-4 mb-4">
                 <div class="card h-100 border shadow-sm rounded-lg overflow-hidden card-eesc">
                     <div class="card-header d-flex justify-content-between align-items-center py-3" style="background-color: #dbe2f0; color: #003366; border-bottom: 1px solid #c3d0e8;">
@@ -90,7 +90,7 @@
                                 </a>
                             </li>
                             @endcan
-                            @can('relatorio-curso')
+                            @can('relatorios')
                             <li class="list-group-item border-0 px-0 py-2">
                                 <a href="{{ url('graduacao/horarios') }}" class="card-link-item text-decoration-none d-flex align-items-center">
                                     <i class="far fa-clock mr-2 fa-lg icon-eesc"></i>
@@ -105,7 +105,7 @@
             @endcan
 
             {{-- BLOCK: Relatórios alunos --}}
-            @can('datagrad')
+            @can('relatorios')
             <div class="col-md-4 mb-4">
                 <div class="card h-100 border shadow-sm rounded-lg overflow-hidden card-eesc">
                     <div class="card-header d-flex justify-content-between align-items-center py-3" style="background-color: #dbe2f0; color: #003366; border-bottom: 1px solid #c3d0e8;">
@@ -114,7 +114,7 @@
                     </div>
                     <div class="card-body bg-white">
                         <ul class="list-group list-group-flush">
-                            @can('datagrad')
+                            @can('relatorios')
                             <li class="list-group-item border-0 px-0 py-2">
                                 <a href="{{ url('graduacao/relatorio/gradehoraria') }}" class="card-link-item text-decoration-none d-flex align-items-center">
                                     <i class="fas fa-id-card mr-2 fa-lg icon-eesc"></i>
@@ -127,6 +127,14 @@
                                 <a href="{{ url('graduacao/relatorio_pecg') }}" class="card-link-item text-decoration-none d-flex align-items-center">
                                     <i class="fas fa-globe-americas mr-2 fa-lg icon-eesc"></i>
                                     <span>Relatório alunos PEC-G</span>
+                                </a>
+                            </li>
+                            @endcan
+                            @can('relatorios')
+                            <li class="list-group-item border-0 px-0 py-2">
+                                <a href="{{ url('graduacao/relatorio/encerramento-matricula') }}" class="card-link-item text-decoration-none d-flex align-items-center">
+                                    <i class="fas fa-user-times mr-2 fa-lg icon-eesc"></i>
+                                    <span>Relatório encerramentos de matrícula</span>
                                 </a>
                             </li>
                             @endcan
@@ -236,6 +244,7 @@
                 - <b>Consultar e Alterar Disciplinas</b>: é possível detalhar disciplinas e propor alterações;<br>
                 - <b>Relatório grade horária</b>: mostra a grade horária corrente para a lista de alunos informada;<br>
                 - <b>Relatório alunos PEC-G</b>: lista os alunos ingressantes com convênio PEC-G por intervalo de anos;<br>
+                - <b>Relatório encerramentos de matrícula</b>: lista os alunos com matrícula encerrada no ano selecionado de um determinado curso;<br>
                 - <b>Relatório carga horária acumulada</b>: mostra a carga horária acumulada em carga obrigatória, optativa, estágio, AAC e AEX cumprida por cada aluno de um determinado curso e ano de ingresso selecionado ou informado na lista;<br>
                 - <b>Quadro horário de aulas</b>: mostra os horários de aula de cada disciplina e suas respectivas turmas, filtrado por curso e ano/semestre;<br>        
                 - <b>Relatório de evasão</b>: mostra gráfico e tabela de evasão por curso e por ano de ingresso.

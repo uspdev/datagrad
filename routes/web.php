@@ -83,3 +83,6 @@ Route::post('graduacao/relatorio_pecg', [GraduacaoController::class, 'relatorioP
 Route::get('configuracoes', [ConfiguracaoController::class, 'index'])->name('configuracoes.index');
 Route::post('configuracoes/gotenberg/teste', [ConfiguracaoController::class, 'testarGotenberg'])->name('configuracoes.gotenberg.teste');
 Route::get('configuracoes/gotenberg/pdf-teste', [ConfiguracaoController::class, 'pdfTeste'])->name('configuracoes.gotenberg.pdf-teste');
+
+Route::get('graduacao/relatorio/encerramento-matricula', [GraduacaoController::class, 'relatorioEncerramentosDeMatricula'])->name('graduacao.relatorio.encerramento-matricula');
+Route::post('graduacao/relatorio/encerramento-matricula', [GraduacaoController::class, 'relatorioEncerramentosDeMatricula'])->name('graduacao.relatorio.encerramento-matricula.post');

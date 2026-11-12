@@ -1345,4 +1345,36 @@ class Graduacao extends GraduacaoReplicado
 
         return DB::fetchAll($query, $param);
     }
+
+    /**
+     * Alunos com matrícula encerrada no ano
+     */
+    public static function listarEncerramentosDeMatricula(int $codcur, int $ano): array
+    {
+        $query = "
+            SELECT DISTINCT
+                p.codpes AS numero_usp,
+                p.nompes AS nome_aluno,
+                YEAR(pgr.dtaing) AS ano_ingresso,
+                pgr.tiping AS tipo_ingresso,
+                COALESCE(pgr.tipencpgm, h.tipenchab, hpg.motstapgm) AS motivo_desligamento,
+                hpg.anoref AS ano_desligamento,
+                hpg.perref AS semestre_desligamento,
+                pgr.stapgm AS status_atual
+            FROM PROGRAMAGR pgr
+            INNER JOIN PESSOA p ON pgr.codpes = p.codpes
+            INNER JOIN HABILPROGGR h ON pgr.codpes = h.codpes AND pgr.codpgm = h.codpgm
+            INNER JOIN HISTPROGGR hpg ON pgr.codpes = hpg.codpes AND pgr.codpgm = hpg.codpgm
+            WHERE
+                hpg.stapgm = 'E'
+                AND h.codcur = :codcur
+                AND hpg.anoref = :ano
+                AND (pgr.tipencpgm NOT LIKE '%Conclusão%' OR pgr.tipencpgm IS NULL)
+                AND (h.tipenchab NOT LIKE '%Conclusão%' OR h.tipenchab IS NULL)
+                AND (hpg.anoref - YEAR(pgr.dtaing)) < 5
+            ORDER BY ano_ingresso, nome_aluno
+        ";
+
+        return DB::fetchAll($query, ['codcur' => $codcur, 'ano' => $ano]);
+    }
 }
