@@ -217,21 +217,10 @@ class DisciplinaController extends Controller
         }
 
 
-        // para aprovação, finaliza a edição do pdf
         if ($action == 'mudar_em_aprovacao') {
-            $erros = $disc->validarCampos();
-            $pendentes = [];
-
-            if (isset($erros['mtdens'])) {
-                $pendentes[] = '"Método de ensino"';
-            }
-            if (isset($erros['objdslsut'])) {
-                $pendentes[] = '"Objetivos de Desenvolvimento Sustentável"';
-            }
-
-            if (!empty($pendentes)) {
-                $msg = 'Não é possível mudar para "Em aprovação": o(s) campo(s) ' . implode(' e ', $pendentes) . ' deve(m) ser preenchido(s).';
-                return redirect()->back()->with('alert-danger', $msg);
+            $pend = $disc->pendenciasAprovacao();
+            if ($pend['campos'] || $pend['cursos']) {
+                return redirect()->route('disciplinas.preview', $disc->coddis);
             }
 
             $disc->atualizarEstado('Em aprovação');
@@ -311,6 +300,7 @@ class DisciplinaController extends Controller
             'cursos_marcados' => 'nullable|array',
             'cursos_marcados.*' => 'string|max:10',
             'cursos_dados.*.tipo' => ['nullable', Rule::in(array_keys(Disciplina::$tiposCurso))],
+            'cursos_dados.*.ciclo' => ['nullable', Rule::in(array_keys(Disciplina::$ciclosCurso))],
             'cursos_dados.*.periodo' => 'nullable|integer|between:1,10',
             'cursos_dados.*.prerequisitos' => 'nullable|string|max:500',
             'habilidades.*.*' => 'string',
@@ -341,6 +331,7 @@ class DisciplinaController extends Controller
                 'periodo' => $request->filled("cursos_dados.$codcur.periodo")
                     ? (int) $request->input("cursos_dados.$codcur.periodo")
                     : null,
+                'ciclo' => $request->input("cursos_dados.$codcur.ciclo") ?: null,
                 'prerequisitos' => $validos,
             ];
         }

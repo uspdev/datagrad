@@ -2,6 +2,8 @@
   $listaCursos = collect($cursos)->unique('codcur')->sortBy('nomcur');
   $dados = (array) ($disc->cursos_dados ?? []);
 
+  $padroes = $disc->padroesCursosReplicado();
+
   // se já foi salvo pelo datagrad, vale o que foi salvo.
   // na primeira edição de uma disciplina do replicado, parte dos cursos atuais dela
   $selecionados = !empty($dados)
@@ -37,15 +39,24 @@
         </div>
       @endforeach
     </div>
+    <div class="small text-muted mt-2">
+      Para enviar a disciplina para aprovação, é obrigatório selecionar ao menos um curso e preencher
+      tipo, período, ciclo e ao menos uma habilidade e uma competência de cada curso selecionado
+      (<span class="text-danger">*</span>).
+    </div>
   </div>
 </div>
 
 @foreach ($listaCursos as $c)
   @php
-    $codcur = $c['codcur'];
+    $codcur = (string) $c['codcur'];
     $local = $cursosLocais[$codcur] ?? null;
     $habs = $itens($local->habilidades ?? '');
     $comps = $itens($local->competencias ?? '');
+
+    $valTipo = old("cursos_dados.$codcur.tipo", $dados[$codcur]['tipo'] ?? ($padroes[$codcur]['tipo'] ?? null));
+    $valPeriodo = (int) old("cursos_dados.$codcur.periodo", $dados[$codcur]['periodo'] ?? ($padroes[$codcur]['periodo'] ?? 0));
+    $valCiclo = old("cursos_dados.$codcur.ciclo", $dados[$codcur]['ciclo'] ?? ($padroes[$codcur]['ciclo'] ?? null));
   @endphp
 
   <div class="card d-none" id="bloco-curso-{{ $codcur }}">
@@ -54,39 +65,49 @@
     </div>
     <div class="card-body">
       <div class="form-row">
-        <div class="form-group col-md-4">
-          <label>Tipo da disciplina neste curso</label>
+        <div class="form-group col-md-3">
+          <label>Tipo da disciplina neste curso <span class="text-danger">*</span></label>
           <select name="cursos_dados[{{ $codcur }}][tipo]" class="form-control">
             <option value="">-- Selecione --</option>
             @foreach (\App\Models\Disciplina::$tiposCurso as $valor => $rotulo)
-              <option value="{{ $valor }}" @selected(($dados[$codcur]['tipo'] ?? null) === $valor)>{{ $rotulo }}</option>
+              <option value="{{ $valor }}" @selected($valTipo === $valor)>{{ $rotulo }}</option>
+            @endforeach
+          </select>
+        </div>
+
+        <div class="form-group col-md-2">
+          <label>Período <span class="text-danger">*</span></label>
+          <select name="cursos_dados[{{ $codcur }}][periodo]" class="form-control">
+            <option value="">-- Selecione --</option>
+            @foreach (range(1, 10) as $p)
+              <option value="{{ $p }}" @selected($valPeriodo === $p)>{{ $p }}º período</option>
             @endforeach
           </select>
         </div>
 
         <div class="form-group col-md-3">
-          <label>Período de oferecimento</label>
-          <select name="cursos_dados[{{ $codcur }}][periodo]" class="form-control">
+          <label>Ciclo <span class="text-danger">*</span></label>
+          <select name="cursos_dados[{{ $codcur }}][ciclo]" class="form-control">
             <option value="">-- Selecione --</option>
-            @foreach (range(1, 10) as $p)
-              <option value="{{ $p }}" @selected((int) ($dados[$codcur]['periodo'] ?? 0) === $p)>{{ $p }}º período</option>
+            @foreach (\App\Models\Disciplina::$ciclosCurso as $valor => $rotulo)
+              <option value="{{ $valor }}" @selected($valCiclo === $valor)>{{ $rotulo }}</option>
             @endforeach
           </select>
         </div>
 
-        <div class="form-group col-md-5">
+        <div class="form-group col-md-4">
           <label>Pré-requisito(s)</label>
           <input type="text" class="form-control input-prereq" name="cursos_dados[{{ $codcur }}][prerequisitos]"
             value="{{ implode(', ', $dados[$codcur]['prerequisitos'] ?? []) }}" placeholder="Ex.: SET0199, SMM0100"
             autocomplete="off">
-          <small class="form-text text-muted">Separe os códigos por vírgula.</small>
+          <small class="form-text text-muted">Separe os códigos por vírgula. Deixe em branco se não houver.</small>
           <div class="prereq-feedback mt-1"></div>
         </div>
       </div>
 
       <div class="row">
         <div class="col-md-6">
-          <strong>Habilidades</strong>
+          <strong>Habilidades @if (count($habs)) <span class="text-danger">*</span> @endif</strong>
           @forelse ($habs as $i => $h)
             <div class="custom-control custom-checkbox">
               <input type="checkbox" class="custom-control-input" name="habilidades[{{ $codcur }}][]"
@@ -102,7 +123,7 @@
         </div>
 
         <div class="col-md-6">
-          <strong>Competências</strong>
+          <strong>Competências @if (count($comps)) <span class="text-danger">*</span> @endif</strong>
           @forelse ($comps as $i => $comp)
             <div class="custom-control custom-checkbox">
               <input type="checkbox" class="custom-control-input" name="competencias[{{ $codcur }}][]"

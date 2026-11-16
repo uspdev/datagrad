@@ -14,6 +14,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 
 class Disciplina extends Model
 {
@@ -67,8 +68,16 @@ class Disciplina extends Model
 
     public static $tiposCurso = [
         'obrigatoria' => 'Obrigatória',
-        'eletiva' => 'Eletiva',
-        'optativa' => 'Optativa',
+        'eletiva' => 'Optativa Eletiva',
+        'livre' => 'Optativa Livre',
+    ];
+
+    public static $ciclosCurso = [
+        'basico' => 'Básico',
+        'intermediario' => 'Intermediário',
+        'profissionalizante' => 'Profissionalizante',
+        'estagio' => 'Estágio',
+        'tcc' => 'TCC',
     ];
 
     /**
@@ -525,6 +534,140 @@ class Disciplina extends Model
         }
 
         return [];
+    }
+
+    /**
+     * Valores sugeridos por curso, vindos do replicado.
+     *
+     * Só serve de padrão na edição: o que o usuário salvar sempre prevalece.
+     * Mapa do tipo (coluna tipobg): O = obrigatória, E = optativa eletiva, L = optativa livre.
+     *
+     * @return array 
+     */
+    public function padroesCursosReplicado(): array
+    {
+        if (empty($this->dr['cursos'])) {
+            return [];
+        }
+
+        $mapaTipo = [
+            'O' => 'obrigatoria',
+            'E' => 'eletiva',
+            'L' => 'livre',
+        ];
+
+        $mapaCiclo = [
+            'basico' => 'basico',
+            'intermediario' => 'intermediario',
+            'profissional' => 'profissionalizante',
+            'estagio' => 'estagio',
+            'tcc' => 'tcc',
+            'conclusao' => 'tcc',
+        ];
+
+        $padroes = [];
+        foreach ($this->dr['cursos'] as $c) {
+            $codcur = (string) $c['codcur'];
+
+            $tipobg = strtoupper(trim((string) ($c['tipobg'] ?? '')));
+            $tipo = $mapaTipo[$tipobg] ?? null;
+ 
+            $periodo = (int) ($c['numsemidl'] ?? $c['perdis'] ?? 0);
+
+            $txt = Str::lower(Str::ascii((string) ($c['cicdisgdecrltxt'] ?? '')));
+            $ciclo = null;
+            foreach ($mapaCiclo as $trecho => $valor) {
+                if (str_contains($txt, $trecho)) {
+                    $ciclo = $valor;
+                    break;
+                }
+            }
+
+            $padroes[$codcur] = [
+                'tipo' => $tipo,
+                'periodo' => $periodo > 0 ? $periodo : null,
+                'ciclo' => $ciclo,
+            ];
+        }
+
+        return $padroes;
+    }
+
+    /**
+     * Valida a aba Cursos para poder mudar para "Em aprovação".
+     *
+     * Retorna array de mensagens de erro, ou vazio se estiver tudo ok.
+     */
+    public function validarCursos(): array
+    {
+        $dados = array_filter((array) ($this->cursos_dados ?? []));
+        if (empty($dados)) {
+            return ['Selecione ao menos um curso.'];
+        }
+
+        $temItens = function (?string $texto): bool {
+            foreach (preg_split('/\r\n|\r|\n/', trim((string) $texto)) as $linha) {
+                if (trim($linha) !== '') {
+                    return true;
+                }
+            }
+            return false;
+        };
+
+        $erros = [];
+        foreach ($dados as $codcur => $d) {
+            $d = (array) $d;
+            $codcur = (string) $codcur;
+            $faltam = [];
+
+            if (!array_key_exists($d['tipo'] ?? '', self::$tiposCurso)) {
+                $faltam[] = 'tipo';
+            }
+            if (empty($d['periodo'])) {
+                $faltam[] = 'período';
+            }
+            if (!array_key_exists($d['ciclo'] ?? '', self::$ciclosCurso)) {
+                $faltam[] = 'ciclo';
+            }
+
+            // habilidades e competências: obrigatório marcar ao menos uma,
+            // desde que o curso tenha itens cadastrados
+            $curso = Curso::where('codcur', $codcur)->first();
+            if ($curso && $temItens($curso->habilidades) && empty($this->habilidades[$codcur] ?? [])) {
+                $faltam[] = 'habilidades';
+            }
+            if ($curso && $temItens($curso->competencias) && empty($this->competencias[$codcur] ?? [])) {
+                $faltam[] = 'competências';
+            }
+
+            if ($faltam) {
+                $erros[] = "Curso $codcur: preencha " . implode(', ', $faltam) . '.';
+            }
+        }
+        return $erros;
+    }
+
+    /**
+     * Pendências para mudar para "Em aprovação".
+     *
+     * @return array 
+     */
+    public function pendenciasAprovacao(): array
+    {
+        $erros = $this->validarCampos();
+
+        $campos = [];
+        if (isset($erros['mtdens'])) {
+            $campos[] = 'Método de ensino';
+        }
+        if (isset($erros['objdslsut'])) {
+            $campos[] = 'Objetivos de Desenvolvimento Sustentável';
+        }
+
+        return [
+            'campos' => $campos,
+            'cursos' => $this->validarCursos(),
+        ];
     }
 
     /**
