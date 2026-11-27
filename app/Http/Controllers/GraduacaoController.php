@@ -769,7 +769,38 @@ class GraduacaoController extends Controller
 
         $cursosHabilitacoes = Graduacao::listarTodosCursosHabilitacoes();
 
-        $semestreSelect = Tools::semestres();
+        $semestresBrutos = Tools::semestres();
+        $semestreSelect = [];
+        foreach ($semestresBrutos as $key => $val) {
+            $codigo = is_numeric($key) && strlen((string) $key) < 5 ? $val : $key;
+            $semestreSelect[(string) $codigo] = (string) $val;
+        }
+
+        $hoje = now();
+        $proximoSemestre = null;
+
+        // A partir de 16/10, libera o 1º semestre do ano seguinte
+        if ($hoje->greaterThanOrEqualTo($hoje->copy()->setDate($hoje->year, 10, 16)->startOfDay())) {
+            $proximoSemestre = ($hoje->year + 1) . '1';
+        } 
+        // A partir de 16/05 (até 15/10), libera o 2º semestre do ano atual
+        elseif ($hoje->greaterThanOrEqualTo($hoje->copy()->setDate($hoje->year, 5, 16)->startOfDay())) {
+            $proximoSemestre = $hoje->year . '2';
+        }
+
+        if ($proximoSemestre && !array_key_exists($proximoSemestre, $semestreSelect)) {
+            $semestreSelect[$proximoSemestre] = $proximoSemestre;
+        }
+
+        krsort($semestreSelect);
+        
+        foreach ($semestreSelect as $codigo => $valor) {
+            $limpo = str_replace('/', '', (string) $codigo);
+            if (strlen($limpo) === 5) {
+                $semestreSelect[$codigo] = substr($limpo, 0, 4) . '/' . substr($limpo, -1);
+            }
+        }
+
         $cursoHab = $request->input('curso_hab');
         $codcur = null;
         $codhab = null;
@@ -778,7 +809,7 @@ class GraduacaoController extends Controller
             [$codcur, $codhab] = explode('-', $cursoHab);
         }
 
-        $semestrePadrao = !empty($semestreSelect) ? array_key_first($semestreSelect) : '20261';
+        $semestrePadrao = !empty($semestreSelect) ? (string) array_key_first($semestreSelect) : (now()->year . '1');
         $semestre = $request->input('semestre', $semestrePadrao);
 
         $gradePorPeriodo = [];
