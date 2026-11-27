@@ -28,10 +28,9 @@
             <div class="col-md-3 form-group mb-3">
                 <label for="semestreInput"><b>Ano/Semestre:</b></label>
                 <select name="semestre" id="semestreInput" class="form-control" required>
-                    @foreach($semestreSelect as $key => $val)
-                        @php $semestreValor = is_numeric($key) ? $val : $key; @endphp
-                        <option value="{{ $semestreValor }}" {{ (isset($semestre) && $semestre == $semestreValor) ? 'selected' : '' }}>
-                            {{ $semestreValor }}
+                    @foreach($semestreSelect as $codigo => $label)
+                        <option value="{{ $codigo }}" {{ (isset($semestre) && (string)$semestre === (string)$codigo) ? 'selected' : '' }}>
+                            {{ $label }}
                         </option>
                     @endforeach
                 </select>

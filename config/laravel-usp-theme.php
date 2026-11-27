@@ -56,6 +56,11 @@ $menu = [
                 'url'  => 'graduacao/relatorio/encerramento-matricula',
                 'can'  => 'relatorios',
             ],
+            [
+                'text' => 'Relatório artigo 76',
+                'url'  => 'graduacao/relatorio/artigo-76',
+                'can'  => 'datagrad',
+            ],
         ],
         'can'  => 'relatorios',
     ],

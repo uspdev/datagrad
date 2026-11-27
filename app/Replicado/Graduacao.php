@@ -1377,4 +1377,200 @@ class Graduacao extends GraduacaoReplicado
 
         return DB::fetchAll($query, ['codcur' => $codcur, 'ano' => $ano]);
     }
+
+    /**
+     * Relatório artigo 76: alunos em situação de desligamento
+     *
+     * Alunos com menos de 20% de créditos aprovados (aprovados + dispensados)
+     * nos 2 últimos semestres com matrícula até o semestre de apuração.
+     *
+     * @param string $semAtual Semestre de apuração no formato AAAAS (ex.: '20262')
+     */
+    public static function listarAlunosArtigo76(string $semAtual): array
+    {
+        $query = <<<'SQL'
+
+            WITH HistDeduplicado AS (
+                SELECT
+                    H.codpes,
+                    H.codpgm,
+                    H.coddis,
+                    LEFT(H.codtur, 5) AS sem,
+                    H.stamtr,
+                    MAX(LTRIM(RTRIM(ISNULL(H.rstfim, '')))) AS rstfim,
+                    MAX(ISNULL(D.creaul, 0) + ISNULL(D.cretrb, 0)) AS creditos,
+                    MAX(CASE 
+                        WHEN LEN(LTRIM(RTRIM(H.codtur))) >= 7 AND ISNUMERIC(SUBSTRING(LTRIM(RTRIM(H.codtur)), 6, 2)) = 1
+                        THEN CAST(SUBSTRING(LTRIM(RTRIM(H.codtur)), 6, 2) AS INT)
+                        ELSE 0 
+                    END) AS num_turma,
+                    MAX(CAST(YEAR(H.dtacrihst) AS VARCHAR(4)) + CASE WHEN MONTH(H.dtacrihst) <= 6 THEN '1' ELSE '2' END) AS sem_criacao
+                FROM HISTESCOLARGR H
+                LEFT JOIN DISCIPLINAGR D
+                    ON H.coddis = D.coddis AND H.verdis = D.verdis
+                WHERE H.stamtr = 'M'
+                  AND LEFT(H.codtur, 5) <= @SemAtual
+                GROUP BY
+                    H.codpes,
+                    H.codpgm,
+                    H.coddis,
+                    LEFT(H.codtur, 5),
+                    H.stamtr
+            )
+            SELECT
+                CAST(P.codpes AS VARCHAR(12)) + '/' + CAST(PG.codpgm AS VARCHAR(3)) AS numusp,
+                P.nompes AS aluno,
+                EmailAluno.codema AS email_aluno,
+                PTutor.nompes AS professor_tutor,
+                EmailTutor.codema AS email_tutor,
+                CAST(YEAR(PG.dtaing) AS VARCHAR(4)) + '/' + CASE WHEN MONTH(PG.dtaing) <= 6 THEN '1' ELSE '2' END AS ingresso,
+
+                SUM(CASE 
+                    WHEN H.sem = '0' AND H.rstfim = 'D' 
+                         AND H.sem_criacao = (CAST(YEAR(PG.dtaing) AS VARCHAR(4)) + CASE WHEN MONTH(PG.dtaing) <= 6 THEN '1' ELSE '2' END)
+                    THEN H.creditos
+                    WHEN H.sem LIKE '[0-9][0-9][0-9][0-9][1-2]' 
+                         AND H.num_turma < 80
+                    THEN H.creditos
+                    ELSE 0 
+                END) AS curso_matric,
+
+                SUM(CASE 
+                    WHEN H.sem LIKE '[0-9][0-9][0-9][0-9][1-2]' 
+                         AND H.num_turma < 80 
+                         AND H.rstfim = 'A' 
+                    THEN H.creditos ELSE 0 
+                END) AS curso_aprov,
+
+                SUM(CASE 
+                    WHEN H.sem = '0' AND H.rstfim = 'D' 
+                         AND H.sem_criacao = (CAST(YEAR(PG.dtaing) AS VARCHAR(4)) + CASE WHEN MONTH(PG.dtaing) <= 6 THEN '1' ELSE '2' END)
+                    THEN H.creditos
+                    WHEN H.sem LIKE '[0-9][0-9][0-9][0-9][1-2]' 
+                         AND H.num_turma < 80 
+                         AND H.rstfim = 'D' 
+                    THEN H.creditos 
+                    ELSE 0 
+                END) AS curso_disp,
+
+                SUM(CASE
+                    WHEN H.sem >= Sem2.PrimeiroSem AND H.sem <= @SemAtual AND H.sem LIKE '[0-9][0-9][0-9][0-9][1-2]'
+                    THEN H.creditos ELSE 0
+                END) AS consid_matric,
+
+                SUM(CASE
+                    WHEN H.sem >= Sem2.PrimeiroSem AND H.sem <= @SemAtual AND H.sem LIKE '[0-9][0-9][0-9][0-9][1-2]'
+                        AND H.rstfim = 'A'
+                    THEN H.creditos ELSE 0
+                END) AS consid_aprov,
+
+                SUM(CASE
+                    WHEN H.sem >= Sem2.PrimeiroSem AND H.sem <= @SemAtual AND H.sem LIKE '[0-9][0-9][0-9][0-9][1-2]'
+                        AND H.rstfim = 'D'
+                    THEN H.creditos ELSE 0
+                END) AS consid_disp,
+
+                CAST(FLOOR(
+                    SUM(CASE
+                        WHEN H.sem >= Sem2.PrimeiroSem AND H.sem <= @SemAtual AND H.sem LIKE '[0-9][0-9][0-9][0-9][1-2]'
+                        THEN H.creditos ELSE 0
+                    END) * 0.20
+                ) AS INT) AS vinte_pct,
+
+                Sem2.PrimeiroSem AS primeiro_sem_considerado
+
+            FROM PESSOA P
+            INNER JOIN PROGRAMAGR PG
+                ON P.codpes = PG.codpes
+
+            LEFT JOIN PESSOA PTutor
+                ON PG.codpestut = PTutor.codpes
+
+            OUTER APPLY (
+                SELECT TOP 1 LTRIM(RTRIM(EA.codema)) AS codema
+                FROM EMAILPESSOA EA
+                WHERE EA.codpes = P.codpes
+                ORDER BY CASE WHEN EA.stausp = 'S' THEN 0 WHEN EA.stamtr = 'S' THEN 1 ELSE 2 END, EA.numseqema DESC
+            ) EmailAluno
+
+            OUTER APPLY (
+                SELECT TOP 1 LTRIM(RTRIM(ET.codema)) AS codema
+                FROM EMAILPESSOA ET
+                WHERE ET.codpes = PG.codpestut
+                ORDER BY CASE WHEN ET.stausp = 'S' THEN 0 WHEN ET.stamtr = 'S' THEN 1 ELSE 2 END, ET.numseqema DESC
+            ) EmailTutor
+
+            OUTER APPLY (
+                SELECT TOP 1 HPG.codcur
+                FROM HABILPROGGR HPG
+                WHERE HPG.codpes = PG.codpes
+                  AND HPG.codpgm = PG.codpgm
+                ORDER BY HPG.dtaini DESC
+            ) CurAtual
+
+            OUTER APPLY (
+                SELECT TOP 1 LTRIM(RTRIM(HP.stapgm)) AS StatusNoSemestre
+                FROM HISTPROGGR HP
+                WHERE HP.codpes = PG.codpes
+                  AND HP.codpgm = PG.codpgm
+                  AND LTRIM(RTRIM(HP.stapgm)) IN ('A', 'R', 'T', 'E')
+                  AND (CAST(HP.anoref AS VARCHAR(4)) + LEFT(LTRIM(RTRIM(HP.perref)), 1)) <= @SemAtual
+                ORDER BY HP.dtaoco DESC
+            ) StatusRef
+
+            INNER JOIN CURSOGR C
+                ON CurAtual.codcur = C.codcur
+            LEFT JOIN HistDeduplicado H
+                ON PG.codpes = H.codpes AND PG.codpgm = H.codpgm
+
+            OUTER APPLY (
+                SELECT
+                    MIN(S.sem) AS PrimeiroSem,
+                    COUNT(*) AS QtdSemestres
+                FROM (
+                    SELECT DISTINCT TOP 2 H2.sem
+                    FROM HistDeduplicado H2
+                    WHERE H2.codpes = PG.codpes
+                      AND H2.codpgm = PG.codpgm
+                      AND H2.sem <= @SemAtual
+                      AND H2.sem LIKE '[0-9][0-9][0-9][0-9][1-2]'
+                    ORDER BY H2.sem DESC
+                ) S
+            ) Sem2
+
+            WHERE
+                PG.stapgm IN ('A', 'R', 'T')
+                AND StatusRef.StatusNoSemestre IN ('A', 'R', 'E')
+                AND C.codclg = 18
+                AND Sem2.QtdSemestres = 2
+
+            GROUP BY
+                P.codpes,
+                PG.codpgm,
+                P.nompes,
+                EmailAluno.codema,
+                PTutor.nompes,
+                EmailTutor.codema,
+                PG.dtaing,
+                Sem2.PrimeiroSem
+
+            HAVING
+                SUM(CASE WHEN H.sem >= Sem2.PrimeiroSem AND H.sem <= @SemAtual AND H.sem LIKE '[0-9][0-9][0-9][0-9][1-2]' THEN H.creditos ELSE 0 END) > 0
+                AND
+                SUM(CASE WHEN H.sem >= Sem2.PrimeiroSem AND H.sem <= @SemAtual AND H.sem LIKE '[0-9][0-9][0-9][0-9][1-2]' AND H.rstfim IN ('A', 'D') THEN H.creditos ELSE 0 END)
+                <
+                FLOOR(SUM(CASE WHEN H.sem >= Sem2.PrimeiroSem AND H.sem <= @SemAtual AND H.sem LIKE '[0-9][0-9][0-9][0-9][1-2]' THEN H.creditos ELSE 0 END) * 0.20)
+
+            ORDER BY
+                P.nompes;
+            SQL;
+
+        if (! preg_match('/^\d{4}[12]$/', $semAtual)) {
+            throw new \InvalidArgumentException('Semestre de apuração inválido: use o formato AAAAS.');
+        }
+
+        $query = str_replace('@SemAtual', "'" . $semAtual . "'", $query);
+
+        return DB::fetchAll($query);
+    }
 }
