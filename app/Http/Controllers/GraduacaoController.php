@@ -1111,4 +1111,28 @@ class GraduacaoController extends Controller
 
         return view('grad.relatorio-encerramento-matricula', compact('cursos', 'anos', 'alunos', 'statusPgm'));
     }
+
+    public function relatorioArtigo76(Request $request)
+    {
+        $this->authorize('datagrad');
+        UspTheme::activeUrl('graduacao/relatorio/artigo-76');
+
+        $anos = range(now()->year, now()->year - 10);
+        $anoPadrao = now()->year;
+        $semestrePadrao = now()->month <= 6 ? 1 : 2;
+
+        $alunos = null;
+        $semAtual = null;
+
+        if ($request->isMethod('post')) {
+            $request->validate([
+                'ano' => 'required|integer|between:2000,' . now()->year,
+                'semestre' => 'required|in:1,2',
+            ]);
+            $semAtual = $request->ano . $request->semestre;
+            $alunos = Graduacao::listarAlunosArtigo76($semAtual);
+        }
+
+        return view('grad.relatorio-artigo-76', compact('anos', 'anoPadrao', 'semestrePadrao', 'alunos', 'semAtual'));
+    }
 }

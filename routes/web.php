@@ -86,3 +86,6 @@ Route::get('configuracoes/gotenberg/pdf-teste', [ConfiguracaoController::class, 
 
 Route::get('graduacao/relatorio/encerramento-matricula', [GraduacaoController::class, 'relatorioEncerramentosDeMatricula'])->name('graduacao.relatorio.encerramento-matricula');
 Route::post('graduacao/relatorio/encerramento-matricula', [GraduacaoController::class, 'relatorioEncerramentosDeMatricula'])->name('graduacao.relatorio.encerramento-matricula.post');
+
+Route::get('graduacao/relatorio/artigo-76', [GraduacaoController::class, 'relatorioArtigo76'])->name('graduacao.relatorio.artigo-76');
+Route::post('graduacao/relatorio/artigo-76', [GraduacaoController::class, 'relatorioArtigo76'])->name('graduacao.relatorio.artigo-76.post');

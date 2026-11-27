@@ -138,6 +138,14 @@
                                 </a>
                             </li>
                             @endcan
+                            @can('datagrad')
+                            <li class="list-group-item border-0 px-0 py-2">
+                                <a href="{{ url('graduacao/relatorio/artigo-76') }}" class="card-link-item text-decoration-none d-flex align-items-center">
+                                    <i class="fas fa-user-slash mr-2 fa-lg icon-eesc"></i>
+                                    <span>Relatório artigo 76</span>
+                                </a>
+                            </li>
+                            @endcan
                         </ul>
                     </div>
                 </div>
@@ -244,6 +252,7 @@
                 - <b>Consultar e Alterar Disciplinas</b>: é possível detalhar disciplinas e propor alterações;<br>
                 - <b>Relatório grade horária</b>: mostra a grade horária corrente para a lista de alunos informada;<br>
                 - <b>Relatório alunos PEC-G</b>: lista os alunos ingressantes com convênio PEC-G por intervalo de anos;<br>
+                - <b>Relatório artigo 76</b>: lista os alunos em situação de desligamento, com menos de 20% de créditos aprovados nos últimos 2 semestres com matrícula até o semestre de apuração selecionado;<br>
                 - <b>Relatório encerramentos de matrícula</b>: lista os alunos com matrícula encerrada no ano selecionado de um determinado curso;<br>
                 - <b>Relatório carga horária acumulada</b>: mostra a carga horária acumulada em carga obrigatória, optativa, estágio, AAC e AEX cumprida por cada aluno de um determinado curso e ano de ingresso selecionado ou informado na lista;<br>
                 - <b>Quadro horário de aulas</b>: mostra os horários de aula de cada disciplina e suas respectivas turmas, filtrado por curso e ano/semestre;<br>        
