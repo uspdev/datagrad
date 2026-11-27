@@ -3,6 +3,21 @@
     <div class="card-header text-center" style="background-color: azure">
           Curso: <b>{{ $curso['codcur'] }} - {{ $curso->dr['nomcur'] ?? $curso->nomcur ?? '' }}</b>
     </div>
+
+    @php
+      $dadosCurso = $disc->cursos_dados[$curso->codcur] ?? null;
+    @endphp
+    @if ($dadosCurso)
+      <div class="text-center border rounded p-2 mt-2" style="background-color: #f8f9fa;">
+        Tipo: <b>{{ \App\Models\Disciplina::$tiposCurso[$dadosCurso['tipo'] ?? ''] ?? '-' }}</b>
+        | Período:
+        <b>{{ !empty($dadosCurso['periodo']) ? $dadosCurso['periodo'] . 'º período' : '-' }}</b>
+        | Ciclo: <b>{{ \App\Models\Disciplina::$ciclosCurso[$dadosCurso['ciclo'] ?? ''] ?? '-' }}</b>
+        | Pré-requisito(s):
+        <b>{{ !empty($dadosCurso['prerequisitos']) ? implode(', ', $dadosCurso['prerequisitos']) : 'Sem pré-requisito' }}</b>
+      </div>
+    @endif
+    
     <div class="card-body p-1">
       @php
         $habilidades = $disc->habilidades($curso->codcur);
@@ -75,19 +90,6 @@
           @endif
         </tr>
       </table>
-
-      @php
-        $dadosCurso = $disc->cursos_dados[$curso->codcur] ?? null;
-      @endphp
-      @if ($dadosCurso)
-        <div class="text-center border rounded p-2 mt-2" style="background-color: #f8f9fa;">
-          Tipo: <b>{{ \App\Models\Disciplina::$tiposCurso[$dadosCurso['tipo'] ?? ''] ?? '-' }}</b>
-          | Período de oferecimento:
-          <b>{{ !empty($dadosCurso['periodo']) ? $dadosCurso['periodo'] . 'º período' : '-' }}</b>
-          | Pré-requisito(s):
-          <b>{{ !empty($dadosCurso['prerequisitos']) ? implode(', ', $dadosCurso['prerequisitos']) : 'Sem pré-requisito' }}</b>
-        </div>
-      @endif
 
     </div>
   </div>

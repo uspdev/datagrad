@@ -1,13 +1,6 @@
 @php
-    $erros = $disc->validarCampos();
-    $pendentes = [];
-
-    if (isset($erros['mtdens'])) {
-        $pendentes[] = 'Método de ensino';
-    }
-    if (isset($erros['objdslsut'])) {
-        $pendentes[] = 'Objetivos de Desenvolvimento Sustentável';
-    }
+    $pend = $disc->pendenciasAprovacao();
+    $bloqueado = !empty($pend['campos']) || !empty($pend['cursos']);
 @endphp
 
 @if ($disc->estado == 'Em edição' || $disc->estado == 'Criar')
@@ -19,18 +12,29 @@
         - Você pode gerar o PDF a qualquer momento para conferência.<br>
         - Quando estiver tudo pronto, mude o estado para "Em aprovação" para encaminhar aos responsáveis pela aprovação.
       </div>
-      
+
       <div class="d-flex align-items-center flex-wrap">
           <a href="{{ route('disciplinas.pdf', ['coddis' => $disc->coddis]) }}" class="btn btn-primary mr-2" target="_blank">
               <i class="fas fa-file-pdf"></i> Gerar PDF
           </a>
 
-          @if (!empty($pendentes))
+          @if ($bloqueado)
               <button type="button" class="btn btn-danger" disabled title="Preencha os campos obrigatórios para avançar">
                   Mudar para "Em aprovação"
               </button>
               <small class="text-danger d-block w-100 mt-1">
-                  * Para mudar para "Em aprovação", preencha o(s) campo(s): <strong>{{ implode(' e ', $pendentes) }}</strong>.
+                  @if (!empty($pend['campos']))
+                      <div>
+                          * Para mudar para "Em aprovação", preencha o(s) campo(s):
+                          <strong>{{ implode(' e ', $pend['campos']) }}</strong>.
+                      </div>
+                  @endif
+                  @if (!empty($pend['cursos']))
+                      <div>
+                          * Na aba <strong>Cursos</strong> (volte para a edição):
+                          <strong>{{ implode(' ', $pend['cursos']) }}</strong>
+                      </div>
+                  @endif
               </small>
           @else
               <form action="{{ route('disciplinas.update', $disc->coddis) }}" method="POST" class="d-inline">
